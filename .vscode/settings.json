@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.osx": {
+        "PATH": "/Users/Daniel/.platformio/penv/bin:/Users/Daniel/.platformio/penv:/usr/local/texlive/2013/bin/x86_64-darwin:/Users/Daniel 1/Desktop/apache-maven-3.3.9/bin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/opt/local/bin:/opt/local/sbin::/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/texbin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
