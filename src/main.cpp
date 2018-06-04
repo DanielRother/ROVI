@@ -4,6 +4,9 @@
 #include <stdint.h>
 
 #include <prettyprint.hpp>
+#include <arduinoIostream.hpp>
+
+#include <LED/ColorTypes.h>
 
 #include <Basecamp.hpp>
 // Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
@@ -17,14 +20,7 @@ void mqttSubscribed(uint16_t packetId, uint8_t qos);
 void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 void mqttPublished(uint16_t packetId);
 
-//#include <MyUtils.h>
-//#include <prettyprint.hpp>
-
-//// Dieses Beispiel verwendet einen DHT11 als Temperatursensor
-//// Sie benötigen https://github.com/beegee-tokyo/DHTesp als Bibliothek
-//#include <DHTesp.h>
-//DHTesp dht;
-//const int dhtPin = 17;
+// 'global' variables
 String room;
 String temp;
 int curTemp = 1;
@@ -35,43 +31,11 @@ String tempTopic;
 
 std::string lightTopic;
 
-struct colorTuple {
-  colorTuple(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
-    : R(R), G(G), B(B), A(A)
-  {}
-
-  colorTuple(uint8_t R, uint8_t G, uint8_t B)
-    : R(R), G(G), B(B), A(255)
-  {}
-
-  colorTuple()
-      : R(255), G(255), B(255), A(255)
-  {}
-
-  
-  uint8_t R;
-  uint8_t G;
-  uint8_t B;
-  uint8_t A;
-
-  std::string toString() {
-    std::stringstream ret;
-    ret << "R: " << (uint32_t) R << "; G: " << (uint32_t) G << "; B: " << (uint32_t) B << "; A: " << (uint32_t) A << ";" << std::endl;
-    
-    ret << "RGBA(" << (uint32_t) R << "," << (uint32_t) G << "," << (uint32_t) B << "," << (uint32_t) A << ")" << std::endl;
-    return ret.str();
-  }
-};
-
 String getTemp() {
 
   String temp = String(25 + curTemp++);
   curTemp %= 10;
 
-//  if (dht.getStatus() != 0) {
-//    Serial.println("DHT11 error status: " + String(dht.getStatusString()));
-//    temp = "-274";
-//  }
   iot.configuration.set("my-Temperature", temp);
   iot.configuration.save();
   iot.mqtt.publish("stat/frontdoor/battery", 1, true, "empty" );
@@ -79,8 +43,10 @@ String getTemp() {
   return temp;
 }
 
+//***************************************************************************//
+// Arduino setup()
+//***************************************************************************//
 void setup() {
-  //dht.setup(dhtPin, DHTesp::DHT11);
   iot.begin();
   iot.mqtt.onConnect(mqttConnected);
   iot.mqtt.onSubscribe(mqttSubscribed);
@@ -125,7 +91,9 @@ void setup() {
 }
 
 
-
+//***************************************************************************//
+// Implementation of MQTT methods
+//***************************************************************************//
 void mqttConnected(bool sessionPresent) {
   Serial.println("MQTT verbunden!");
   subTopic = iot.hostname + "/sendtemp";
@@ -139,15 +107,11 @@ void mqttConnected(bool sessionPresent) {
 };
 
 void mqttSubscribed(uint16_t packetId, uint8_t qos) {
-  Serial.println("Abonnement erfolgreich");
+  Serial << "Abonnement erfolgreich\n";
 };
 
 void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-  Serial.println("Neue MQTT-Nachricht:");
-  Serial.print("Topic:");
-  Serial.println(topic);
-  Serial.print("Payload:");
-  Serial.println(payload);
+  Serial << "Neue MQTT-Nachricht:\n" << "Topic: " << topic << "\nPayload: " << payload << "\n";
 
   std::string topicString(topic);
   std::string payloadString(payload);
@@ -155,7 +119,7 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
   iot.mqtt.publish(tempTopic.c_str(), 1, true, getTemp().c_str());
 
   if(topicString == lightTopic) {
-    Serial.println("lightTopic received");
+    Serial << "lightTopic received\n";
 
     // TODO: Move to ctor of colorTuple
     //       and cleanup
@@ -165,11 +129,7 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
     auto valEnd   = payloadString.find(')'); 
     std::string values = payloadString.substr(valStart, valEnd - valStart);
 
-    std::stringstream msg;
-    msg << "start: " << valStart << "\tend: " << valEnd << std::endl;
-    Serial.println(msg.str().c_str());
-    Serial.print("Values: ");
-    Serial.println(values.c_str());
+    Serial << "start: " << valStart << "\tend: " << valEnd << "\n" << "Values: " << values.c_str() << "\n";
 
     // 2. Extract the actual RGB values
     std::stringstream ss(values);
@@ -179,14 +139,12 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
         int curVal = atoi(token.c_str());
         cont.push_back(curVal);
 
-        Serial.print("curVal: ");
-        Serial.println(curVal);
+        Serial << "curVal: " << curVal << "\n";
     }
 
     std::stringstream ss2;
     ss2 << cont << std::endl;
-    Serial.print("cont: ");
-    Serial.println(ss2.str().c_str());
+    Serial << "cont new: " << ss2.str().c_str() << "\n";
 
     colorTuple ct;
     if(cont.size() == 4) {
@@ -195,24 +153,22 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
       ct = colorTuple(cont[0], cont[1], cont[2]);  
     }
 
-    auto ctString = ct.toString();
-    Serial.print("ctString: ");
-    Serial.println(ctString.c_str());
-    Serial.print("manual B:");
-    Serial.println(ct.B);
-
+    Serial << "ctString: " << ct.toString().c_str() << "\nmanual B: " <<  (int) ct.B << "\n";
   }
 };
 
 void mqttPublished(uint16_t packetId) {
-  Serial.println("MQTT-Nachricht veröffentlicht");
+  Serial << "MQTT-Nachricht veröffentlicht\n";
 };
 
-
+//***************************************************************************//
+// Arduino loop()
+//***************************************************************************//
 void loop() {
   delay(10000);
-  Serial.print("Temperatur: ");
   temp = getTemp();
-  Serial.println(temp);
+  Serial << "Temperatur: " << temp << "\n";
   iot.mqtt.publish(tempTopic.c_str(), 1, true, temp.c_str());
+
+  Serial << "Serial streaming foobar\n";
 }
