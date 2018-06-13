@@ -43,35 +43,87 @@ String getTemp() {
   return temp;
 }
 
+
+class RoviDevice {
+public:
+  RoviDevice(Basecamp& iot)
+    : iot(iot), name(""), room("")
+  {}
+
+  void setupRovi() {
+    Serial << "--- RoviDevice::setupRovi() ---" << endl;
+    // Needs to be in a dedicated method, 'cause iot.begin() in the ctor crashes the application...
+    // iot.begin();
+
+    name = iot.configuration.get("DeviceName");
+    room = addVariableToIotConfig("room", "/haus/etage/zimmer");
+    iot.configuration.save();
+  }
+
+
+// private:
+  String addVariableToIotConfig(String name, String defaultValue) {
+    String var = iot.configuration.get(name);
+    
+    if(var.length() == 0) {
+      Serial << "  Variable '" << name << "' is empty. Set to default (" << defaultValue << ")\n";
+      iot.configuration.set(name, defaultValue);
+    } else {
+      Serial << "  Variable '" << name << "': " << var << endl;
+    }
+
+    iot.web.addInterfaceElement(
+      "html_" + name,
+      "input",
+      "Variable " + name + ":",
+      "#configform",
+      name
+    );
+
+    return iot.configuration.get(name);
+  }
+
+  Basecamp& iot;
+  String name;
+  String room;
+};
+
+
+RoviDevice myRovi(iot);
+
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
 void setup() {
+  sleep(5);
   iot.begin();
+  myRovi.setupRovi();
+
+  // TODO: Move to RoviBaseclass
   iot.mqtt.onConnect(mqttConnected);
   iot.mqtt.onSubscribe(mqttSubscribed);
   iot.mqtt.onMessage(mqttMessage);
-
-  temp = getTemp();
-  iot.configuration.set("my-Temperature", temp);
-  iot.configuration.save();
-
-  room = iot.configuration.get("my-Room");
-
-
-  iot.web.addInterfaceElement(
-    "tempDisplay",
-    "input",
-    "Aktuelle Temperatur:",
-    "#configform",
-    "my-Temperature"
-  );
-  iot.web.setInterfaceElementAttribute(
-    "tempDisplay",
-    "readonly",
-    "true"
-  );
   iot.mqtt.onPublish(mqttPublished);
+
+
+
+  // Noch aus dem Beispiel zum hinzufügen zum Webinterface
+  // temp = getTemp();
+  // iot.configuration.set("my-Temperature", temp);
+  // iot.configuration.save();
+
+  // iot.web.addInterfaceElement(
+  //   "tempDisplay",
+  //   "input",
+  //   "Aktuelle Temperatur:",
+  //   "#configform",
+  //   "my-Temperature"
+  // );
+  // iot.web.setInterfaceElementAttribute(      // <- Das setzt das Element noch auf Readonly
+  //   "tempDisplay",
+  //   "readonly",
+  //   "true"
+  // );
 
   iot.web.server.on(
     "/temperature",
@@ -111,7 +163,7 @@ void mqttSubscribed(uint16_t packetId, uint8_t qos) {
 };
 
 void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-  Serial << "Neue MQTT-Nachricht:\n" << "Topic: " << topic << "\nPayload: " << payload << "\n";
+  Serial << "Neue MQTT-Nachricht:\n" << "Topic: " << topic << "\nPayload: " << payload << endl;
 
   std::string topicString(topic);
   std::string payloadString(payload);
@@ -129,7 +181,7 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
     auto valEnd   = payloadString.find(')'); 
     std::string values = payloadString.substr(valStart, valEnd - valStart);
 
-    Serial << "start: " << valStart << "\tend: " << valEnd << "\n" << "Values: " << values.c_str() << "\n";
+    Serial << "start: " << valStart << "\tend: " << valEnd << endl << "Values: " << values.c_str() << endl;
 
     // 2. Extract the actual RGB values
     std::stringstream ss(values);
@@ -139,12 +191,12 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
         int curVal = atoi(token.c_str());
         cont.push_back(curVal);
 
-        Serial << "curVal: " << curVal << "\n";
+        Serial << "curVal: " << curVal << endl;
     }
 
     std::stringstream ss2;
     ss2 << cont << std::endl;
-    Serial << "cont new: " << ss2.str().c_str() << "\n";
+    Serial << "cont new: " << ss2.str().c_str() << endl;
 
     colorTuple ct;
     if(cont.size() == 4) {
@@ -153,7 +205,7 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
       ct = colorTuple(cont[0], cont[1], cont[2]);  
     }
 
-    Serial << "ctString: " << ct.toString().c_str() << "\nmanual B: " <<  (int) ct.B << "\n";
+    Serial << "ctString: " << ct.toString().c_str() << "\nmanual B: " <<  (int) ct.B << endl;
   }
 };
 
@@ -165,10 +217,11 @@ void mqttPublished(uint16_t packetId) {
 // Arduino loop()
 //***************************************************************************//
 void loop() {
-  delay(10000);
+  sleep(5);
   temp = getTemp();
-  Serial << "Temperatur: " << temp << "\n";
+  Serial << "Temperatur: " << temp << endl;
   iot.mqtt.publish(tempTopic.c_str(), 1, true, temp.c_str());
 
-  Serial << "Serial streaming foobar\n";
+
+  Serial << "myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 }
