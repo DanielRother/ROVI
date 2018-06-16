@@ -43,7 +43,7 @@ void RoviDevice::mqttConnected(bool sessionPresent) {
 }
 
 void RoviDevice::mqttSubscribed(uint16_t packetId, uint8_t qos) {
-
+  Serial << "MQTT Abonnement erfolgreich" << endl;
 }
 
 void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
