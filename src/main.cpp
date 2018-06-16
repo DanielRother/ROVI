@@ -51,6 +51,8 @@ RoviDevice myRovi(iot);
 // Arduino setup()
 //***************************************************************************//
 void setup() {
+  Serial << "--- setup() ---" << endl;
+
   sleep(5);
   iot.begin();
   myRovi.setupRovi();
@@ -64,17 +66,6 @@ void setup() {
 
 
   // Noch aus dem Beispiel zum hinzufügen zum Webinterface
-  // temp = getTemp();
-  // iot.configuration.set("my-Temperature", temp);
-  // iot.configuration.save();
-
-  // iot.web.addInterfaceElement(
-  //   "tempDisplay",
-  //   "input",
-  //   "Aktuelle Temperatur:",
-  //   "#configform",
-  //   "my-Temperature"
-  // );
   // iot.web.setInterfaceElementAttribute(      // <- Das setzt das Element noch auf Readonly
   //   "tempDisplay",
   //   "readonly",
@@ -94,26 +85,12 @@ void setup() {
       );
     request->send(response);
   });
-
-  Serial.println("PlatformIO setup");
 }
 
 
 //***************************************************************************//
 // Implementation of MQTT methods
 //***************************************************************************//
-void mqttConnected(bool sessionPresent) {
-  Serial.println("MQTT verbunden!");
-  subTopic = iot.hostname + "/sendtemp";
-  pubTopic = iot.hostname + "/status";
-  tempTopic = iot.hostname + "/temp";
-  iot.mqtt.subscribe(subTopic.c_str(), 2);
-  iot.mqtt.publish(subTopic.c_str(), 1, true, "online");
-
-  lightTopic = "/house/lightabc/set";
-  iot.mqtt.subscribe(lightTopic.c_str(), 2);
-};
-
 void mqttSubscribed(uint16_t packetId, uint8_t qos) {
   Serial << "Abonnement erfolgreich\n";
 };

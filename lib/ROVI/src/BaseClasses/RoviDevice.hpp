@@ -27,6 +27,9 @@ public:
   Basecamp& iot;
   String name;
   String room;
+
+  String baseTopic;
+  String statusTopic;
 };
 
 #endif /* __ROVIDEVICE_H__ */
