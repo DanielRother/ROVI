@@ -44,51 +44,7 @@ String getTemp() {
 }
 
 
-class RoviDevice {
-public:
-  RoviDevice(Basecamp& iot)
-    : iot(iot), name(""), room("")
-  {}
-
-  void setupRovi() {
-    Serial << "--- RoviDevice::setupRovi() ---" << endl;
-    // Needs to be in a dedicated method, 'cause iot.begin() in the ctor crashes the application...
-    // iot.begin();
-
-    name = iot.configuration.get("DeviceName");
-    room = addVariableToIotConfig("room", "/haus/etage/zimmer");
-    iot.configuration.save();
-  }
-
-
-// private:
-  String addVariableToIotConfig(String name, String defaultValue) {
-    String var = iot.configuration.get(name);
-    
-    if(var.length() == 0) {
-      Serial << "  Variable '" << name << "' is empty. Set to default (" << defaultValue << ")\n";
-      iot.configuration.set(name, defaultValue);
-    } else {
-      Serial << "  Variable '" << name << "': " << var << endl;
-    }
-
-    iot.web.addInterfaceElement(
-      "html_" + name,
-      "input",
-      "Variable " + name + ":",
-      "#configform",
-      name
-    );
-
-    return iot.configuration.get(name);
-  }
-
-  Basecamp& iot;
-  String name;
-  String room;
-};
-
-
+#include "BaseClasses/RoviDevice.hpp"
 RoviDevice myRovi(iot);
 
 //***************************************************************************//
@@ -99,12 +55,12 @@ void setup() {
   iot.begin();
   myRovi.setupRovi();
 
-  // TODO: Move to RoviBaseclass
-  iot.mqtt.onConnect(mqttConnected);
-  iot.mqtt.onSubscribe(mqttSubscribed);
-  iot.mqtt.onMessage(mqttMessage);
-  iot.mqtt.onPublish(mqttPublished);
-
+  // TODO: Is there an easier way to connect to methods???
+  iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
+  iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {myRovi.mqttSubscribed(packetId, qos);});
+  iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
+    size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
+  iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
 
 
   // Noch aus dem Beispiel zum hinzufügen zum Webinterface

@@ -1,6 +1,8 @@
 #ifndef __ROVI_RGBCOLOR_H__
 #define __ROVI_RGBCOLOR_H__
 
+#include <Arduino.h>
+
 #include <string>
 #include <stdint.h>
 #include <sstream>
