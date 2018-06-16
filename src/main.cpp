@@ -91,10 +91,6 @@ void setup() {
 //***************************************************************************//
 // Implementation of MQTT methods
 //***************************************************************************//
-void mqttSubscribed(uint16_t packetId, uint8_t qos) {
-  Serial << "Abonnement erfolgreich\n";
-};
-
 void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
   Serial << "Neue MQTT-Nachricht:\n" << "Topic: " << topic << "\nPayload: " << payload << endl;
 
@@ -140,10 +136,6 @@ void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties pr
 
     Serial << "ctString: " << ct.toString().c_str() << "\nmanual B: " <<  (int) ct.B << endl;
   }
-};
-
-void mqttPublished(uint16_t packetId) {
-  Serial << "MQTT-Nachricht veröffentlicht\n";
 };
 
 //***************************************************************************//

@@ -51,7 +51,7 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
 }
 
 void RoviDevice::mqttPublished(uint16_t packetId) {
-
+  Serial << "MQTT-Nachricht veröffentlicht" << endl;
 }
 
 // private:
