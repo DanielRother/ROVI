@@ -18,8 +18,8 @@ public:
   //****************************************//
   void mqttConnected(bool sessionPresent);
   void mqttSubscribed(uint16_t packetId, uint8_t qos);
-  void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
   void mqttPublished(uint16_t packetId);
+  void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
 // private:
   String addVariableToIotConfig(String name, String defaultValue);
