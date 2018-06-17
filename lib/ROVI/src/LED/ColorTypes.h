@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <sstream>
 
-#include <enumUtils.hpp>
+#include <EnumUtils.hpp>
 
 class RGBAColor {
   enum class RGBAIdx {

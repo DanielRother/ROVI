@@ -5,9 +5,15 @@
 
 #include <Basecamp.hpp>
 
-#include <arduinoIostream.hpp>
+#include <ArduinoIostream.hpp>
 
 class RoviDevice {
+  enum class MQTTQoSClasses {
+    AT_MOST_ONE   = 0,
+    AT_LEAST_ONE  = 1,
+    EXACTLY_ONE   = 2
+  };
+
 public:
   RoviDevice(Basecamp& iot);
 
@@ -22,14 +28,14 @@ public:
   void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
 // private:
-  String addVariableToIotConfig(String name, String defaultValue);
+  std::string addVariableToIotConfig(std::string name, std::string defaultValue);
 
   Basecamp& iot;
-  String name;
-  String room;
+  std::string name;
+  std::string room;
 
-  String baseTopic;
-  String statusTopic;
+  std::string baseTopic;
+  std::string statusTopic;
 };
 
 #endif /* __ROVIDEVICE_H__ */

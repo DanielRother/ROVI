@@ -2,7 +2,8 @@
 #include "LED/ColorTypes.h"
 
 #include <prettyprint.hpp>
-#include <arduinoIostream.hpp>
+#include <ArduinoIostream.hpp>
+#include <FileIOUtils.hpp>
 
 RoviDevice::RoviDevice(Basecamp& iot)
     : iot(iot), name(""), room(""), baseTopic(""), statusTopic("")
@@ -13,13 +14,16 @@ void RoviDevice::setupRovi() {
     // Needs to be in a dedicated method, 'cause iot.begin() in the ctor crashes the application...
     // iot.begin();
 
-    name = iot.configuration.get("DeviceName");
+    name = iot.configuration.get("DeviceName").c_str();
     room = addVariableToIotConfig("room", "/haus/etage/zimmer");
     iot.configuration.save();
 
     // TODO: fullfile()
-    baseTopic = room + "/" + name + "/"; 
-    statusTopic = baseTopic + "status/";
+    baseTopic   = fullfile(room, name); 
+    statusTopic = fullfile(baseTopic, "status");
+
+    Serial << "baseTopic: " << baseTopic << endl;
+    Serial << "statusTopic: " << statusTopic << endl;
 }
 
 //****************************************//
@@ -27,20 +31,14 @@ void RoviDevice::setupRovi() {
 //****************************************//
 void RoviDevice::mqttConnected(bool sessionPresent) {
     Serial << "MQTT verbunden!" << endl;
+    
+    iot.mqtt.subscribe(fullfile(baseTopic, "#").c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE));
 
-    // Noch aus dem Beispiel
-//   subTopic = iot.hostname + "/sendtemp";
-//   pubTopic = iot.hostname + "/status";
-//   tempTopic = iot.hostname + "/temp";
-//   iot.mqtt.subscribe(subTopic.c_str(), 2);
-//   iot.mqtt.publish(subTopic.c_str(), 1, true, "online");        // <- Publishes a test message
-
-//   lightTopic = "/house/lightabc/set";
-    iot.mqtt.subscribe((baseTopic + "#").c_str(), 2);
-
-    int qosLevel = 1;
     bool retainFlag = true;
-    iot.mqtt.publish(statusTopic.c_str(), qosLevel, retainFlag, "online");    // TODO: Explain magic numbers
+    iot.mqtt.publish(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "online");
+    // TODO: Abmelden? Ungetestet
+    iot.mqtt.setWill(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "offline");
+
 }
 
 void RoviDevice::mqttSubscribed(uint16_t packetId, uint8_t qos) {
@@ -57,6 +55,7 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
     std::string topicString(topic);
     std::string payloadString(payload);
 
+    // TODO: Redirect message to components
     std::string lightTopic = std::string(baseTopic.c_str()) + "light/";
     if(topicString == lightTopic) {
         Serial << "lightTopic received\n";
@@ -67,23 +66,27 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
     }
 }
 
-String RoviDevice::addVariableToIotConfig(String name, String defaultValue) {
-    String var = iot.configuration.get(name);
+std::string RoviDevice::addVariableToIotConfig(std::string name, std::string defaultValue) {
+    // Convertion required due to interface...
+    String nameConv         = String(name.c_str());
+    String defaultValueConv = String(defaultValue.c_str());
+
+    String var = iot.configuration.get(nameConv);
 
     if(var.length() == 0) {
-        Serial << "  Variable '" << name << "' is empty. Set to default (" << defaultValue << ")\n";
-        iot.configuration.set(name, defaultValue);
+        Serial << "  Variable '" << nameConv << "' is empty. Set to default (" << defaultValueConv << ")\n";
+        iot.configuration.set(nameConv, defaultValueConv);
     } else {
-        Serial << "  Variable '" << name << "': " << var << endl;
+        Serial << "  Variable '" << nameConv << "': " << var << endl;
     }
 
     iot.web.addInterfaceElement(
-        "html_" + name,
+        "html_" + nameConv,
         "input",
-        "Variable " + name + ":",
+        "Variable " + nameConv + ":",
         "#configform",
-        name
+        nameConv
     );
 
-    return iot.configuration.get(name);
+    return std::string(iot.configuration.get(nameConv).c_str());
 }

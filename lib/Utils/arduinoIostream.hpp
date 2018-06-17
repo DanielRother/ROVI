@@ -2,7 +2,8 @@
 #define __ARDUINOIOSTREAM_H__
 
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } 
+inline Print &operator <<(Print &obj, std::string arg) { obj.print(arg.c_str()); return obj; } 
 
-static const String endl = "\n";
+static const std::string endl = "\n";
 
 #endif /* __ARDUINOIOSTREAM_H__ */

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include <prettyprint.hpp>
-#include <arduinoIostream.hpp>
+#include <ArduinoIostream.hpp>
 
 //***************************************************************************//
 // Basecamp and Rovi initialize 
