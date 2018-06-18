@@ -47,7 +47,7 @@ public:
     std::vector<int> rgba;
     while (std::getline(ss, token, ',')) {
         int curVal = atoi(token.c_str());
-       rgba.push_back(curVal);
+        rgba.push_back(curVal);
     }
     // std::stringstream ss2;
     // ss2 << rgba << std::endl;

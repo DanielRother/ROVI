@@ -18,13 +18,17 @@ void RoviDevice::setupRovi() {
     room = addVariableToIotConfig("room", "/haus/etage/zimmer");
     iot.configuration.save();
 
-    // TODO: fullfile()
     baseTopic   = fullfile(room, name); 
     statusTopic = fullfile(baseTopic, "status");
 
-    Serial << "baseTopic: " << baseTopic << endl;
-    Serial << "statusTopic: " << statusTopic << endl;
+    Serial << "  baseTopic: " << baseTopic << endl;
+    Serial << "  statusTopic: " << statusTopic << endl;
 }
+
+  void RoviDevice::addComponent(std::shared_ptr<RoviComponent> component) {
+      this->components[component->name] = component;
+  }
+
 
 //****************************************//
 // MQTT interface methods
@@ -38,7 +42,7 @@ void RoviDevice::mqttConnected(bool sessionPresent) {
     iot.mqtt.publish(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "online");
     // TODO: Abmelden? Ungetestet
     iot.mqtt.setWill(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "offline");
-
+    // iot.mqtt.setKeepAlive
 }
 
 void RoviDevice::mqttSubscribed(uint16_t packetId, uint8_t qos) {
@@ -55,6 +59,13 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
     std::string topicString(topic);
     std::string payloadString(payload);
 
+    // Get responsible component and redirect shortened message, if component exists
+    auto responsibleCompontent = components.find(getResponsibleComponent(topicString));
+    if(responsibleCompontent != components.end()) {
+        std::string topicWithoutBasestring = removeBaseTopic(topicString);
+        responsibleCompontent->second->redirectedMqttMessage(topicWithoutBasestring, payload);
+    }
+
     // TODO: Redirect message to components
     std::string lightTopic = std::string(baseTopic.c_str()) + "light/";
     if(topicString == lightTopic) {
@@ -66,7 +77,7 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
     }
 }
 
-std::string RoviDevice::addVariableToIotConfig(std::string name, std::string defaultValue) {
+std::string RoviDevice::addVariableToIotConfig(const std::string& name, const std::string& defaultValue) {
     // Convertion required due to interface...
     String nameConv         = String(name.c_str());
     String defaultValueConv = String(defaultValue.c_str());
@@ -89,4 +100,25 @@ std::string RoviDevice::addVariableToIotConfig(std::string name, std::string def
     );
 
     return std::string(iot.configuration.get(nameConv).c_str());
+}
+
+std::string RoviDevice::removeBaseTopic(const std::string& mqttTopic) {
+    if(mqttTopic.find(baseTopic) == std::string::npos) {
+        return mqttTopic;
+    }
+    std::string topicWithoutBasestring = mqttTopic.substr(baseTopic.size() + 1, mqttTopic.size());
+
+    return topicWithoutBasestring;
+}
+
+std::string RoviDevice::getResponsibleComponent(const std::string& mqttTopic) {
+    std::string topicWithoutBasestring = removeBaseTopic(mqttTopic);
+    std::string compontent             = topicWithoutBasestring.substr(0, topicWithoutBasestring.find("/"));
+
+    // Serial << "Topic:       "   << mqttTopic << endl;
+    // Serial << "Basetopic:   "   << baseTopic << endl;
+    // Serial << "withoutBase: "   << topicWithoutBasestring << endl;
+    // Serial << "compontent:  "   << compontent << endl;
+
+    return compontent;  
 }

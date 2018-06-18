@@ -3,9 +3,14 @@
 
 #include <Arduino.h>
 
+#include <map>
+#include <memory>
+
 #include <Basecamp.hpp>
 
 #include <ArduinoIostream.hpp>
+
+#include "BaseClasses/RoviComponent.hpp"
 
 class RoviDevice {
   enum class MQTTQoSClasses {
@@ -18,6 +23,7 @@ public:
   RoviDevice(Basecamp& iot);
 
   void setupRovi();
+  void addComponent(std::shared_ptr<RoviComponent> component);
 
   //****************************************//
   // MQTT interface methods
@@ -28,7 +34,9 @@ public:
   void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
 // private:
-  std::string addVariableToIotConfig(std::string name, std::string defaultValue);
+  std::string addVariableToIotConfig(const std::string&, const std::string& defaultValue);
+  std::string removeBaseTopic(const std::string& mqttTopic);
+  std::string getResponsibleComponent(const std::string& mqttTopic);
 
   Basecamp& iot;
   std::string name;
@@ -36,6 +44,8 @@ public:
 
   std::string baseTopic;
   std::string statusTopic;
+
+  std::map<std::string, std::shared_ptr<RoviComponent>> components;
 };
 
 #endif /* __ROVIDEVICE_H__ */
