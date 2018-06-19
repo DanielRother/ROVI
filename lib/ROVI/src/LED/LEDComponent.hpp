@@ -28,6 +28,7 @@ public:
         Serial << "Color: " << rgba.toString().c_str() << endl;
     }
 
+    virtual void updateColor(const RGBAColor& rgba) = 0;
 // protected:
     RGBAColor rgba;
 };

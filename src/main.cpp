@@ -17,6 +17,7 @@ Basecamp iot{
 
 #include "BaseClasses/RoviDevice.hpp"
 #include "LED/LEDComponent.hpp"
+#include "LED/NeoPixelComponent.hpp"
 
 RoviDevice myRovi(iot);
 
@@ -46,7 +47,10 @@ void setup() {
   sleep(5);
   iot.begin();
 
-  myRovi.addComponent(std::make_shared<LEDComponent>());
+  // myRovi.addComponent(std::make_shared<LEDComponent>());
+  uint16_t nbNeoPixelLEDs = 16;
+  uint8_t  neoPixelPin    = 9;
+  myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
   myRovi.setupRovi();
 
   // TODO: Is there an easier way to connect to methods???

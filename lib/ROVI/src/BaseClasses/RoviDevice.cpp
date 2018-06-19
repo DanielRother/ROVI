@@ -65,16 +65,6 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
         std::string topicWithoutBasestring = removeBaseTopic(topicString);
         responsibleCompontent->second->redirectedMqttMessage(topicWithoutBasestring, payload);
     }
-
-    // TODO: Redirect message to components
-    std::string lightTopic = std::string(baseTopic.c_str()) + "light/";
-    if(topicString == lightTopic) {
-        Serial << "lightTopic received\n";
-
-        RGBAColor rgba(payloadString);
-
-        Serial << "Color: " << rgba.toString().c_str() << endl;
-    }
 }
 
 std::string RoviDevice::addVariableToIotConfig(const std::string& name, const std::string& defaultValue) {
