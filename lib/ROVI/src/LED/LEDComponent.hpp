@@ -26,6 +26,8 @@ public:
         rgba = RGBAColor(payload);
 
         Serial << "Color: " << rgba.toString().c_str() << endl;
+
+        updateColor(rgba);
     }
 
     virtual void updateColor(const RGBAColor& rgba) = 0;

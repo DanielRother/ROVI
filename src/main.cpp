@@ -48,8 +48,8 @@ void setup() {
   iot.begin();
 
   // myRovi.addComponent(std::make_shared<LEDComponent>());
-  uint16_t nbNeoPixelLEDs = 16;
-  uint8_t  neoPixelPin    = 9;
+  uint16_t nbNeoPixelLEDs = 12;
+  uint8_t  neoPixelPin    = 15;
   myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
   myRovi.setupRovi();
 

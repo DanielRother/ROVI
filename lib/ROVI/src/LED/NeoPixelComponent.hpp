@@ -18,9 +18,9 @@ public:
     NeoPixelComponent(uint16_t nbPixel, uint8_t pin, const std::string& name = "NeoPixel") 
         : LEDComponent(name), pixels(nbPixel, pin, NEO_GRB + NEO_KHZ800)        // TBD: Maybe make the Pixeltype dynamic as well
         {
-              pixels.begin();                                                    // This initializes the NeoPixel library.
+              pixels.begin();                                                   // This initializes the NeoPixel library.
                                                                                 // TBD: Must this be called by the setup method
-                                                                                //      As for Basecamp?
+                                                                                //      as for Basecamp?
         };
 
     NeoPixelComponent(const NeoPixelComponent& other) = default;
@@ -28,6 +28,8 @@ public:
 
 
     virtual void updateColor(const RGBAColor& rgba) override {
+        Serial << "NeoPixel::updateColor" << endl;
+
         for(uint16_t pixelIdx = 0; pixelIdx < pixels.numPixels(); ++pixelIdx) {
             pixels.setPixelColor(pixelIdx, rgba.R, rgba.G, rgba.B);
         }
