@@ -89,10 +89,11 @@ void setup() {
 //***************************************************************************//
 void loop() {
   sleep(5);
+  Serial << "--- loop() ---" << endl;
   String temp = getTemp();
-  Serial << "Temperatur: " << temp << endl;
+  Serial << "  Temperatur: " << temp << endl;
   iot.mqtt.publish("example/temp/", 1, true, temp.c_str());
 
 
-  Serial << "myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
+  Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 }

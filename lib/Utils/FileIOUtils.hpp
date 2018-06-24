@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string>
 
-std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
+static std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
     std::string ret = baseDirectory;
 
     // Check if the baseDirectory ends with an slash and add one if not 
@@ -17,5 +17,15 @@ std::string fullfile(const std::string& baseDirectory, const std::string& additi
     return ret + additionDirectoryOrFile;
 }
 
+static std::vector<std::string> splitString(const std::string& s, char delimiter) {
+   std::vector<std::string> tokens;
+   std::string token;
+   std::istringstream tokenStream(s);
+   while (std::getline(tokenStream, token, delimiter))
+   {
+      tokens.push_back(token);
+   }
+   return tokens;
+}
 
 #endif /* __FILEIOUTILS_H__ */

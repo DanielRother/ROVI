@@ -34,7 +34,7 @@ void RoviDevice::setupRovi() {
 // MQTT interface methods
 //****************************************//
 void RoviDevice::mqttConnected(bool sessionPresent) {
-    Serial << "MQTT verbunden!" << endl;
+    Serial << "  MQTT verbunden!" << endl;
     
     iot.mqtt.subscribe(fullfile(baseTopic, "#").c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE));
 
@@ -46,15 +46,15 @@ void RoviDevice::mqttConnected(bool sessionPresent) {
 }
 
 void RoviDevice::mqttSubscribed(uint16_t packetId, uint8_t qos) {
-  Serial << "MQTT Abonnement erfolgreich" << endl;
+  Serial << "  MQTT Abonnement erfolgreich" << endl;
 }
 
 void RoviDevice::mqttPublished(uint16_t packetId) {
-  Serial << "MQTT-Nachricht veröffentlicht" << endl;
+  Serial << "  MQTT-Nachricht veröffentlicht" << endl;
 }
 
 void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-    Serial << "Neue MQTT-Nachricht:\n" << "Topic: " << topic << "\nPayload: " << payload << endl;
+    Serial << "  Neue MQTT-Nachricht:\n" << "    Topic: " << topic << "\n    Payload: " << payload << endl;
 
     std::string topicString(topic);
     std::string payloadString(payload);
