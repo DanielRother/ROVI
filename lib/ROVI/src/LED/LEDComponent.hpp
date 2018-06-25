@@ -5,11 +5,14 @@
 
 #include <string>
 #include <algorithm>
+#include <thread>
 
 #include <ArduinoIostream.hpp>
 
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
+
+#include <ThreadUtil.hpp>
 
 class LEDComponent : public RoviComponent {
 public:
@@ -73,6 +76,28 @@ public:
         Serial << "  setEffect() " << endl;
         Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
         // TODO
+
+        t = std::thread(&LEDComponent::colorFlow, this);
+
+        // t.join();
+
+    }
+
+    void colorFlow() {
+        for(double h = 0.0; h < 255.0; ++h) {
+            hsv hsvValue;
+            hsvValue.h = h;
+            hsvValue.s = 1.0;
+            hsvValue.v = 0.5;
+
+            rgb rgbValue = hsv2rgb(hsvValue);
+
+            RGBAColor rgba(rgbValue.r * 255, rgbValue.g * 255, rgbValue.b * 255);
+            setColor(rgba);
+            delay(100);
+        }
+
+        Serial << "colorFlow finished" << endl;
     }
 
 
@@ -84,6 +109,8 @@ public:
 
 // protected:
     RGBAColor rgba;
+
+    std::thread t;
 };
 
 #endif /* __LEDCOMPONENT_H__ */
