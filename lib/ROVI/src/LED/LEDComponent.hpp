@@ -39,7 +39,7 @@ public:
         std::transform(localPayload.begin(), localPayload.end(), localPayload.begin(),::tolower);
 
         bool power = false;
-        if(payload == "on" || payload == "true") {
+        if(payload == "on" || payload == "true" || payload == "1") {
             power = true;
         }
 
@@ -48,11 +48,11 @@ public:
 
     virtual void setColorMQTT(const std::string& payload) {
         Serial << "  setColor() " << endl;
-        rgba = RGBAColor(payload);
+        m_rgb = Color::createColor(payload);
 
-        Serial << "    Color: " << rgba.toString().c_str() << endl;
+        Serial << "    Color: " << m_rgb->toString().c_str() << endl;
 
-        setColor(rgba);
+        setColor(m_rgb);
     }
 
     virtual void setBrightnessMQTT(const std::string& payload) {
@@ -84,16 +84,17 @@ public:
     }
 
     void colorFlow() {
-        for(double h = 0.0; h < 255.0; ++h) {
-            hsv hsvValue;
-            hsvValue.h = h;
-            hsvValue.s = 1.0;
-            hsvValue.v = 0.5;
+        for(double h = 0.0; h < 360.0; ++h) {
+            // TODO: Reactivate
+            // hsv hsvValue;
+            // hsvValue.h = h;
+            // hsvValue.s = 1.0;
+            // hsvValue.v = 0.5;
 
-            rgb rgbValue = hsv2rgb(hsvValue);
+            // rgb rgbValue = hsv2rgb(hsvValue);
 
-            RGBAColor rgba(rgbValue.r * 255, rgbValue.g * 255, rgbValue.b * 255);
-            setColor(rgba);
+            // m_rgb = std::make_shared<RGBColor>(rgbValue.r * 255, rgbValue.g * 255, rgbValue.b * 255);
+            setColor(std::make_shared<HSVColor>(h, 1.0, 0.5));
             delay(100);
         }
 
@@ -102,13 +103,13 @@ public:
 
 
     // Interfac for the derived class
-    virtual void setColor(const RGBAColor& rgba) = 0;
+    virtual void setColor(const std::shared_ptr<Color>& color) = 0;
     virtual void setPower(bool power) = 0;
     virtual void setBrightness(uint8_t brightness) = 0;
     // virtual void setEffect(something) = 0;
 
 // protected:
-    RGBAColor rgba;
+    std::shared_ptr<Color> m_rgb;
 
     std::thread t;
 };
