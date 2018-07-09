@@ -1,3 +1,6 @@
+#ifndef __THREAD_UTILS_H_
+#define __THREAD_UTILS_H_
+
 // Based on https://thispointer.com/c11-how-to-stop-or-terminate-a-thread/
 
 #include <thread>
@@ -58,3 +61,5 @@ public:
 		exitSignal.set_value();
 	}
 };
+
+#endif /* __THREAD_UTILS_H_ */

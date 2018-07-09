@@ -1,11 +1,14 @@
 #ifndef __ROVICOMPONENT_H__
 #define __ROVICOMPONENT_H__
 
+#include <Arduino.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
 #include <iterator>
 #include <functional>
+#include <map>
 
 #include <FileIOUtils.hpp>
 

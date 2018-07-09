@@ -12,8 +12,9 @@
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/LEDComponent.hpp"
 #include "LED/ColorTypes.h"
+#include "LEDEffect.hpp"
 
-class NeoPixelComponent : public LEDComponent {
+class NeoPixelComponent : public LEDComponent /*, public std::enable_shared_from_this<NeoPixelComponent> */ {
 public:
     NeoPixelComponent(uint16_t nbPixel, uint8_t pin, const std::string& name = "NeoPixel") 
         : LEDComponent(name), pixels(nbPixel, pin, NEO_GRB + NEO_KHZ800),        // TBD: Maybe make the Pixeltype dynamic as well
@@ -26,8 +27,8 @@ public:
             setPower(true);
         };
 
-    NeoPixelComponent(const NeoPixelComponent& other) = default;
-    virtual ~NeoPixelComponent() = default;
+    // NeoPixelComponent(const NeoPixelComponent& other) = default;
+    // virtual ~NeoPixelComponent() = default;
 
 
     virtual void setColor(const std::shared_ptr<Color>& color) override {
@@ -67,6 +68,36 @@ public:
 
         // TBD: Should the new color be stored?
         // If so, convert NeoPixels color type...
+    }
+
+    virtual void setEffectMQTT(const std::string& payload) {
+        Serial << "  NeoPixel::setEffect() " << endl;
+        Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
+        // TODO
+
+        // t = std::thread(&LEDComponent::colorFlow, this);        // <- First try
+        // t.join();
+
+        // Creating our Task
+        // LEDEffect effect(std::make_shared<NeoPixelComponent>(*this));         // <- Not compiling due to pure virtual...
+                                                                                 // or some delete function (make_shared(*this))???
+        LEDEffect effect;
+
+        //Creating a thread to execute our task
+        std::thread th([&]()
+        {
+            effect.run();
+        });
+
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+
+        std::cout << "Asking Task to Stop" << std::endl;
+        // Stop the Task
+        effect.stop();
+
+        //Waiting for thread to join
+        th.join();
+        std::cout << "Thread Joined" << std::endl;
     }
 
 

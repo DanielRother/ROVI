@@ -5,6 +5,9 @@
 
 #include <stdio.h>
 #include <string>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 static std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
     std::string ret = baseDirectory;
