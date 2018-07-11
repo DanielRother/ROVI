@@ -10,19 +10,24 @@
 
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
-#include "LEDEffect.hpp"
 
 #include <ThreadUtil.hpp>
 
 
 LEDComponent::LEDComponent(const std::string& name) 
-: RoviComponent(name) {
+: RoviComponent(name), effect(std::make_shared<LEDEffect>(this)) {
     handler[std::string("setPower")]        = std::bind(&LEDComponent::setPowerMQTT,        this, std::placeholders::_1);
     handler[std::string("setColor")]        = std::bind(&LEDComponent::setColorMQTT,        this, std::placeholders::_1);
     handler[std::string("setBrightness")]   = std::bind(&LEDComponent::setBrightnessMQTT,   this, std::placeholders::_1);
     handler[std::string("setEffect")]       = std::bind(&LEDComponent::setEffectMQTT,       this, std::placeholders::_1);
 }
 
+LEDComponent::LEDComponent(const LEDComponent& other)
+: RoviComponent(other.name), m_rgb(other.m_rgb) {}
+
+LEDComponent::~LEDComponent() {
+    Serial << "LEDComponent dtor" << endl;
+}
 
 // The convertion between string and concrete data type can be done in this abstract class
 // But the actual action have to be implemented in an derived class
@@ -73,44 +78,47 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
     Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
     // TODO
 
-    // // t = std::thread(&LEDComponent::colorFlow, this);        // <- First try
-    // // t.join();
 
-    // Second try
-    // (moved to sublcass due to pure virtual...)
     // TODO: CLeanup
-    // // Creating our Task
-    // // LEDEffect effect(std::make_shared<LEDComponent>(*this));         // <- Not compiling due to pure virtual...
+    // // Creating our Task    
+    // LEDEffect effect(this);                             // <- Currently a raw pointer, because I'm not able to create a 
+                                                        // shared_ptr to LEDCompontente due to it's abstractness
+                                                        // With the latests tries the object was delete together with this class
+                                                        // because the ref counter accedently drops to zero... :( 
+    // Something like this would be better
+    // std::shared_ptr<LEDComponent> thisPtr;//(this);
+    // thisPtr.reset(this);
+    // LEDEffect effect(std::make_shared<LEDComponent>(*this));         // <- Not compiling due to pure virtual...
     // LEDEffect effect;
 
-    // //Creating a thread to execute our task
-    // std::thread th([&]()
-    // {
-    //     effect.run();
-    // });
+    effect = std::make_shared<LEDEffect>(this);
 
-    // std::this_thread::sleep_for(std::chrono::seconds(10));
+    //Creating a thread to execute our task
+    std::thread th([&]()
+    {
+        effect->run();
+    });
 
-    // std::cout << "Asking Task to Stop" << std::endl;
-    // // Stop the Task
-    // effect.stop();
+    // TODO: Move to stopThread()...
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
-    // //Waiting for thread to join
-    // th.join();
-    // std::cout << "Thread Joined" << std::endl;
+    std::cout << "Asking Task to Stop" << std::endl;
+    // Stop the Task
+    effect->stop();
+    std::cout << "Asking Thread to Join" << std::endl;
+
+    //Waiting for thread to join
+    th.join();
+    std::cout << "Thread Joined" << std::endl;
 }
+
+void LEDComponent::stopThread() {
+    
+}
+
 
 void LEDComponent::colorFlow() {
     for(double h = 0.0; h < 360.0; ++h) {
-        // TODO: Reactivate
-        // hsv hsvValue;
-        // hsvValue.h = h;
-        // hsvValue.s = 1.0;
-        // hsvValue.v = 0.5;
-
-        // rgb rgbValue = hsv2rgb(hsvValue);
-
-        // m_rgb = std::make_shared<RGBColor>(rgbValue.r * 255, rgbValue.g * 255, rgbValue.b * 255);
         setColor(std::make_shared<HSVColor>(h, 1.0, 0.5));
         delay(100);
     }

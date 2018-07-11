@@ -17,7 +17,7 @@ template<char delimiter>
 class WordDelimitedBy : public std::string
 {};
 
-class RoviComponent {
+class RoviComponent : public std::enable_shared_from_this<RoviComponent>  {
 public:
     RoviComponent(const std::string& name) 
         : name(name)

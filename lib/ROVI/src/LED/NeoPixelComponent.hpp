@@ -70,35 +70,37 @@ public:
         // If so, convert NeoPixels color type...
     }
 
-    virtual void setEffectMQTT(const std::string& payload) {
-        Serial << "  NeoPixel::setEffect() " << endl;
-        Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
-        // TODO
+    // virtual void setEffectMQTT(const std::string& payload) {
+    //     Serial << "  NeoPixel::setEffect() " << endl;
+    //     Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
+    //     // TODO
 
-        // t = std::thread(&LEDComponent::colorFlow, this);        // <- First try
-        // t.join();
+    //     // t = std::thread(&LEDComponent::colorFlow, this);        // <- First try
+    //     // t.join();
 
-        // Creating our Task
-        // LEDEffect effect(std::make_shared<NeoPixelComponent>(*this));         // <- Not compiling due to pure virtual...
-                                                                                 // or some delete function (make_shared(*this))???
-        LEDEffect effect;
+    //     // Creating our Task
+    //     // TODO: Implement me!!!!
+    //     auto thisPtr = std::make_shared<NeoPixelComponent>(*this);
+    //     // LEDEffect effect(std::make_shared<NeoPixelComponent>(*this));         // <- Not compiling due to pure virtual...
+    //                                                                              // or some delete function (make_shared(*this))???
+    //     LEDEffect effect;
 
-        //Creating a thread to execute our task
-        std::thread th([&]()
-        {
-            effect.run();
-        });
+    //     //Creating a thread to execute our task
+    //     std::thread th([&]()
+    //     {
+    //         effect.run();
+    //     });
 
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+    //     std::this_thread::sleep_for(std::chrono::seconds(10));
 
-        std::cout << "Asking Task to Stop" << std::endl;
-        // Stop the Task
-        effect.stop();
+    //     std::cout << "Asking Task to Stop" << std::endl;
+    //     // Stop the Task
+    //     effect.stop();
 
-        //Waiting for thread to join
-        th.join();
-        std::cout << "Thread Joined" << std::endl;
-    }
+    //     //Waiting for thread to join
+    //     th.join();
+    //     std::cout << "Thread Joined" << std::endl;
+    // }
 
 
 // protected:

@@ -8,18 +8,20 @@
 #include <thread>
 
 #include <ArduinoIostream.hpp>
+#include <ThreadUtil.hpp>
 
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
 
-#include <ThreadUtil.hpp>
+class LEDComponent;
+#include "LEDEffect.hpp"
 
 
-class LEDComponent : public RoviComponent {
+class LEDComponent : public RoviComponent /*, public std::enable_shared_from_this<LEDComponent>*/ {
 public:
     LEDComponent(const std::string& name = "LED");
-    LEDComponent(const LEDComponent& other) = default;
-    virtual ~LEDComponent() = default;
+    LEDComponent(const LEDComponent& other);
+    virtual ~LEDComponent() /*= default*/;
 
     // The convertion between string and concrete data type can be done in this abstract class
     // But the actual action have to be implemented in an derived class
@@ -41,7 +43,9 @@ public:
 // protected:
     std::shared_ptr<Color> m_rgb;
 
+    void stopThread();
     std::thread t;
+    std::shared_ptr<LEDEffect> effect;
 };
 
 
