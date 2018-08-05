@@ -10,6 +10,7 @@
 
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
+#include "LED/Effects/AllEffects.hpp"
 
 #include <ThreadUtil.hpp>
 
@@ -96,45 +97,25 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
     stopThread();           // <- TODO: in Handler einbauen...
 
     Serial << "  LEDComponent::setEffect() " << endl;
-    Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
-    // TODO
 
-
-    // TODO: CLeanup
-    // // Creating our Task    
-    // LEDEffect effect(this);                             // <- Currently a raw pointer, because I'm not able to create a 
-                                                        // shared_ptr to LEDCompontente due to it's abstractness
-                                                        // With the latests tries the object was delete together with this class
-                                                        // because the ref counter accedently drops to zero... :( 
-    // Something like this would be better
-    // std::shared_ptr<LEDComponent> thisPtr;//(this);
-    // thisPtr.reset(this);
-    // LEDEffect effect(std::make_shared<LEDComponent>(*this));         // <- Not compiling due to pure virtual...
-    // LEDEffect effect;
-
-    effect = std::make_shared<LEDEffect>(this);
+    // TODO: Move to some kind of factory (simple map not possible due to internal promise...)
+    std::string payloardLower = payload;
+    std::transform(payloardLower.begin(), payloardLower.end(), payloardLower.begin(), ::tolower);
+    if(payloardLower == "colorflow" || payloardLower == "colorflownormal") {
+        effect = std::make_shared<ColorFlow>(this);
+    } else if(payloardLower == "colorflowslow") {
+        effect = std::make_shared<ColorFlow>(this, 1000);
+    } else if(payloardLower == "colorflowfast") {
+        effect = std::make_shared<ColorFlow>(this, 10);
+    } else {
+        effect = std::make_shared<LEDEffect>(this);
+    } 
 
     //Creating a thread to execute our task
-    // std::thread th([&]()
-    // {
-    //     effect->run();
-    // });
     t = std::thread([&]()
     {
         effect->run();
     });
-
-    // // TODO: Move to stopThread()...
-    // std::this_thread::sleep_for(std::chrono::seconds(10));
-
-    // std::cout << "Asking Task to Stop" << std::endl;
-    // // Stop the Task
-    // effect->stop();
-    // std::cout << "Asking Thread to Join" << std::endl;
-
-    // //Waiting for thread to join
-    // t.join();
-    // std::cout << "Thread Joined" << std::endl;
 }
 
 void LEDComponent::stopThread() {
