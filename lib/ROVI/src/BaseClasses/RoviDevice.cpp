@@ -16,6 +16,11 @@ void RoviDevice::setupRovi() {
 
     name = iot.configuration.get("DeviceName").c_str();
     room = addVariableToIotConfig("room", "/haus/etage/zimmer");
+
+    // OTAPassword
+    iot.web.addInterfaceElement("OTAPassword", "input", "OTA Password:", "#configform", "OTAPassword");
+    iot.web.setInterfaceElementAttribute("OTAPassword", "type", "password");
+    
     iot.configuration.save();
 
     baseTopic   = fullfile(room, name); 

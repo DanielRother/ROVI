@@ -6,7 +6,7 @@
 #include <prettyprint.hpp>
 #include <ArduinoIostream.hpp>
 
-#include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 
 //***************************************************************************//
 // Basecamp and Rovi initialize 
@@ -63,6 +63,15 @@ void setup() {
   iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
 
 
+  // Activate Over-the-Air updates
+  String otaPassword = iot.configuration.get("OTAPassword");
+  Serial << "*******************************************" << endl
+         << "* OTA PASSWORD:" <<  otaPassword << endl
+         << "*******************************************" << endl;
+  ArduinoOTA.setPassword(otaPassword.c_str());
+  ArduinoOTA.begin();
+
+
   // Noch aus dem Beispiel zum hinzufügen zum Webinterface
   // iot.web.setInterfaceElementAttribute(      // <- Das setzt das Element noch auf Readonly
   //   "tempDisplay",
@@ -90,12 +99,15 @@ void setup() {
 // Arduino loop()
 //***************************************************************************//
 void loop() {
+  ArduinoOTA.handle();
+
   sleep(5);
   Serial << "--- loop() ---" << endl;
   String temp = getTemp();
   Serial << "  Temperatur: " << temp << endl;
   iot.mqtt.publish("example/temp/", 1, true, temp.c_str());
 
+  iot.mqtt.publish("example/foo/", 1, true, "OTA hat geklappt :)");
 
   Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 }
