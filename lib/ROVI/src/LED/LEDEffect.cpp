@@ -13,3 +13,7 @@ LEDEffect::LEDEffect(LEDComponent* led, uint32_t delay_ms)
 void LEDEffect::run() {
     Serial << "Dummy LEDEffect. Doesn't do anything" << endl;
 }
+
+float LEDEffect::getCurrentBrightness() {
+    return led->m_rgb->toHSV()->v;
+}

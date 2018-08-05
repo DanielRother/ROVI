@@ -16,7 +16,7 @@
 
 
 LEDComponent::LEDComponent(const std::string& name) 
-: RoviComponent(name), effect(std::make_shared<LEDEffect>(this)) {
+: RoviComponent(name), m_rgb(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
         stopThread();
@@ -107,6 +107,8 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
         effect = std::make_shared<ColorFlow>(this, 1000);
     } else if(payloardLower == "colorflowfast") {
         effect = std::make_shared<ColorFlow>(this, 10);
+    } else if(payloardLower == "randomcolor") {
+        effect = std::make_shared<RandomColor>(this);
     } else {
         effect = std::make_shared<LEDEffect>(this);
     } 
@@ -134,13 +136,3 @@ void LEDComponent::stopThread() {
     effect = std::make_shared<LEDEffect>(this);         // <- Otherwise effect->stop() crashes the next time this method is called
                                                         // TODO: Find a better solution
 }
-
-
-// void LEDComponent::colorFlow() {
-//     for(double h = 0.0; h < 360.0; ++h) {
-//         setColor(std::make_shared<HSVColor>(h, 1.0, 0.5));
-//         delay(100);
-//     }
-
-//     Serial << "colorFlow finished" << endl;
-// }

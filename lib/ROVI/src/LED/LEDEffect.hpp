@@ -23,6 +23,8 @@ protected:
     // std::shared_ptr<LEDComponent> led;      // TODO: Synchronize access
     LEDComponent* led;      // TODO: Synchronize access
     uint32_t delay_ms;
+
+    float getCurrentBrightness();
 };
 
 #endif /* __LED_EFFECT_H__ */

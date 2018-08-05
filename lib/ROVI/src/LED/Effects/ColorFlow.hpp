@@ -10,12 +10,9 @@ public:
         {}
 
     void run() {
-        // TODO: Move to subclass
         Serial << "ColorFlow start" << endl;
 
-        // Get current brightness
-        double brightness = led->m_rgb->toHSV()->v;
-        Serial << "Used brightness: " << brightness << endl;
+        float brightness = getCurrentBrightness();
 
         // Check if thread is requested to stop ?
         while(stopRequested() == false) {
@@ -24,7 +21,7 @@ public:
                     break;
                 }
 
-                led->setColor(std::make_shared<HSVColor>(h, 1.0, brightness));
+                led->setColor(std::make_shared<HSVColor>(h, 1.0f, brightness));
                 delay(delay_ms);
             }
 
