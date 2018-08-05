@@ -6,6 +6,8 @@
 #include <prettyprint.hpp>
 #include <ArduinoIostream.hpp>
 
+#include <ArduinoJson.h>
+
 //***************************************************************************//
 // Basecamp and Rovi initialize 
 //***************************************************************************//

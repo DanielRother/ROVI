@@ -31,8 +31,6 @@ public:
     virtual void setBrightnessMQTT(const std::string& payload);
     virtual void setEffectMQTT(const std::string& payload);
 
-    void colorFlow();
-
 
     // Interfac for the derived class
     virtual void setColor(const std::shared_ptr<Color>& color) = 0;
@@ -43,9 +41,9 @@ public:
 // protected:
     std::shared_ptr<Color> m_rgb;
 
-    void stopThread();
     std::thread t;
     std::shared_ptr<LEDEffect> effect;
+    void stopThread();
 };
 
 

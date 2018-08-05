@@ -9,6 +9,7 @@
 #include <iterator>
 #include <functional>
 #include <map>
+#include <memory>
 
 #include <FileIOUtils.hpp>
 

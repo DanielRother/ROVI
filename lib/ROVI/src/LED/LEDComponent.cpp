@@ -16,10 +16,19 @@
 
 LEDComponent::LEDComponent(const std::string& name) 
 : RoviComponent(name), effect(std::make_shared<LEDEffect>(this)) {
-    handler[std::string("setPower")]        = std::bind(&LEDComponent::setPowerMQTT,        this, std::placeholders::_1);
-    handler[std::string("setColor")]        = std::bind(&LEDComponent::setColorMQTT,        this, std::placeholders::_1);
-    handler[std::string("setBrightness")]   = std::bind(&LEDComponent::setBrightnessMQTT,   this, std::placeholders::_1);
-    handler[std::string("setEffect")]       = std::bind(&LEDComponent::setEffectMQTT,       this, std::placeholders::_1);
+    // Always stop a possibly running effect thread first
+    handler[std::string("setPower")]        = [this](const std::string payload){
+        stopThread();
+        setPowerMQTT(payload);};
+    handler[std::string("setColor")]        = [this](const std::string payload){
+        stopThread();
+        setColorMQTT(payload);};
+    handler[std::string("setBrightness")]   = [this](const std::string payload){
+        stopThread();
+        setBrightnessMQTT(payload);};
+    handler[std::string("setEffect")]       = [this](const std::string payload){
+        stopThread();
+        setEffectMQTT(payload);};
 }
 
 LEDComponent::LEDComponent(const LEDComponent& other)
@@ -33,6 +42,8 @@ LEDComponent::~LEDComponent() {
 // But the actual action have to be implemented in an derived class
 // Names due to overloaded function and bind make problems and would led to long typecasts...
 void LEDComponent::setPowerMQTT(const std::string& payload) {
+    stopThread();           // <- TODO: in Handler einbauen...
+
     Serial << "  setPower() " << endl;
 
     // Convert to lower cases
@@ -48,6 +59,8 @@ void LEDComponent::setPowerMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setColorMQTT(const std::string& payload) {
+    stopThread();           // <- TODO: in Handler einbauen...
+
     Serial << "  setColor() " << endl;
     m_rgb = Color::createColor(payload);
 
@@ -57,6 +70,8 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setBrightnessMQTT(const std::string& payload) {
+    stopThread();           // <- TODO: in Handler einbauen...
+
     Serial << "  setBrightness() " << endl;
 
     uint8_t brightness = 255;
@@ -70,10 +85,16 @@ void LEDComponent::setBrightnessMQTT(const std::string& payload) {
     // TODO: Error handling
     brightness = atoi(payload.c_str());
 
-    setBrightness(brightness);        
+    auto color = m_rgb->toHSV();
+    color->v = (float) brightness / 255.0f;
+    m_rgb = color->toRGB();
+
+    setColor(color);     
 }
 
 void LEDComponent::setEffectMQTT(const std::string& payload) {
+    stopThread();           // <- TODO: in Handler einbauen...
+
     Serial << "  LEDComponent::setEffect() " << endl;
     Serial << "!!!! NOT IMPLEMENTED YET !!!!" << endl;
     // TODO
@@ -94,13 +115,29 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
     effect = std::make_shared<LEDEffect>(this);
 
     //Creating a thread to execute our task
-    std::thread th([&]()
+    // std::thread th([&]()
+    // {
+    //     effect->run();
+    // });
+    t = std::thread([&]()
     {
         effect->run();
     });
 
-    // TODO: Move to stopThread()...
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    // // TODO: Move to stopThread()...
+    // std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    // std::cout << "Asking Task to Stop" << std::endl;
+    // // Stop the Task
+    // effect->stop();
+    // std::cout << "Asking Thread to Join" << std::endl;
+
+    // //Waiting for thread to join
+    // t.join();
+    // std::cout << "Thread Joined" << std::endl;
+}
+
+void LEDComponent::stopThread() {
 
     std::cout << "Asking Task to Stop" << std::endl;
     // Stop the Task
@@ -108,20 +145,21 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
     std::cout << "Asking Thread to Join" << std::endl;
 
     //Waiting for thread to join
-    th.join();
-    std::cout << "Thread Joined" << std::endl;
-}
-
-void LEDComponent::stopThread() {
-    
-}
-
-
-void LEDComponent::colorFlow() {
-    for(double h = 0.0; h < 360.0; ++h) {
-        setColor(std::make_shared<HSVColor>(h, 1.0, 0.5));
-        delay(100);
+    if(t.joinable()) {
+        t.join();
     }
+    std::cout << "Thread Joined" << std::endl;
 
-    Serial << "colorFlow finished" << endl;
+    effect = std::make_shared<LEDEffect>(this);         // <- Otherwise effect->stop() crashes the next time this method is called
+                                                        // TODO: Find a better solution
 }
+
+
+// void LEDComponent::colorFlow() {
+//     for(double h = 0.0; h < 360.0; ++h) {
+//         setColor(std::make_shared<HSVColor>(h, 1.0, 0.5));
+//         delay(100);
+//     }
+
+//     Serial << "colorFlow finished" << endl;
+// }
