@@ -20,6 +20,7 @@ Basecamp iot{
 #include "BaseClasses/RoviDevice.hpp"
 #include "LED/LEDComponent.hpp"
 #include "LED/NeoPixelComponent.hpp"
+#include "LED/RGBLEDComponent.hpp"
 
 RoviDevice myRovi(iot);
 
@@ -49,10 +50,15 @@ void setup() {
   sleep(5);
   iot.begin();
 
-  // myRovi.addComponent(std::make_shared<LEDComponent>());
   uint16_t nbNeoPixelLEDs = 12;
   uint8_t  neoPixelPin    = 15;
-  myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
+
+  uint8_t pinR = 15; 
+  uint8_t pinG = 2; 
+  uint8_t pinB = 4; 
+
+  // myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
+  myRovi.addComponent(std::make_shared<RGBLEDComponent>(pinR, pinG, pinB));
   myRovi.setupRovi();
 
   // TODO: Is there an easier way to connect to methods???
@@ -102,12 +108,13 @@ void loop() {
   ArduinoOTA.handle();
 
   sleep(5);
-  Serial << "--- loop() ---" << endl;
-  String temp = getTemp();
-  Serial << "  Temperatur: " << temp << endl;
-  iot.mqtt.publish("example/temp/", 1, true, temp.c_str());
+  // Serial << "--- loop() ---" << endl;
+  // String temp = getTemp();
+  // Serial << "  Temperatur: " << temp << endl;
+  // iot.mqtt.publish("example/temp/", 1, true, temp.c_str());
 
-  iot.mqtt.publish("example/foo/", 1, true, "OTA hat geklappt :)");
+  // iot.mqtt.publish("example/foo/", 1, true, "OTA hat geklappt :)");
+  iot.mqtt.publish(myRovi.statusTopic.c_str(), 1, false, "online");
 
   Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 }
