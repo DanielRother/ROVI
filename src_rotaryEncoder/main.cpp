@@ -1,10 +1,10 @@
-// #include <Arduino.h>
+#include <Arduino.h>
 
 // #include <string>
 // #include <stdint.h>
 
-// #include <prettyprint.hpp>
-// #include <ArduinoIostream.hpp>
+#include <prettyprint.hpp>
+#include <ArduinoIostream.hpp>
 
 // #include <ArduinoOTA.h>
 
@@ -25,140 +25,8 @@
 // RoviDevice myRovi(iot);
 
 
-// //***************************************************************************//
-// // Example method
-// // To be removed
-// //***************************************************************************//
-// int curTemp = 1;
-// String getTemp() {
-
-//   String temp = String(25 + curTemp++);
-//   curTemp %= 10;
-
-//   return temp;
-// }
-
-// //***************************************************************************//
-// // rotary encoder
-// //***************************************************************************//
-// // // Variables
-// // volatile byte aFlag = 0; // let's us know when we're expecting a rising edge on pinA to signal that the encoder has arrived at a detent
-// // volatile byte bFlag = 0; // let's us know when we're expecting a rising edge on pinB to signal that the encoder has arrived at a detent (opposite direction to when aFlag is set)
-// // volatile byte encoderPos = 0; //this variable stores our current value of encoder position. Change to int or uin16_t instead of byte if you want to record a larger range than 0-255
-// // volatile byte oldEncPos = 0; //stores the last encoder position value so we can compare to the current reading and see if it has changed (so we know when to print to the serial monitor)
-// // volatile byte reading = 0; //somewhere to store the direct values we read from our interrupt pins before checking to see if we have moved a whole detent
-
-// // // Callbacks
-
-// // void PinA(){
-// //   cli(); //stop interrupts happening before we read pin values
-// //   reading = PIND & 0xC; // read all eight pin values then strip away all but pinA and pinB's values
-// //   if(reading == B00001100 && aFlag) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-// //     encoderPos --; //decrement the encoder's position count
-// //     bFlag = 0; //reset flags for the next turn
-// //     aFlag = 0; //reset flags for the next turn
-// //   }
-// //   else if (reading == B00000100) bFlag = 1; //signal that we're expecting pinB to signal the transition to detent from free rotation
-// //   sei(); //restart interrupts
-// // }
-
-// // void PinB(){
-// //   cli(); //stop interrupts happening before we read pin values
-// //   reading = PIND & 0xC; //read all eight pin values then strip away all but pinA and pinB's values
-// //   if (reading == B00001100 && bFlag) { //check that we have both pins at detent (HIGH) and that we are expecting detent on this pin's rising edge
-// //     encoderPos ++; //increment the encoder's position count
-// //     bFlag = 0; //reset flags for the next turn
-// //     aFlag = 0; //reset flags for the next turn
-// //   }
-// //   else if (reading == B00001000) aFlag = 1; //signal that we're expecting pinA to signal the transition to detent from free rotation
-// //   sei(); //restart interrupts
-// // }
-
-// uint8_t pinPressed = 15;
-// uint8_t pinPressed2 = 26;
-// uint8_t pinLeftRotation = 12;
-// uint8_t pinRightRotation = 13;
-
-// #include "AiEsp32RotaryEncoder.h"
-// AiEsp32RotaryEncoder rotaryEncoder = AiEsp32RotaryEncoder(pinLeftRotation, pinRightRotation, pinPressed2, -1);
-
-// int test_limits = 2;
-
-// void rotary_onButtonClick() {
-// 	//rotaryEncoder.reset();
-// 	//rotaryEncoder.disable();
-// 	rotaryEncoder.setBoundaries(-test_limits, test_limits, false);
-// 	test_limits *= 2;
-// }
-
-// void rotary_loop() {
-// 	//first lets handle rotary encoder button click
-// 	if (rotaryEncoder.currentButtonState() == BUT_RELEASED) {
-// 		//we can process it here or call separate function like:
-// 		rotary_onButtonClick();
-// 	}
-
-// 	//lets see if anything changed
-// 	int16_t encoderDelta = rotaryEncoder.encoderChanged();
-	
-// 	//optionally we can ignore whenever there is no change
-// 	if (encoderDelta == 0) return;
-	
-// 	//for some cases we only want to know if value is increased or decreased (typically for menu items)
-// 	if (encoderDelta>0) Serial.print("+");
-// 	if (encoderDelta<0) Serial.print("-");
-
-// 	//for other cases we want to know what is current value. Additionally often we only want if something changed
-// 	//example: when using rotary encoder to set termostat temperature, or sound volume etc
-	
-// 	//if value is changed compared to our last read
-// 	if (encoderDelta!=0) {
-// 		//now we need current value
-// 		int16_t encoderValue = rotaryEncoder.readEncoder();
-// 		//process new value. Here is simple output.
-// 		Serial.print("Value: ");
-// 		Serial.println(encoderValue);
-// 	} 	
-// }
-
-// #include <OneButton.h>
-// OneButton button(pinPressed, true);
-// // OneButton button(pinRightRotation, true);
-
-// #include <iostream>
-// void clicked() {
-//   Serial << "clicked()" << endl;
-// }
-
-// void doubleClicked() {
-//   Serial << "doubleClicked()" << endl;
-// }
-
-// void longPressStart() {
-//   Serial << "longPressStart()" << endl;
-// }
-
-// void longPressEnd() {
-//   Serial << "longPressEnd()" << endl;
-// }
-
-// void duringLongPress() {
-//   Serial << "duringLongPress()" << endl;
-// }
 
 
-
-// // const byte interruptPin = pinLeftRotation;
-// // volatile int interruptCounter = 0;
-// // int numberOfInterrupts = 0;
- 
-// // portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
- 
-// // void IRAM_ATTR handleInterrupt() {
-// //   portENTER_CRITICAL_ISR(&mux);
-// //   interruptCounter++;
-// //   portEXIT_CRITICAL_ISR(&mux);
-// // }
 
 // //***************************************************************************//
 // // Arduino setup()
@@ -168,30 +36,6 @@
 
 //   sleep(5);
 //   iot.begin();
-
-//   //setting up the rotary encoder
-//   // pinMode(pinLeftRotation, INPUT_PULLUP); // set pinA as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-//   // pinMode(pinRightRotation, INPUT_PULLUP); // set pinB as an input, pulled HIGH to the logic voltage (5V or 3.3V for most cases)
-//   // attachInterrupt(0,pinLeftRotation,RISING); // set an interrupt on PinA, looking for a rising edge signal and executing the "PinA" Interrupt Service Routine (below)
-//   // attachInterrupt(1,pinRightRotation,RISING); // set an interrupt on PinB, looking for a rising edge signal and executing the "PinB" Interrupt Service Routine (below)
-
-//   // //setting up rotary encoder push button
-//   // pinMode(pinPressed, INPUT_PULLUP);
-// 	//we must initialize rorary encoder 
-// 	rotaryEncoder.begin();
-// 	rotaryEncoder.setup([]{rotaryEncoder.readEncoder_ISR();});
-// 	//optionally we can set boundaries and if values should cycle or not
-// 	rotaryEncoder.setBoundaries(0, 10, true); //minValue, maxValue, cycle values (when max go to min and vice versa)
-  
-//   // pinMode(interruptPin, INPUT_PULLUP);
-//   // attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, FALLING);
-
-
-//   button.attachClick(clicked);
-//   button.attachDoubleClick(doubleClicked);
-//   button.attachLongPressStart(longPressStart);
-//   button.attachLongPressStop(longPressEnd);
-//   button.attachDuringLongPress(duringLongPress);
 
 //   // myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
 //   // myRovi.addComponent(std::make_shared<RGBLEDComponent>(pinR, pinG, pinB));
@@ -255,36 +99,11 @@
 //   // iot.mqtt.publish(myRovi.statusTopic.c_str(), 1, false, "online");
 
 //   // Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
-
-
-//   //in loop call your custom function which will process rotary encoder values
-// 	rotary_loop();
-	
-// 	delay(50);															 
-// 	if (millis()>20000) {
-//     if(!showEnableMessage) {
-//       Serial << "Enable rotary" << endl;
-//       showEnableMessage = true;
-//     }
-//     rotaryEncoder.enable ();
-//   }
-
-//   // if(interruptCounter>0){
- 
-//   //     portENTER_CRITICAL(&mux);
-//   //     interruptCounter--;
-//   //     portEXIT_CRITICAL(&mux);
- 
-//   //     numberOfInterrupts++;
-//   //     Serial.print("An interrupt has occurred. Total: ");
-//   //     Serial.println(numberOfInterrupts);
-//   // }
-
-//   // keep watching the push button:
-//   button.tick();
 // }
 
-#include "Arduino.h"
+
+#include <OneButton.h>
+
 
 #define ENC_A 12
 #define ENC_B 13
@@ -303,26 +122,53 @@
 
 class RotaryEncoder {
 public:
+  enum class ButtonStates {
+    NORMAL,
+    CLICKED,
+    DOUBLE_CLICKED,
+    HOLDED
+  };
+
   RotaryEncoder(uint8_t pinA, uint8_t pinB, uint8_t pinButton)
   : pinA(pinA), pinB(pinB), pinButton(pinButton),
     rotarySignalTransitions(0.0f), lastRotaryCounterUpdate_ms(millis()),
-    counter(0) {
+    counter(0),
+    button(pinButton, true),
+    buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
+      // Configure rotary encoder state pins 
       pinMode(pinA, INPUT_PULLUP);
       digitalWrite(pinA, HIGH);
       pinMode(pinB, INPUT_PULLUP);
       digitalWrite(pinB, HIGH);
 
-      // TODO: Setup push button
+      // Setup button
+      // TODO: Add callbacks
+      // button.attachClick(&RotaryEncoder::onClick);
+      // button.attachClick([&](){onClick();});
+
+      // button.attachDoubleClick(doubleClicked);
+      // button.attachLongPressStart(longPressStart);
+      // button.attachLongPressStop(longPressEnd);
+      // button.attachDuringLongPress(duringLongPress);
   }
 
   void update() {
-    counter += getRotaryTick();
+    button.tick();
+    // auto curButtonState = getCurrentButtonState();
+
+    auto tick = getRotaryTick(); 
+    counter += tick;
     // TODO: Update button
 
-    // Serial.print("Counter value: ");
-    // Serial.println(counter, DEC);
+    if(tick != 0) {
+      Serial << "Counter value (in update()) = " << counter << endl;
+    }
   }
 
+protected:
+  //*************************************************************************************************//
+  //*** Calculate rotary state update
+  //*************************************************************************************************//
   /*!
   * \brief Converts the transitions of the rotary encoder into a tick of the counter
   * 
@@ -359,19 +205,6 @@ public:
     return tick;
   }
 
-protected:
-  uint8_t pinA;
-  uint8_t pinB;
-  uint8_t pinButton;
-
-  float rotarySignalTransitions;
-  unsigned long lastRotaryCounterUpdate_ms;
-
-  uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
-
-  static const float    SIGNAL_TRANSITIONS_PER_TICK;//    = 4.0f;
-  static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;// = 100;
-
   /*!
     \return change in encoder state (-1,0,1) 
   */
@@ -404,10 +237,93 @@ protected:
     // Thanks to kolban in the esp32 channel, who has a great book on everything iot,
     // for his initial help at my panic on the esp32 gpio access. long live IRC :)
   }
+
+  //*************************************************************************************************//
+  //*** Callback functions for the button state updates
+  //*************************************************************************************************//
+  void onClick() {
+    updateButtonState(ButtonStates::CLICKED);
+    // TODO: Call user defined callback function
+  }
+
+  void onDoubleClick() {
+    updateButtonState(ButtonStates::DOUBLE_CLICKED);
+    // TODO: Call user defined callback function
+  }
+
+  void onHold() {
+    updateButtonState(ButtonStates::HOLDED);
+    // TODO: Call user defined callback function
+  }
+
+  ButtonStates getCurrentButtonState() {
+    auto now = millis();
+    if(now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS) {
+      updateButtonState(ButtonStates::NORMAL);
+    }
+
+    return buttonState;
+  }
+
+  void updateButtonState(ButtonStates state) {
+    buttonState = state;
+    lastButtonStateUpdate_ms = millis();
+
+    auto buttonStateString = buttonStateToString(state);
+    Serial << "Button state changed to " << buttonStateString << endl;
+    // TODO: Add MQTT state update message here
+  }
+
+  std::string buttonStateToString(ButtonStates state) {
+    switch (state) {
+      case ButtonStates::NORMAL:
+        return "NORMAL";
+        break;    
+      case ButtonStates::CLICKED:
+        return "CLICKED";
+        break;
+      case ButtonStates::DOUBLE_CLICKED:
+        return "DOUBLE_CLICKED";
+        break;
+    
+      case ButtonStates::HOLDED:
+        return "HOLDED";
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  }
+
+protected:
+  //*************************************************************************************************//
+  //*** Member variables
+  //*************************************************************************************************//
+  uint8_t pinA;
+  uint8_t pinB;
+  uint8_t pinButton; 
+
+  float rotarySignalTransitions;
+  unsigned long lastRotaryCounterUpdate_ms;
+
+  uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
+
+  static const float    SIGNAL_TRANSITIONS_PER_TICK;
+  static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
+
+
+  OneButton button;
+  ButtonStates buttonState;
+  unsigned long lastButtonStateUpdate_ms;
+
+  static const uint16_t BUTTON_STATE_TIMEOUT_MS;
 };
 
 const float    RotaryEncoder::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
 const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
+
+const uint16_t BUTTON_STATE_TIMEOUT_MS                       = 10000;
 
 
 RotaryEncoder rotary(ENC_A, ENC_B, -1);
