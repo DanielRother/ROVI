@@ -300,14 +300,121 @@
 // as the pins may have changed value between calls potentially. One should
 // suffice, maybe at the expense of a second variable or additional shifts.
 #include <rom/gpio.h>
+
+class RotaryEncoder {
+public:
+  RotaryEncoder(uint8_t pinA, uint8_t pinB, uint8_t pinButton)
+  : pinA(pinA), pinB(pinB), pinButton(pinButton),
+    rotarySignalTransitions(0.0f), lastRotaryCounterUpdate_ms(millis()),
+    counter(0) {
+      pinMode(pinA, INPUT_PULLUP);
+      digitalWrite(pinA, HIGH);
+      pinMode(pinB, INPUT_PULLUP);
+      digitalWrite(pinB, HIGH);
+
+      // TODO: Setup push button
+  }
+
+  void update() {
+    counter += getRotaryTick();
+    // TODO: Update button
+
+    // Serial.print("Counter value: ");
+    // Serial.println(counter, DEC);
+  }
+
+  /*!
+  * \brief Converts the transitions of the rotary encoder into a tick of the counter
+  * 
+  * As there are n (typically n=4) transitions of the encoder signal during one pysical rotation tick
+  * these have to be converted before updating the counter value. I.e. there have to be n transitions
+  * for one update. Additionally, and to keep bouncing effects of the hardware to a minimum, there is
+  * a timeout which resets the transistion counter after a while (e.g. one transition was lost but the 
+  * counter is still updated after m ms as n-1 ticks are enough to savely detect the tick). 
+  * 
+  * \return Change of the counter value (-1,0,1) 
+  */
+  uint8_t getRotaryTick() {
+    uint8_t tick = 0;
+
+    auto transition = getEncoderTransition();
+    rotarySignalTransitions += transition;
+
+    auto now = millis();
+    if(transition) {
+      lastRotaryCounterUpdate_ms = now;
+    }
+
+
+    if(fabs(rotarySignalTransitions) >= SIGNAL_TRANSITIONS_PER_TICK ||
+       (now - lastRotaryCounterUpdate_ms > ENCODER_TICK_UPDATE_TIMEOUT_MS && rotarySignalTransitions != 0.0f)) {
+      // TBD: Is the last condition still required
+
+      tick = round(rotarySignalTransitions / SIGNAL_TRANSITIONS_PER_TICK);
+
+      rotarySignalTransitions = 0;
+      lastRotaryCounterUpdate_ms = now;
+    }
+
+    return tick;
+  }
+
+protected:
+  uint8_t pinA;
+  uint8_t pinB;
+  uint8_t pinButton;
+
+  float rotarySignalTransitions;
+  unsigned long lastRotaryCounterUpdate_ms;
+
+  uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
+
+  static const float    SIGNAL_TRANSITIONS_PER_TICK;//    = 4.0f;
+  static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;// = 100;
+
+  /*!
+    \return change in encoder state (-1,0,1) 
+  */
+  int8_t getEncoderTransition() {  
+    static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
+    static uint8_t old_AB = 0;
+    static uint32_t curval = 0;
+    static uint32_t curtmpA = 0;
+    static uint32_t curtmpB = 0;
+    /**/
+    old_AB <<= 2;                   //remember previous state
+    //bit shift old_AB two positions to the left and store.
+
+    curval = gpio_input_get();  // returns gpio pin status of pins - SEE DEFINE 
+    //Serial.println("curval");
+    //Serial.println(curval);
+    //note to self: these curval bits are probably backwards...
+    curtmpA = (curval & 1<< ENC_A ) >> ENC_A;
+    //Serial.println("curtmp A");
+    //Serial.println(curtmpA);
+
+    curtmpB=(curval & 1<< ENC_B ) >> (ENC_B - 1);
+    //Serial.println(curtmpB);
+    old_AB |= ( ( curtmpA | curtmpB ) & 0x03 ); 
+    //add current state and hopefully truncate to 8bit 
+  
+    return ( enc_states[( old_AB & 0x0f )]);
+    // return the array item that matches the known possible encoder states
+
+    // Thanks to kolban in the esp32 channel, who has a great book on everything iot,
+    // for his initial help at my panic on the esp32 gpio access. long live IRC :)
+  }
+};
+
+const float    RotaryEncoder::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
+const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
+
+
+RotaryEncoder rotary(ENC_A, ENC_B, -1);
  
 void setup()
 {
-  /* Setup encoder pins as inputs */
-  pinMode(ENC_A, INPUT_PULLUP);
-  digitalWrite(ENC_A, HIGH);
-  pinMode(ENC_B, INPUT_PULLUP);
-  digitalWrite(ENC_B, HIGH);
+  
   Serial.begin (115200);
       delay(10);
     delay(10);
@@ -315,90 +422,10 @@ void setup()
   Serial.println("Start");
 }
  
- int8_t read_encoder();
-
-unsigned long lastRead = 0;
 void loop()
 {
- static uint8_t counter = 0;      //this variable will be changed by encoder input
- static float tmpCounter = 0.0f;      //this variable will be changed by encoder input
- int8_t tmpdata;
- /**/
-  tmpdata = read_encoder();
-  if( tmpdata ) {
-    tmpCounter += tmpdata;
+  rotary.update();
 
-    if(tmpCounter > 3) {
-      ++counter;
-      tmpCounter = 0;
-
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);   
-    } else if(tmpCounter < -3) {
-      --counter;
-      tmpCounter = 0;
-
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);   
-    }
-
-    lastRead = millis();
-
-
-    
-    // Serial.print("Counter value: ");
-    // Serial.println(counter, DEC);
-    
-    // Serial.print("time delta: ");
-    // Serial.println(timeDelta, DEC);
-    
-    }
-    else{
-    //  Serial.println("No Change");
-        auto now = millis();
-        if(now - lastRead > 100 && tmpCounter != 0.0f) {
-            tmpCounter = round(tmpCounter / 4.0f);
-            counter += tmpCounter;
-
-            lastRead = now;
-            tmpCounter = 0;
-
-            Serial.print("Counter value (timeout): ");
-            Serial.println(counter, DEC);
-        }
-      }
   delay(10);
 } 
- 
-/* returns change in encoder state (-1,0,1) */
-int8_t read_encoder()
-{
-  
-  static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-  static uint8_t old_AB = 0;
-  static uint32_t curval = 0;
-  static uint32_t curtmpA = 0;
-  static uint32_t curtmpB = 0;
-  /**/
-  old_AB <<= 2;                   //remember previous state
-  //bit shift old_AB two positions to the left and store.
 
-  curval = gpio_input_get();  // returns gpio pin status of pins - SEE DEFINE 
- // Serial.println("curval");
-  //Serial.println(curval);
-  //note to self: these curval bits are probably backwards...
- curtmpA = (curval & 1<< ENC_A ) >> ENC_A;
-//  Serial.println("curtmp A");
-  //Serial.println(curtmpA);
-
-curtmpB=(curval & 1<< ENC_B ) >> (ENC_B - 1);
- //Serial.println(curtmpB);
-  old_AB |= ( ( curtmpA | curtmpB ) & 0x03 ); 
-  //add current state and hopefully truncate to 8bit 
- 
-  return ( enc_states[( old_AB & 0x0f )]);
-  // return the array item that matches the known possible encoder states
-
-  // Thanks to kolban in the esp32 channel, who has a great book on everything iot,
-  // for his initial help at my panic on the esp32 gpio access. long live IRC :)
-}
