@@ -192,10 +192,18 @@ public:
         auto buttonStateString = buttonStateToString(buttonState);
         Serial << "defaultValueChangeCallback - New value = " << value << " for state " << buttonStateString << endl;
       };
-      rotaryValueChangedCallbacks[ButtonStates::NORMAL]         = defaultValueChangeCallback;
-      rotaryValueChangedCallbacks[ButtonStates::CLICKED]        = defaultValueChangeCallback;
-      rotaryValueChangedCallbacks[ButtonStates::DOUBLE_CLICKED] = defaultValueChangeCallback;
-      rotaryValueChangedCallbacks[ButtonStates::HOLDED]         = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::NORMAL]           = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::CLICKED]          = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::DOUBLE_CLICKED]   = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::HOLDED]           = defaultValueChangeCallback;
+
+      auto defaultButtonStateActivatedCallback = []() {
+        Serial << "defaultButtonStateActivatedCallback" << endl;
+      };
+      buttonStateActivatedCallbacks[ButtonStates::NORMAL]         = defaultButtonStateActivatedCallback;
+      buttonStateActivatedCallbacks[ButtonStates::CLICKED]        = defaultButtonStateActivatedCallback;
+      buttonStateActivatedCallbacks[ButtonStates::DOUBLE_CLICKED] = defaultButtonStateActivatedCallback;
+      buttonStateActivatedCallbacks[ButtonStates::HOLDED]         = defaultButtonStateActivatedCallback;      
   }
 
   void update() {
@@ -294,17 +302,14 @@ protected:
   //*************************************************************************************************//
   void onClick() {
     updateButtonState(ButtonStates::CLICKED);
-    // TODO: Call user defined callback function
   }
 
   void onDoubleClick() {
     updateButtonState(ButtonStates::DOUBLE_CLICKED);
-    // TODO: Call user defined callback function
   }
 
   void onHold() {
     updateButtonState(ButtonStates::HOLDED);
-    // TODO: Call user defined callback function
   }
 
   ButtonStates getCurrentButtonState() {
@@ -320,9 +325,7 @@ protected:
     buttonState = state;
     lastButtonStateUpdate_ms = millis();
 
-    auto buttonStateString = buttonStateToString(state);
-    Serial << "Button state changed to " << buttonStateString << endl;
-    // TODO: Add MQTT state update message here
+    invokeButtonStateActivatedCallback(state);
   }
 
   std::string buttonStateToString(const ButtonStates state) const {
@@ -348,7 +351,6 @@ protected:
   }
 
   int incrementStateValueByValue(const ButtonStates state, const int increment) {
-    // TBD: MQTT here?
     return rotaryValuePerState[state].incrementByValue(increment);
   }
 
@@ -358,6 +360,14 @@ protected:
     Serial << "Value changed to " << value << " for ButtonState = " << buttonStateString << endl;
 
     rotaryValueChangedCallbacks[state](value);
+  }
+
+  void invokeButtonStateActivatedCallback(const ButtonStates state) {
+    // TODO: Add MQTT here
+    auto buttonStateString = buttonStateToString(state);
+    Serial << "ButtonState = " << buttonStateString << " activated" << endl;
+
+    buttonStateActivatedCallbacks[state]();
   }
 
 protected:
@@ -374,6 +384,7 @@ protected:
   uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
   std::map<ButtonStates, RotaryValue> rotaryValuePerState;
   std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
+  std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
 
   static const float    SIGNAL_TRANSITIONS_PER_TICK;
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
