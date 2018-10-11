@@ -223,6 +223,13 @@ public:
     }
   }
 
+  void setupState(const ButtonStates state, int maxValue, bool preventOverflow,
+    const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback) {
+      rotaryValuePerState[state] = RotaryValue(maxValue, preventOverflow);
+      buttonStateActivatedCallbacks[state] = stateActivatedCallback;
+      rotaryValueChangedCallbacks[state] = stateValueChangedCallback;
+  }
+
 protected:
   //*************************************************************************************************//
   //*** Calculate rotary state update
