@@ -42,14 +42,84 @@ int RotaryValue::getValue() const {
   return value;
 }
 
+RotaryEncoder::RotaryEncoder(const uint8_t pinA, const uint8_t pinB)
+  : rotarySignalTransitions(0.0f), lastRotaryCounterUpdate_ms(millis()) {
+      // Configure rotary encoder state pins
+      pinMode(pinA, INPUT_PULLUP);
+      digitalWrite(pinA, HIGH);
+      pinMode(pinB, INPUT_PULLUP);
+      digitalWrite(pinB, HIGH);
+}
 
+
+uint8_t RotaryEncoder::getRotaryTick() {
+    uint8_t tick = 0;
+
+    auto transition = getEncoderTransition();
+    rotarySignalTransitions += transition;
+
+    auto now = millis();
+    if(transition) {
+        lastRotaryCounterUpdate_ms = now;
+    }
+
+    if(fabs(rotarySignalTransitions) >= SIGNAL_TRANSITIONS_PER_TICK ||
+        (now - lastRotaryCounterUpdate_ms > ENCODER_TICK_UPDATE_TIMEOUT_MS && rotarySignalTransitions != 0.0f)) {
+        // TBD: Is the last condition still required
+
+        tick = round(rotarySignalTransitions / SIGNAL_TRANSITIONS_PER_TICK);
+
+        rotarySignalTransitions = 0;
+        lastRotaryCounterUpdate_ms = now;
+    }
+
+    return tick;
+}
+
+int8_t RotaryEncoder::getEncoderTransition() {
+    // TODO: Create members...
+    static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
+    static uint8_t old_AB = 0;
+    static uint32_t curval = 0;
+    static uint32_t curtmpA = 0;
+    static uint32_t curtmpB = 0;
+    /**/
+    old_AB <<= 2;                   //remember previous state
+    //bit shift old_AB two positions to the left and store.
+
+    curval = gpio_input_get();  // returns gpio pin status of pins - SEE DEFINE
+    //Serial.println("curval");
+    //Serial.println(curval);
+    //note to self: these curval bits are probably backwards...
+    curtmpA = (curval & 1<< ENC_A ) >> ENC_A;
+    //Serial.println("curtmp A");
+    //Serial.println(curtmpA);
+
+    curtmpB=(curval & 1<< ENC_B ) >> (ENC_B - 1);
+    //Serial.println(curtmpB);
+    old_AB |= ( ( curtmpA | curtmpB ) & 0x03 );
+    //add current state and hopefully truncate to 8bit
+
+    return ( enc_states[( old_AB & 0x0f )]);
+    // return the array item that matches the known possible encoder states
+
+    // Thanks to kolban in the esp32 channel, who has a great book on everything iot,
+    // for his initial help at my panic on the esp32 gpio access. long live IRC :)
+}
+
+const float    RotaryEncoder::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
+const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
+
+//   RotaryEncoder rotary;
+//   OneButton button;
+
+//   ButtonStates buttonState;
+//   unsigned long lastButtonStateUpdate_ms;
 
 RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton)
-  : pinA(pinA), pinB(pinB), pinButton(pinButton),
-    rotarySignalTransitions(0.0f), lastRotaryCounterUpdate_ms(millis()),
-    counter(0),
-    button(pinButton, true),
-    buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
+  : rotary(pinA, pinB), button(pinButton, true),
+    buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()),
+    counter(0) {
       // Configure rotary encoder state pins
       pinMode(pinA, INPUT_PULLUP);
       digitalWrite(pinA, HIGH);
@@ -87,7 +157,7 @@ void RotaryEncoderWithButton::update() {
     button.tick();
     auto curButtonState = getCurrentButtonState();
 
-    auto tick = getRotaryTick();
+    auto tick = rotary.getRotaryTick();
     counter += tick;
     // TODO: Remove old counter
 
@@ -107,61 +177,6 @@ void RotaryEncoderWithButton::setupState(const ButtonStates state, int maxValue,
     rotaryValueChangedCallbacks[state] = stateValueChangedCallback;
 }
 
-uint8_t RotaryEncoderWithButton::getRotaryTick() {
-    uint8_t tick = 0;
-
-    auto transition = getEncoderTransition();
-    rotarySignalTransitions += transition;
-
-    auto now = millis();
-    if(transition) {
-        lastRotaryCounterUpdate_ms = now;
-    }
-
-
-    if(fabs(rotarySignalTransitions) >= SIGNAL_TRANSITIONS_PER_TICK ||
-        (now - lastRotaryCounterUpdate_ms > ENCODER_TICK_UPDATE_TIMEOUT_MS && rotarySignalTransitions != 0.0f)) {
-        // TBD: Is the last condition still required
-
-        tick = round(rotarySignalTransitions / SIGNAL_TRANSITIONS_PER_TICK);
-
-        rotarySignalTransitions = 0;
-        lastRotaryCounterUpdate_ms = now;
-    }
-
-    return tick;
-}
-
-int8_t RotaryEncoderWithButton::getEncoderTransition() {
-// TODO: Create members...
-static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-static uint8_t old_AB = 0;
-static uint32_t curval = 0;
-static uint32_t curtmpA = 0;
-static uint32_t curtmpB = 0;
-/**/
-old_AB <<= 2;                   //remember previous state
-//bit shift old_AB two positions to the left and store.
-
-curval = gpio_input_get();  // returns gpio pin status of pins - SEE DEFINE
-//Serial.println("curval");
-//Serial.println(curval);
-//note to self: these curval bits are probably backwards...
-curtmpA = (curval & 1<< ENC_A ) >> ENC_A;
-//Serial.println("curtmp A");
-//Serial.println(curtmpA);
-
-curtmpB=(curval & 1<< ENC_B ) >> (ENC_B - 1);
-//Serial.println(curtmpB);
-old_AB |= ( ( curtmpA | curtmpB ) & 0x03 );
-//add current state and hopefully truncate to 8bit
-
-return ( enc_states[( old_AB & 0x0f )]);
-// return the array item that matches the known possible encoder states
-
-// Thanks to kolban in the esp32 channel, who has a great book on everything iot,
-// for his initial help at my panic on the esp32 gpio access. long live IRC :)
-}
 
 //*************************************************************************************************//
 //*** Callback functions for the button state updates
@@ -234,9 +249,5 @@ void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(const ButtonSta
 
     buttonStateActivatedCallbacks[state]();
 }
-
-
-const float    RotaryEncoderWithButton::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
-const uint16_t RotaryEncoderWithButton::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
 
 const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 10000;
