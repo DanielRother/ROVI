@@ -161,10 +161,10 @@ void RotaryEncoderWithButton::update() {
     counter += tick;
     // TODO: Remove old counter
 
-    auto stateValue = incrementStateValueByValue(curButtonState, tick);
-    invokeRotaryValueChangeCallback(curButtonState, stateValue);
-
     if(tick != 0) {
+        auto stateValue = incrementStateValueByValue(curButtonState, tick);
+        invokeRotaryValueChangeCallback(curButtonState, stateValue);
+
         Serial << "Counter value (in update()) = " << counter << endl;
         Serial << "Counter value perState      = " << stateValue << endl;
     }
@@ -195,7 +195,7 @@ void RotaryEncoderWithButton::onHold() {
 
 RotaryEncoderWithButton::ButtonStates RotaryEncoderWithButton::getCurrentButtonState() {
     auto now = millis();
-    if(now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS) {
+    if(now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS && buttonState != ButtonStates::NORMAL) {
         updateButtonState(ButtonStates::NORMAL);
     }
 

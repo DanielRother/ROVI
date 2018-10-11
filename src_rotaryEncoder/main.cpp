@@ -102,8 +102,11 @@
 // }
 
 // #include "Input/RotaryEncoderWithButton.hpp"
+// #define ENC_A 12
+// #define ENC_B 13
+// TODO: CLeanup macro use
 #include "RotaryEncoderWithButton.hpp"
-RotaryEncoderWithButton rotary(ENC_A, ENC_B, -1);
+RotaryEncoderWithButton rotary(ENC_A, ENC_B, 15);
  
 void setup()
 {
