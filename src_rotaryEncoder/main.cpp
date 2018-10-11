@@ -104,6 +104,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <map>
 
 #include <OneButton.h>
 
@@ -182,18 +183,25 @@ public:
       button.attachClick(std::bind(&RotaryEncoder::onClick, this));   // TBD: Maybe attachPress is better suited.... Test!
       button.attachDoubleClick(std::bind(&RotaryEncoder::onDoubleClick, this));
       button.attachLongPressStart(std::bind(&RotaryEncoder::onHold, this));
+
+      // TBD: Is it required to add default values to the counterMap?
+      // I don't think so because there is a default ctor of RotaryValues
+      // TODO: Test!
   }
 
   void update() {
     button.tick();
-    // auto curButtonState = getCurrentButtonState();
+    auto curButtonState = getCurrentButtonState();
 
     auto tick = getRotaryTick(); 
     counter += tick;
-    // TODO: Update button
+    // TODO: Remove old counter
+    
+    auto stateValue = rotaryValuePerState[curButtonState].incrementByValue(tick);
 
     if(tick != 0) {
       Serial << "Counter value (in update()) = " << counter << endl;
+      Serial << "Counter value perState      = " << stateValue << endl;
     }
   }
 
@@ -341,6 +349,7 @@ protected:
   unsigned long lastRotaryCounterUpdate_ms;
 
   uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
+  std::map<ButtonStates, RotaryValue> rotaryValuePerState;
 
   static const float    SIGNAL_TRANSITIONS_PER_TICK;
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
@@ -356,7 +365,7 @@ protected:
 const float    RotaryEncoder::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
 const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
 
-const uint16_t BUTTON_STATE_TIMEOUT_MS                       = 10000;
+const uint16_t RotaryEncoder::BUTTON_STATE_TIMEOUT_MS        = 10000;
 
 
 RotaryEncoder rotary(ENC_A, ENC_B, -1);
