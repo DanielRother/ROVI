@@ -187,6 +187,15 @@ public:
       // TBD: Is it required to add default values to the counterMap?
       // I don't think so because there is a default ctor of RotaryValues
       // TODO: Test!
+
+      auto defaultValueChangeCallback = [&](int value) {
+        auto buttonStateString = buttonStateToString(buttonState);
+        Serial << "defaultValueChangeCallback - New value = " << value << " for state " << buttonStateString << endl;
+      };
+      rotaryValueChangedCallbacks[ButtonStates::NORMAL]         = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::CLICKED]        = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::DOUBLE_CLICKED] = defaultValueChangeCallback;
+      rotaryValueChangedCallbacks[ButtonStates::HOLDED]         = defaultValueChangeCallback;
   }
 
   void update() {
@@ -196,8 +205,9 @@ public:
     auto tick = getRotaryTick(); 
     counter += tick;
     // TODO: Remove old counter
-    
-    auto stateValue = rotaryValuePerState[curButtonState].incrementByValue(tick);
+
+    auto stateValue = incrementStateValueByValue(curButtonState, tick);
+    invokeRotaryValueChangeCallback(curButtonState, stateValue);
 
     if(tick != 0) {
       Serial << "Counter value (in update()) = " << counter << endl;
@@ -337,6 +347,19 @@ protected:
     return "";
   }
 
+  int incrementStateValueByValue(const ButtonStates state, const int increment) {
+    // TBD: MQTT here?
+    return rotaryValuePerState[state].incrementByValue(increment);
+  }
+
+  void invokeRotaryValueChangeCallback(const ButtonStates state, const int value) {
+    // TODO: Add MQTT here
+    auto buttonStateString = buttonStateToString(state);
+    Serial << "Value changed to " << value << " for ButtonState = " << buttonStateString << endl;
+
+    rotaryValueChangedCallbacks[state](value);
+  }
+
 protected:
   //*************************************************************************************************//
   //*** Member variables
@@ -350,6 +373,7 @@ protected:
 
   uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
   std::map<ButtonStates, RotaryValue> rotaryValuePerState;
+  std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
 
   static const float    SIGNAL_TRANSITIONS_PER_TICK;
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
