@@ -102,8 +102,10 @@
 // }
 
 
-#include <OneButton.h>
+#include <algorithm>
+#include <math.h>
 
+#include <OneButton.h>
 
 #define ENC_A 12
 #define ENC_B 13
@@ -120,6 +122,41 @@
 // suffice, maybe at the expense of a second variable or additional shifts.
 #include <rom/gpio.h>
 
+class RotaryValue {
+public:
+RotaryValue()
+: value(0), maxValue(255), preventOverflow(false) {
+
+}
+
+RotaryValue(const int maxValue, const bool preventOverflow = false)
+: value(0), maxValue(maxValue), preventOverflow(preventOverflow) {
+
+}
+
+int incrementByValue(const int increment) {
+  int tmpValue = value + increment;
+
+  if(preventOverflow) {
+    tmpValue = std::max(std::min(tmpValue, maxValue), 0);
+  } else {
+    tmpValue = tmpValue % (maxValue + 1);
+  }
+
+  value = tmpValue;
+  return value;
+}
+
+int getValue() const {
+  return value;
+}
+
+protected:
+  int value;
+  int maxValue;
+  bool preventOverflow;
+};
+
 class RotaryEncoder {
 public:
   enum class ButtonStates {
@@ -129,7 +166,7 @@ public:
     HOLDED
   };
 
-  RotaryEncoder(uint8_t pinA, uint8_t pinB, uint8_t pinButton)
+  RotaryEncoder(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton)
   : pinA(pinA), pinB(pinB), pinButton(pinButton),
     rotarySignalTransitions(0.0f), lastRotaryCounterUpdate_ms(millis()),
     counter(0),
@@ -142,14 +179,9 @@ public:
       digitalWrite(pinB, HIGH);
 
       // Setup button
-      // TODO: Add callbacks
-      // button.attachClick(&RotaryEncoder::onClick);
-      // button.attachClick([&](){onClick();});
-
-      // button.attachDoubleClick(doubleClicked);
-      // button.attachLongPressStart(longPressStart);
-      // button.attachLongPressStop(longPressEnd);
-      // button.attachDuringLongPress(duringLongPress);
+      button.attachClick(std::bind(&RotaryEncoder::onClick, this));   // TBD: Maybe attachPress is better suited.... Test!
+      button.attachDoubleClick(std::bind(&RotaryEncoder::onDoubleClick, this));
+      button.attachLongPressStart(std::bind(&RotaryEncoder::onHold, this));
   }
 
   void update() {
@@ -208,7 +240,8 @@ protected:
   /*!
     \return change in encoder state (-1,0,1) 
   */
-  int8_t getEncoderTransition() {  
+  int8_t getEncoderTransition() { 
+    // TODO: Create members... 
     static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
     static uint8_t old_AB = 0;
     static uint32_t curval = 0;
@@ -265,7 +298,7 @@ protected:
     return buttonState;
   }
 
-  void updateButtonState(ButtonStates state) {
+  void updateButtonState(const ButtonStates state) {
     buttonState = state;
     lastButtonStateUpdate_ms = millis();
 
@@ -274,7 +307,7 @@ protected:
     // TODO: Add MQTT state update message here
   }
 
-  std::string buttonStateToString(ButtonStates state) {
+  std::string buttonStateToString(const ButtonStates state) const {
     switch (state) {
       case ButtonStates::NORMAL:
         return "NORMAL";
