@@ -101,13 +101,29 @@
 //   // Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 // }
 
-// #include "Input/RotaryEncoderWithButton.hpp"
+
+
 // #define ENC_A 12
 // #define ENC_B 13
-// TODO: CLeanup macro use
+// #include "Input/RotaryEncoderWithButton.hpp"
 #include "RotaryEncoderWithButton.hpp"
-RotaryEncoderWithButton rotary(ENC_A, ENC_B, 15);
+uint8_t pinA = 13;
+uint8_t pinB = 12;
+uint8_t pinButton = 15;
+
+RotaryEncoderWithButton rotary(pinA, pinB, pinButton);
  
+// TODO:
+// - TBDs in RotaryEncoderWithButton.cpp
+// - Test Rotary mit Member-Variablen
+// - Add source links
+// - Test callback registration
+// - Test value overflow prevention
+// - Nach Rovi-Lib verschieben
+// - OneButton-Forken
+// - Integration into ROVI
+// - MQTT-Messages
+// - Kombination mit LED  
 void setup()
 {
   

@@ -7,9 +7,6 @@
 
 #include <OneButton.h>
 
-#define ENC_A 12
-#define ENC_B 13
-
 class RotaryValue {
 public:
   RotaryValue();
@@ -36,18 +33,24 @@ public:
    * these have to be converted before updating the counter value. I.e. there have to be n transitions
    * for one update. Additionally, and to keep bouncing effects of the hardware to a minimum, there is
    * a timeout which resets the transistion counter after a while (e.g. one transition was lost but the 
-   * counter is still updated after m ms as n-1 ticks are enough to savely detect the tick). 
+   * counter is still updated after m ms as n-1 transitions are enough to savely detect the tick). 
    * 
-   * \return Change of the counter value (-1,0,1) 
+   * \return Change of the encoder ticj value (-1,0,1) 
    */
   uint8_t getRotaryTick();
 
   /*!
-   * \return change in encoder state (-1,0,1) 
+   * \return change in encoder transition value (-1,0,1) 
    */
   int8_t getEncoderTransition();
 
 protected:
+  uint8_t pinA;
+  uint8_t pinB;
+
+  static const int8_t enc_states[];
+  uint8_t old_AB;
+
   float rotarySignalTransitions;
   unsigned long lastRotaryCounterUpdate_ms;
 
@@ -97,7 +100,6 @@ protected:
   ButtonStates buttonState;
   unsigned long lastButtonStateUpdate_ms;
 
-  uint8_t counter; // <- Only for testing. Will be removed/replace by a button state dependened map
   std::map<ButtonStates, RotaryValue> rotaryValuePerState;
   std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
   std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
