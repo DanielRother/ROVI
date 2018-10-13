@@ -102,11 +102,9 @@
 // }
 
 
-
-// #define ENC_A 12
-// #define ENC_B 13
-// #include "Input/RotaryEncoderWithButton.hpp"
-#include "RotaryEncoderWithButton.hpp"
+#include <Basecamp.hpp>       // MUST be include bevore any ROVI header...! Check why? (Including Basecamp.hppp within the Rovi classes doesn't work)
+#include "Input/RotaryEncoderWithButton.hpp"
+// #include "RotaryEncoderWithButton.hpp"
 uint8_t pinA = 13;
 uint8_t pinB = 12;
 uint8_t pinButton = 15;
