@@ -112,7 +112,6 @@ uint8_t pinButton = 15;
 RotaryEncoderWithButton rotary(pinA, pinB, pinButton);
  
 // TODO:
-// - Nach Rovi-Lib verschieben
 // - OneButton-Forken
 // - Integration into ROVI
 // - MQTT-Messages
