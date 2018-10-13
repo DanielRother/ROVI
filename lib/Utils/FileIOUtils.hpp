@@ -31,4 +31,11 @@ static std::vector<std::string> splitString(const std::string& s, char delimiter
    return tokens;
 }
 
+template<typename T>
+static std::string to_string(T value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 #endif /* __FILEIOUTILS_H__ */

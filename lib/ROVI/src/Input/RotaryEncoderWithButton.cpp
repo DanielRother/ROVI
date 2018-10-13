@@ -2,8 +2,10 @@
 
 #include <map>
 #include <list>
+#include <string>
 
 #include <ArduinoIostream.hpp>
+#include <FileIOUtils.hpp>
 
 #include <rom/gpio.h>
 
@@ -108,8 +110,8 @@ const float    RotaryEncoder::SIGNAL_TRANSITIONS_PER_TICK    = 4.0f;
 const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
 
 
-RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton)
-  : rotary(pinA, pinB), button(pinButton, true),
+RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name)
+  : RoviComponent(name), rotary(pinA, pinB), button(pinButton, true),
     buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
       // Setup button, i.e. callbacks
       button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));
@@ -130,6 +132,13 @@ RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8
         rotaryValueChangedCallbacks[state]   = defaultValueChangeCallback;
       }
 }
+
+// RotaryEncoderWithButton::RotaryEncoderWithButton(const RotaryEncoder& other)
+//   : RoviComponent(other.name), rotary
+// {
+
+// }
+
 
 void RotaryEncoderWithButton::update() {
     button.tick();
@@ -187,19 +196,29 @@ int RotaryEncoderWithButton::incrementStateValueByValue(const ButtonStates state
 }
 
 void RotaryEncoderWithButton::invokeRotaryValueChangeCallback(const ButtonStates state, const int value) {
-    // TODO: Add MQTT here
-    auto buttonStateString = buttonStateToString(state);
-    Serial << "Value changed to " << value << " for ButtonState = " << buttonStateString << endl;
-
     rotaryValueChangedCallbacks[state](value);
+
+    // MQTT
+    std::string buttonStateString   = buttonStateToString(state);
+    std::string topic               = "state/" + buttonStateString;
+    std::string valueString         = to_string(value);
+    publishMQTTMessage(topic, valueString);
+
+    // Debugging output
+    Serial << "Value changed to " << value << " for ButtonState = " << buttonStateString << endl;
 }
 
 void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(const ButtonStates state) {
-    // TODO: Add MQTT here
-    auto buttonStateString = buttonStateToString(state);
-    Serial << "ButtonState = " << buttonStateString << " activated" << endl;
-
     buttonStateActivatedCallbacks[state]();
+
+    // MQTT here
+    std::string buttonStateString   = buttonStateToString(state);
+    std::string topic               = "state/" + buttonStateString;
+    std::string valueString         = "activated";
+    publishMQTTMessage(topic, valueString);
+
+    // Debugging output
+    Serial << "ButtonState = " << buttonStateString << " activated" << endl;
 }
 
 std::string RotaryEncoderWithButton::buttonStateToString(const ButtonStates state) const {
@@ -221,6 +240,10 @@ std::string RotaryEncoderWithButton::buttonStateToString(const ButtonStates stat
     }
 
     return "";
+}
+
+std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
+
 }
 
 const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 10000;

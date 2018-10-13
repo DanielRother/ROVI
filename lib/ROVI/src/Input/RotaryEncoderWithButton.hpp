@@ -5,6 +5,7 @@
 
 #include <map>
 
+#include "BaseClasses/RoviComponent.hpp"
 #include "OneButtonFork.h"
 
 class RotaryValue {
@@ -25,6 +26,8 @@ protected:
 class RotaryEncoder {
 public:
   RotaryEncoder(const uint8_t pinA, const uint8_t pinB);
+  RotaryEncoder(const RotaryEncoder& other) = default;
+  virtual ~RotaryEncoder() = default;
 
   /*!
    * \brief Converts the transitions of the rotary encoder into a tick of the counter
@@ -58,7 +61,7 @@ protected:
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
 };
 
-class RotaryEncoderWithButton {
+class RotaryEncoderWithButton : public RoviComponent {
 public:
   enum class ButtonStates {
     NORMAL,
@@ -67,7 +70,9 @@ public:
     HOLDED
   };
 
-  RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton);
+  RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name = "RotaryEncoder");
+  // RotaryEncoderWithButton(const RotaryEncoder& other);
+  virtual ~RotaryEncoderWithButton() = default;
 
   void update();
   void setupState(const ButtonStates state, int maxValue, bool preventOverflow,
@@ -89,6 +94,7 @@ protected:
   void invokeButtonStateActivatedCallback(const ButtonStates state);
 
   std::string buttonStateToString(const ButtonStates state) const;
+  std::string prepareMQTTTopicString() const;
 
 protected:
   //*************************************************************************************************//

@@ -12,15 +12,16 @@
 
 #include "BaseClasses/RoviComponent.hpp"
 
-class RoviDevice {
+class RoviDevice : public std::enable_shared_from_this<RoviDevice>{
+public:
   enum class MQTTQoSClasses {
     AT_MOST_ONE   = 0,
     AT_LEAST_ONE  = 1,
     EXACTLY_ONE   = 2
   };
 
-public:
   RoviDevice(Basecamp& iot);
+  RoviDevice(const RoviDevice& other) = default;
 
   void setupRovi();
   void addComponent(std::shared_ptr<RoviComponent> component);
@@ -32,6 +33,8 @@ public:
   void mqttSubscribed(uint16_t packetId, uint8_t qos);
   void mqttPublished(uint16_t packetId);
   void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
+
+  std::string getBaseTopic() const;
 
 // private:
   std::string addVariableToIotConfig(const std::string&, const std::string& defaultValue);

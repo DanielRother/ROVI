@@ -31,7 +31,13 @@ void RoviDevice::setupRovi() {
 }
 
   void RoviDevice::addComponent(std::shared_ptr<RoviComponent> component) {
+      Serial << "Add component " << component->name << " to device " << name << endl;
+
       this->components[component->name] = component;
+
+    // TODO: Fix me! shared_from_this() in RoviDevice crashes application... :( Therefore, raw pointer is used
+    // component->setRoviDevice(shared_from_this());
+    component->setRoviDevice(this);
   }
 
 
@@ -70,6 +76,11 @@ void RoviDevice::mqttMessage(char* topic, char* payload, AsyncMqttClientMessageP
         std::string topicWithoutBasestring = removeBaseTopic(topicString);
         responsibleCompontent->second->redirectedMqttMessage(topicWithoutBasestring, payload);
     }
+}
+
+std::string RoviDevice::getBaseTopic() const {
+    Serial << "RoviDevice::getBaseTopic() - " << baseTopic << endl;
+    return baseTopic;
 }
 
 std::string RoviDevice::addVariableToIotConfig(const std::string& name, const std::string& defaultValue) {
