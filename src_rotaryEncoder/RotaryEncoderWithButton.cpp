@@ -23,6 +23,9 @@ int RotaryValue::incrementByValue(const int increment) {
     tmpValue = std::max(std::min(tmpValue, maxValue), 0);
   } else {
     tmpValue = tmpValue % (maxValue + 1);
+    if(tmpValue < 0) {
+        tmpValue += maxValue + 1;
+    }
   }
 
   value = tmpValue;
@@ -45,7 +48,7 @@ RotaryEncoder::RotaryEncoder(const uint8_t pinA, const uint8_t pinB)
 }
 
 
-uint8_t RotaryEncoder::getRotaryTick() {
+int8_t RotaryEncoder::getRotaryTick() {
     uint8_t tick = 0;
 
     auto transition = getEncoderTransition();
@@ -57,8 +60,7 @@ uint8_t RotaryEncoder::getRotaryTick() {
     }
 
     if(fabs(rotarySignalTransitions) >= SIGNAL_TRANSITIONS_PER_TICK ||
-        (now - lastRotaryCounterUpdate_ms > ENCODER_TICK_UPDATE_TIMEOUT_MS && rotarySignalTransitions != 0.0f)) {
-        // TBD: Is the last condition still required
+        (now - lastRotaryCounterUpdate_ms > ENCODER_TICK_UPDATE_TIMEOUT_MS)) {
 
         tick = round(rotarySignalTransitions / SIGNAL_TRANSITIONS_PER_TICK);
 
@@ -70,6 +72,7 @@ uint8_t RotaryEncoder::getRotaryTick() {
 }
 
 // This code is based on https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino/ and 
+// https://www.hackster.io/tyeth/rotary-quadrature-encoder-let-s-make-a-digital-safe-769ca4
 // Original comment:
 // initially was going to hand pull the required bits from esp32 gpio via
 // the 32bit functions gpio_input_get() and gpio_input_get_high() and test
@@ -82,13 +85,6 @@ uint8_t RotaryEncoder::getRotaryTick() {
 // as the pins may have changed value between calls potentially. One should
 // suffice, maybe at the expense of a second variable or additional shifts.
 int8_t RotaryEncoder::getEncoderTransition() {
-    // TODO: Create members...
-    // static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-    // static uint8_t old_AB = 0;
-    // static uint32_t curval = 0;
-    // static uint32_t curtmpA = 0;
-    // static uint32_t curtmpB = 0;
-    /**/
     old_AB <<= 2;                   //remember previous state
     //bit shift old_AB two positions to the left and store.
 
@@ -116,7 +112,7 @@ RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8
   : rotary(pinA, pinB), button(pinButton, true),
     buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
       // Setup button, i.e. callbacks
-      button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));   // TBD: Maybe attachPress is better suited.... Test!
+      button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));
       button.attachDoubleClick(std::bind(&RotaryEncoderWithButton::onDoubleClick, this));
       button.attachLongPressStart(std::bind(&RotaryEncoderWithButton::onHold, this));
 
@@ -141,6 +137,7 @@ void RotaryEncoderWithButton::update() {
     auto tick = rotary.getRotaryTick();
 
     if(tick != 0) {
+        lastButtonStateUpdate_ms = millis();
         auto stateValue = incrementStateValueByValue(curButtonState, tick);
         invokeRotaryValueChangeCallback(curButtonState, stateValue);
     }

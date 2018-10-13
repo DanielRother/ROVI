@@ -37,7 +37,7 @@ public:
    * 
    * \return Change of the encoder ticj value (-1,0,1) 
    */
-  uint8_t getRotaryTick();
+  int8_t getRotaryTick();
 
   /*!
    * \return change in encoder transition value (-1,0,1) 

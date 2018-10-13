@@ -114,11 +114,6 @@ uint8_t pinButton = 15;
 RotaryEncoderWithButton rotary(pinA, pinB, pinButton);
  
 // TODO:
-// - TBDs in RotaryEncoderWithButton.cpp
-// - Test Rotary mit Member-Variablen
-// - Add source links
-// - Test callback registration
-// - Test value overflow prevention
 // - Nach Rovi-Lib verschieben
 // - OneButton-Forken
 // - Integration into ROVI
@@ -130,6 +125,18 @@ void setup()
   Serial.begin (115200);
       delay(10);
     delay(10);
+
+
+  // Test setup some state
+  auto buttonStateActivatedCallback = []() {
+    Serial << "My user defined state activation callback" << endl;
+  };
+  auto valueChangeCallback = [&](int value) {
+    Serial << "My user defined value change callback - New value = " << value << endl;
+  };
+  int maxRotaryValue = 10;
+  bool preventOverflow = false;
+  rotary.setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, maxRotaryValue, preventOverflow, buttonStateActivatedCallback, valueChangeCallback);
 
   Serial.println("Start");
 }
