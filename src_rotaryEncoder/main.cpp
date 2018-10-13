@@ -33,7 +33,7 @@ uint8_t pinButton = 15;
 
 // LED
 uint16_t nbNeoPixelLEDs = 12;
-uint8_t  neoPixelPin    = 15;
+uint8_t  neoPixelPin    = 16;
 
 std::shared_ptr<RotaryEncoderWithButton> rotary;
 
