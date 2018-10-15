@@ -43,6 +43,7 @@ public:
 
     virtual void setColor(const std::shared_ptr<Color>& color) override {
         Serial << "--- LEDRGB::setColor" << endl;
+        powerStatus = true;
 
         // dynamic_pointer_cast requires RTTI...
         // auto rgb = std::dynamic_pointer_cast<RGBColor>(color);
@@ -58,7 +59,6 @@ public:
 
     virtual void setPower(bool power) override {
         Serial << "--- LEDRGB::setPower" << endl;
-
         if(power) {
             setColor(lastColor);
         } else {
@@ -66,10 +66,13 @@ public:
             setColor(std::make_shared<RGBColor>(0,0,0));
             lastColor = tmpLastColor;
         }
+
+        powerStatus = power;
     };
 
     virtual void setBrightness(uint8_t brightness) override {
         Serial << "--- LEDRGB::setBrightness" << endl;
+        powerStatus = true;
 
         auto hsvColor = lastColor->toHSV();
         hsvColor->v = brightness;
@@ -85,8 +88,6 @@ public:
 
     boolean invert;
     uint8_t ledArray[3] = {1, 2, 3}; // three led channels
-
-    std::shared_ptr<Color> lastColor;
 };
 
 #endif /* __RGBLEDCOMPONENT_H__ */

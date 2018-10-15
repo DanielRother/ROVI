@@ -1,3 +1,7 @@
+// TODO:
+// - Kombination mit LED  
+// - Cleanup (vorallem debugging)
+
 #include <Arduino.h>
 
 #include <string>
@@ -29,14 +33,14 @@ RoviDevice myRovi(iot);
 // RotaryEncoder
 uint8_t pinA = 13;
 uint8_t pinB = 12;
-uint8_t pinButton = 15;
+uint8_t pinButton = 14;
 
 // LED
 uint16_t nbNeoPixelLEDs = 12;
-uint8_t  neoPixelPin    = 16;
+uint8_t  neoPixelPin    = 15;
 
 std::shared_ptr<RotaryEncoderWithButton> rotary;
-
+std::shared_ptr<NeoPixelComponent> leds;
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
@@ -48,22 +52,65 @@ void setup() {
 
   myRovi.setupRovi();
 
+  // Setup LED
+  leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
 
-  // Test setup some state
-  auto buttonStateActivatedCallback = []() {
-    Serial << "My user defined state activation callback" << endl;
+  // Setup rotary
+    rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
+  // NORMAL
+  auto normalButtonStateActivatedCallback = []() {
+    Serial << "NORMAL state activation callback" << endl;
+    if(leds->getPowerStatus()) {
+      leds->setPower(false);
+      delay(250);
+      leds->setPower(true);
+    }
   };
-  auto valueChangeCallback = [&](int value) {
-    Serial << "My user defined value change callback - New value = " << value << endl;
+  auto normalValueChangeCallback = [&](int value) {
+    Serial << "NORMAL value change callback - New value = " << value << endl;
+
+    leds->setBrightness(value * 10);
+    leds->setColor(leds->getLastColor());     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
+                                              // TODO: Check, if this is also required and/or working for the RGB_LEDs
   };
-  int maxRotaryValue = 10;
-  bool preventOverflow = false;
+  int normalMaxRotaryValue = 25;
+  bool normalPreventOverflow = true;
+  rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
 
-  rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
-  rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, maxRotaryValue, preventOverflow, buttonStateActivatedCallback, valueChangeCallback);
+  // CLICKED
+  auto clickedButtonStateActivatedCallback = []() {
+    Serial << "CLICKED state activation callback" << endl;
+    leds->setPower(!leds->getPowerStatus());
+  };
+  auto clickedValueChangeCallback = [&](int value) {
+    Serial << "CLICKED value change callback - Do nothing" << endl;
+  };
+  int clickedMaxRotaryValue = 10;
+  bool clickedPreventOverflow = false;
+  rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, clickedMaxRotaryValue, clickedPreventOverflow, clickedButtonStateActivatedCallback, clickedValueChangeCallback);
+
+  // DOUBLE_CLICKED
+  auto doubleClickedButtonStateActivatedCallback = []() {
+    Serial << "DOUBLE_CLICKED state activation callback" << endl;
+    leds->setPower(false);
+    delay(250);
+    leds->setPower(true);
+    delay(250);
+    leds->setPower(false);
+    delay(250);
+    leds->setPower(true);
+  };
+  auto doubleClickedValueChangeCallback = [&](int value) {
+    Serial << "DOUBLE_CLICKED value change callback - New value = " << value << endl;
+
+    leds->setColor(std::make_shared<HSVColor>(value*10, 1.0f, 1.0f));
+  };
+  int doubleClickedMaxRotaryValue = 36;
+  bool doubleClickedPreventOverflow = false;
+  rotary->setupState(RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, doubleClickedMaxRotaryValue, doubleClickedPreventOverflow, doubleClickedButtonStateActivatedCallback, doubleClickedValueChangeCallback);
 
 
-  myRovi.addComponent(std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin));
+  myRovi.addComponent(leds);
   // myRovi.addComponent(std::make_shared<RGBLEDComponent>(pinR, pinG, pinB));
   myRovi.addComponent(rotary);
 
@@ -110,11 +157,9 @@ void loop() {
 }
 
  
-// TODO:
-// - Integration into ROVI
-// - MQTT-Messages
-// - Kombination mit LED  
 
+
+// Minimal example
 // RotaryEncoderWithButton rotary(pinA, pinB, pinButton);
 
 // void setup()

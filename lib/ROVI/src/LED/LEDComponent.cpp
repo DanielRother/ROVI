@@ -16,7 +16,7 @@
 
 
 LEDComponent::LEDComponent(const std::string& name) 
-: RoviComponent(name), m_rgb(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
+: RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
         stopThread();
@@ -33,7 +33,7 @@ LEDComponent::LEDComponent(const std::string& name)
 }
 
 LEDComponent::LEDComponent(const LEDComponent& other)
-: RoviComponent(other.name), m_rgb(other.m_rgb) {}
+: RoviComponent(other.name), lastColor(other.lastColor) {}
 
 LEDComponent::~LEDComponent() {
     Serial << "LEDComponent dtor" << endl;
@@ -63,11 +63,11 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
     stopThread();           // <- TODO: in Handler einbauen...
 
     Serial << "  setColor() " << endl;
-    m_rgb = Color::createColor(payload);
+    lastColor = Color::createColor(payload);
 
-    Serial << "    Color: " << m_rgb->toString().c_str() << endl;
+    Serial << "    Color: " << lastColor->toString().c_str() << endl;
 
-    setColor(m_rgb);
+    setColor(lastColor);
 }
 
 void LEDComponent::setBrightnessMQTT(const std::string& payload) {
@@ -86,9 +86,9 @@ void LEDComponent::setBrightnessMQTT(const std::string& payload) {
     // TODO: Error handling
     brightness = atoi(payload.c_str());
 
-    auto color = m_rgb->toHSV();
+    auto color = lastColor->toHSV();
     color->v = (float) brightness / 255.0f;
-    m_rgb = color->toRGB();
+    lastColor = color->toRGB();
 
     setColor(color);     
 }
@@ -135,4 +135,14 @@ void LEDComponent::stopThread() {
 
     effect = std::make_shared<LEDEffect>(this);         // <- Otherwise effect->stop() crashes the next time this method is called
                                                         // TODO: Find a better solution
+}
+
+std::shared_ptr<Color> LEDComponent::getLastColor() const {
+    Serial << "--- LEDComponent::getLastColor(): " << lastColor->toString() << endl;
+
+    return lastColor;
+}
+
+bool LEDComponent::getPowerStatus() const {
+    return powerStatus;
 }

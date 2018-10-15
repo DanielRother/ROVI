@@ -15,5 +15,5 @@ void LEDEffect::run() {
 }
 
 float LEDEffect::getCurrentBrightness() {
-    return led->m_rgb->toHSV()->v;
+    return led->lastColor->toHSV()->v;
 }

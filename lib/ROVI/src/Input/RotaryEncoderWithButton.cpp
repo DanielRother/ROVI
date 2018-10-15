@@ -246,4 +246,4 @@ std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
 
 }
 
-const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 10000;
+const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 5000;

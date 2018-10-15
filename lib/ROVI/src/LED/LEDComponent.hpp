@@ -38,8 +38,12 @@ public:
     virtual void setBrightness(uint8_t brightness) = 0;
     // virtual void setEffect(something) = 0;
 
+    std::shared_ptr<Color> getLastColor() const;
+    bool getPowerStatus() const;
+
 // protected:
-    std::shared_ptr<Color> m_rgb;
+    std::shared_ptr<Color> lastColor;
+    bool powerStatus;
 
     std::thread t;
     std::shared_ptr<LEDEffect> effect;
