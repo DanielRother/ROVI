@@ -31,7 +31,7 @@ public:
 
 
     virtual void setColor(const std::shared_ptr<Color>& color) override {
-        Serial << "--- NeoPixel::setColor" << endl;
+        // Serial << "--- NeoPixel::setColor" << endl;
         powerStatus = true;
 
         std::shared_ptr<RGBColor> rgb = color->toRGB();
@@ -43,11 +43,12 @@ public:
 
         lastColor = rgb;
 
-        Serial << "   lastColor: " << lastColor->toString() << endl;
+        // Serial << "   lastColor: " << lastColor->toString() << endl;
     }
 
     virtual void setPower(bool power) override {
         Serial << "--- NeoPixel::setPower" << endl;
+
         if(power) {
             setColor(lastColor);
         } else {

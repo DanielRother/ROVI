@@ -3,15 +3,18 @@
 
 
     std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const std::string& selectedEffect, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
+        Serial << "   getEffect(" << selectedEffect << ")" << endl;
+        
         // Convert string to lower
         std::string effectLower;
+        effectLower.resize(selectedEffect.size());                         // allocate space
         std::transform(selectedEffect.begin(), selectedEffect.end(), effectLower.begin(), ::tolower);
 
         auto delay_ms = getDelay(effectLower);
 
-        if(selectedEffect.find("color_flow") != std::string::npos) {
+        if(effectLower.find("color_flow") != std::string::npos) {
             return std::make_shared<ColorFlow>(led, delay_ms);
-        } else if(selectedEffect.find("color_random") != std::string::npos) {
+        } else if(effectLower.find("color_random") != std::string::npos) {
             return std::make_shared<RandomColor>(led, delay_ms);
         }
 
@@ -24,6 +27,8 @@
     }
 
     std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const uint32_t effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
+        Serial << "   getEffect(" << effectNumber << ")" << endl;
+        
         auto effectString = std::string("");
 
         if(effectNumber < getNumberOfEffects()) {

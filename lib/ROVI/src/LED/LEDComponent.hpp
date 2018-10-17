@@ -42,6 +42,7 @@ public:
 
     std::shared_ptr<Color> getLastColor() const;
     bool getPowerStatus() const;
+    void stopEffect();
 
 // protected:
     std::shared_ptr<Color> lastColor;
@@ -49,7 +50,6 @@ public:
 
     std::thread t;
     std::shared_ptr<LEDEffect> effect;
-    void stopThread();
 };
 
 

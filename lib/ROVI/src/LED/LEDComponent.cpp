@@ -17,16 +17,16 @@ LEDComponent::LEDComponent(const std::string& name)
 : RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
-        stopThread();
+        stopEffect();
         setPowerMQTT(payload);};
     handler[std::string("setColor")]        = [this](const std::string payload){
-        stopThread();
+        stopEffect();
         setColorMQTT(payload);};
     handler[std::string("setBrightness")]   = [this](const std::string payload){
-        stopThread();
+        stopEffect();
         setBrightnessMQTT(payload);};
     handler[std::string("setEffect")]       = [this](const std::string payload){
-        stopThread();
+        stopEffect();
         setEffectMQTT(payload);};
 }
 
@@ -41,7 +41,7 @@ LEDComponent::~LEDComponent() {
 // But the actual action have to be implemented in an derived class
 // Names due to overloaded function and bind make problems and would led to long typecasts...
 void LEDComponent::setPowerMQTT(const std::string& payload) {
-    stopThread();           // <- TODO: in Handler einbauen...
+    stopEffect();           // <- TODO: in Handler einbauen...
 
     Serial << "  setPower() " << endl;
 
@@ -58,7 +58,7 @@ void LEDComponent::setPowerMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setColorMQTT(const std::string& payload) {
-    stopThread();           // <- TODO: in Handler einbauen...
+    stopEffect();           // <- TODO: in Handler einbauen...
 
     Serial << "  setColor() " << endl;
     lastColor = Color::createColor(payload);
@@ -71,7 +71,7 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setBrightnessMQTT(const std::string& payload) {
-    stopThread();           // <- TODO: in Handler einbauen...
+    stopEffect();           // <- TODO: in Handler einbauen...
 
     Serial << "  setBrightness() " << endl;
 
@@ -94,7 +94,7 @@ void LEDComponent::setBrightnessMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setEffectMQTT(const std::string& payload) {
-    stopThread();           // <- TODO: in Handler einbauen...
+    stopEffect();           // <- TODO: in Handler einbauen...
 
     Serial << "  LEDComponent::setEffect() " << endl;
 
@@ -102,7 +102,7 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
     setEffect(selectedEffect);
 }
 
-void LEDComponent::stopThread() {
+void LEDComponent::stopEffect() {
 
     std::cout << "Asking Task to Stop" << std::endl;
     // Stop the Task
@@ -119,9 +119,8 @@ void LEDComponent::stopThread() {
                                                         // TODO: Find a better solution
 }
 
-void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {
-    stopThread();
-    
+void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
+    stopEffect();
     effect = selectedEffect;
 
     //Creating a thread to execute our task

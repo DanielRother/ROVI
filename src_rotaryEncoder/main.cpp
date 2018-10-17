@@ -86,6 +86,8 @@ void setup() {
   {
     auto clickedButtonStateActivatedCallback = []() {
       Serial << "CLICKED state activation callback" << endl;
+      leds->stopEffect();
+
       leds->setPower(!leds->getPowerStatus());
     };
     auto clickedValueChangeCallback = [&](int value) {
@@ -128,11 +130,12 @@ void setup() {
     };
     auto holdedValueChangeCallback = [&](int value) {
       Serial << "HOLDED value change callback - New value = " << value << endl;
-
+      
+      leds->stopEffect();
       auto selectedEffect = LEDEffectFactory::getEffect(value, leds.get());
       leds->setEffect(selectedEffect);
     };
-    int holdedMaxRotaryValue = LEDEffectFactory::getNumberOfEffects();
+    int holdedMaxRotaryValue = LEDEffectFactory::getNumberOfEffects() - 1;
     bool holdedPreventOverflow = false;
     rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
   }
