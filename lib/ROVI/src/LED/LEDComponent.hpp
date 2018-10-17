@@ -36,7 +36,9 @@ public:
     virtual void setColor(const std::shared_ptr<Color>& color) = 0;
     virtual void setPower(bool power) = 0;
     virtual void setBrightness(uint8_t brightness) = 0;
-    // virtual void setEffect(something) = 0;
+
+    // Other member methods
+    void setEffect(std::shared_ptr<LEDEffect> selectedEffect);
 
     std::shared_ptr<Color> getLastColor() const;
     bool getPowerStatus() const;

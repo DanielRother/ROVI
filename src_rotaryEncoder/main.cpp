@@ -25,6 +25,7 @@ Basecamp iot{
 #include "LED/LEDComponent.hpp"
 #include "LED/NeoPixelComponent.hpp"
 //#include "LED/RGBLEDComponent.hpp"
+#include "LED/LEDEffectFactory.hpp"
 #include "Input/RotaryEncoderWithButton.hpp"
 
 RoviDevice myRovi(iot);
@@ -56,58 +57,85 @@ void setup() {
   leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
 
   // Setup rotary
+  // TBD/TODO: Must the effect thread be stopped before changing (at least the color, i.e. DOUBLE_CLICK)
+  //           Is the brightness change used by the effect thread?
     rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
   // NORMAL
-  auto normalButtonStateActivatedCallback = []() {
-    Serial << "NORMAL state activation callback" << endl;
-    if(leds->getPowerStatus()) {
+  {
+    auto normalButtonStateActivatedCallback = []() {
+      Serial << "NORMAL state activation callback" << endl;
+      if(leds->getPowerStatus()) {
+        leds->setPower(false);
+        delay(250);
+        leds->setPower(true);
+      }
+    };
+    auto normalValueChangeCallback = [&](int value) {
+      Serial << "NORMAL value change callback - New value = " << value << endl;
+
+      leds->setBrightness(value * 10);
+      leds->setColor(leds->getLastColor());     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
+                                                // TODO: Check, if this is also required and/or working for the RGB_LEDs
+    };
+    int normalMaxRotaryValue = 25;
+    bool normalPreventOverflow = true;
+    rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
+  }
+  
+  // CLICKED
+  {
+    auto clickedButtonStateActivatedCallback = []() {
+      Serial << "CLICKED state activation callback" << endl;
+      leds->setPower(!leds->getPowerStatus());
+    };
+    auto clickedValueChangeCallback = [&](int value) {
+      Serial << "CLICKED value change callback - Do nothing" << endl;
+    };
+    int clickedMaxRotaryValue = 10;
+    bool clickedPreventOverflow = false;
+    rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, clickedMaxRotaryValue, clickedPreventOverflow, clickedButtonStateActivatedCallback, clickedValueChangeCallback);
+  }
+
+  // DOUBLE_CLICKED
+  {
+    auto doubleClickedButtonStateActivatedCallback = []() {
+      Serial << "DOUBLE_CLICKED state activation callback" << endl;
       leds->setPower(false);
       delay(250);
       leds->setPower(true);
-    }
-  };
-  auto normalValueChangeCallback = [&](int value) {
-    Serial << "NORMAL value change callback - New value = " << value << endl;
+      delay(250);
+      leds->setPower(false);
+      delay(250);
+      leds->setPower(true);
+    };
+    auto doubleClickedValueChangeCallback = [&](int value) {
+      Serial << "DOUBLE_CLICKED value change callback - New value = " << value << endl;
 
-    leds->setBrightness(value * 10);
-    leds->setColor(leds->getLastColor());     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
-                                              // TODO: Check, if this is also required and/or working for the RGB_LEDs
-  };
-  int normalMaxRotaryValue = 25;
-  bool normalPreventOverflow = true;
-  rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
+      leds->setColor(std::make_shared<HSVColor>(value*10, 1.0f, 1.0f));   // TODO: getCurrentBrightness()?
+    };
+    int doubleClickedMaxRotaryValue = 36;
+    bool doubleClickedPreventOverflow = false;
+    rotary->setupState(RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, doubleClickedMaxRotaryValue, doubleClickedPreventOverflow, doubleClickedButtonStateActivatedCallback, doubleClickedValueChangeCallback);
+  }
 
-  // CLICKED
-  auto clickedButtonStateActivatedCallback = []() {
-    Serial << "CLICKED state activation callback" << endl;
-    leds->setPower(!leds->getPowerStatus());
-  };
-  auto clickedValueChangeCallback = [&](int value) {
-    Serial << "CLICKED value change callback - Do nothing" << endl;
-  };
-  int clickedMaxRotaryValue = 10;
-  bool clickedPreventOverflow = false;
-  rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, clickedMaxRotaryValue, clickedPreventOverflow, clickedButtonStateActivatedCallback, clickedValueChangeCallback);
+  // HOLDED
+  {
+    auto holdedButtonStateActivatedCallback = []() {
+      Serial << "HOLDED state activation callback" << endl;
+      leds->setPower(false);
+      delay(500);
+      leds->setPower(true);
+    };
+    auto holdedValueChangeCallback = [&](int value) {
+      Serial << "HOLDED value change callback - New value = " << value << endl;
 
-  // DOUBLE_CLICKED
-  auto doubleClickedButtonStateActivatedCallback = []() {
-    Serial << "DOUBLE_CLICKED state activation callback" << endl;
-    leds->setPower(false);
-    delay(250);
-    leds->setPower(true);
-    delay(250);
-    leds->setPower(false);
-    delay(250);
-    leds->setPower(true);
-  };
-  auto doubleClickedValueChangeCallback = [&](int value) {
-    Serial << "DOUBLE_CLICKED value change callback - New value = " << value << endl;
-
-    leds->setColor(std::make_shared<HSVColor>(value*10, 1.0f, 1.0f));
-  };
-  int doubleClickedMaxRotaryValue = 36;
-  bool doubleClickedPreventOverflow = false;
-  rotary->setupState(RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, doubleClickedMaxRotaryValue, doubleClickedPreventOverflow, doubleClickedButtonStateActivatedCallback, doubleClickedValueChangeCallback);
+      auto selectedEffect = LEDEffectFactory::getEffect(value, leds.get());
+      leds->setEffect(selectedEffect);
+    };
+    int holdedMaxRotaryValue = LEDEffectFactory::getNumberOfEffects();
+    bool holdedPreventOverflow = false;
+    rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
+  }
 
 
   myRovi.addComponent(leds);

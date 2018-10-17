@@ -7,13 +7,11 @@
 #include <thread>
 
 #include <ArduinoIostream.hpp>
+#include <ThreadUtil.hpp>
 
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
-#include "LED/Effects/AllEffects.hpp"
-
-#include <ThreadUtil.hpp>
-
+#include "LEDEffectFactory.hpp"
 
 LEDComponent::LEDComponent(const std::string& name) 
 : RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
@@ -65,6 +63,8 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
     Serial << "  setColor() " << endl;
     lastColor = Color::createColor(payload);
 
+    // TODO: Reset brightness if this was changed internaly (e.g. by a rotary encoder)
+
     Serial << "    Color: " << lastColor->toString().c_str() << endl;
 
     setColor(lastColor);
@@ -98,26 +98,8 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
 
     Serial << "  LEDComponent::setEffect() " << endl;
 
-    // TODO: Move to some kind of factory (simple map not possible due to internal promise...)
-    std::string payloardLower = payload;
-    std::transform(payloardLower.begin(), payloardLower.end(), payloardLower.begin(), ::tolower);
-    if(payloardLower == "colorflow" || payloardLower == "colorflownormal") {
-        effect = std::make_shared<ColorFlow>(this);
-    } else if(payloardLower == "colorflowslow") {
-        effect = std::make_shared<ColorFlow>(this, 1000);
-    } else if(payloardLower == "colorflowfast") {
-        effect = std::make_shared<ColorFlow>(this, 10);
-    } else if(payloardLower == "randomcolor") {
-        effect = std::make_shared<RandomColor>(this);
-    } else {
-        effect = std::make_shared<LEDEffect>(this);
-    } 
-
-    //Creating a thread to execute our task
-    t = std::thread([&]()
-    {
-        effect->run();
-    });
+    auto selectedEffect = LEDEffectFactory::getEffect(payload, this);   // TODO: Better use shared_ptr instead of this
+    setEffect(selectedEffect);
 }
 
 void LEDComponent::stopThread() {
@@ -136,6 +118,19 @@ void LEDComponent::stopThread() {
     effect = std::make_shared<LEDEffect>(this);         // <- Otherwise effect->stop() crashes the next time this method is called
                                                         // TODO: Find a better solution
 }
+
+void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {
+    stopThread();
+    
+    effect = selectedEffect;
+
+    //Creating a thread to execute our task
+    t = std::thread([&]()
+    {
+        effect->run();
+    });
+}
+
 
 std::shared_ptr<Color> LEDComponent::getLastColor() const {
     Serial << "--- LEDComponent::getLastColor(): " << lastColor->toString() << endl;
