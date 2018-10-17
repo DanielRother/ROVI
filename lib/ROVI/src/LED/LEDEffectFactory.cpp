@@ -23,7 +23,7 @@
         return std::make_shared<LEDEffect>(led, delay_ms);
     }
 
-    std::shared_ptr<LEDEffect> LEDEffectFactorygetEffect(const uint32_t effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
+    std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const uint32_t effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
         auto effectString = std::string("");
 
         if(effectNumber < getNumberOfEffects()) {

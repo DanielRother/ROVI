@@ -19,7 +19,7 @@ protected:
     static uint32_t getDelay(const std::string& selectedEffect);
 
     static const std::vector<std::string> effectNames; 
-    static const uint32_t DEFAULT_DELAY_MS = 100;
+    static const uint32_t DEFAULT_DELAY_MS;
 };
 
 #endif /* __LED_EFFECT_FACTORY__ */
