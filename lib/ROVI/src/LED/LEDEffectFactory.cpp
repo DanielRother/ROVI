@@ -12,15 +12,15 @@
 
         auto delay_ms = getDelay(effectLower);
 
-        if(effectLower.find("color_flow") != std::string::npos) {
+        if(effectLower.find("white_static") != std::string::npos) {
+            return std::make_shared<WhiteStatic>(led, delay_ms);
+        } else if(effectLower.find("color_static") != std::string::npos) {
+            return std::make_shared<ColorStatic>(led, delay_ms);
+        } else if(effectLower.find("color_flow") != std::string::npos) {
             return std::make_shared<ColorFlow>(led, delay_ms);
         } else if(effectLower.find("color_random") != std::string::npos) {
             return std::make_shared<RandomColor>(led, delay_ms);
         }
-
-        // TODO
-        // "white_static",
-        // "color_static",
 
         Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;
         return std::make_shared<LEDEffect>(led, delay_ms);
