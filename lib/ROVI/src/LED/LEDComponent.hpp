@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <thread>
+#include <mutex>          // std::mutex
 
 #include <ArduinoIostream.hpp>
 #include <ThreadUtil.hpp>
@@ -40,12 +41,13 @@ public:
     // Other member methods
     void setEffect(std::shared_ptr<LEDEffect> selectedEffect);
 
-    std::shared_ptr<Color> getLastColor() const;
+    std::shared_ptr<Color> getLastColor() ;
     bool getPowerStatus() const;
     void stopEffect();
 
 // protected:
     std::shared_ptr<Color> lastColor;
+    std::mutex lastColorMutex;           // mutex for critical section
     bool powerStatus;
 
     std::thread t;

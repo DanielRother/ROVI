@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 static std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
     std::string ret = baseDirectory;
@@ -36,6 +37,14 @@ static std::string to_string(T value) {
     std::stringstream ss;
     ss << value;
     return ss.str();
+}
+
+static std::string toLower(const std::string& in) {
+    std::string lower;
+    lower.resize(in.size());                         // allocate space
+    std::transform(in.begin(), in.end(), lower.begin(), ::tolower);
+
+    return lower;
 }
 
 #endif /* __FILEIOUTILS_H__ */

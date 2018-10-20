@@ -14,7 +14,7 @@ void RoviDevice::setupRovi() {
     // Needs to be in a dedicated method, 'cause iot.begin() in the ctor crashes the application...
     // iot.begin();
 
-    name = iot.configuration.get("DeviceName").c_str();
+    name = toLower(iot.configuration.get("DeviceName").c_str());
     room = addVariableToIotConfig("room", "/haus/etage/zimmer");
 
     // OTAPassword
@@ -47,12 +47,12 @@ void RoviDevice::setupRovi() {
 void RoviDevice::mqttConnected(bool sessionPresent) {
     Serial << "  MQTT verbunden!" << endl;
     
-    iot.mqtt.subscribe(fullfile(baseTopic, "#").c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE));
+    iot.mqtt.subscribe(fullfile(baseTopic, "#").c_str(), to_underlying(MQTTQoSClasses::AT_MOST_ONE));
 
     bool retainFlag = true;
-    iot.mqtt.publish(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "online");
+    iot.mqtt.publish(statusTopic.c_str(), to_underlying(MQTTQoSClasses::AT_MOST_ONE), retainFlag, "online");
     // TODO: Abmelden? Ungetestet
-    iot.mqtt.setWill(statusTopic.c_str(), to_underlying(MQTTQoSClasses::EXACTLY_ONE), retainFlag, "offline");
+    iot.mqtt.setWill(statusTopic.c_str(), to_underlying(MQTTQoSClasses::AT_MOST_ONE), retainFlag, "offline");
     // iot.mqtt.setKeepAlive
 }
 

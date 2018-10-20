@@ -212,9 +212,11 @@ void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(const ButtonSta
     buttonStateActivatedCallbacks[state]();
 
     // MQTT here
+    Serial << "RotaryEncoderWithButton - send MQTT message" << endl;
     std::string buttonStateString   = buttonStateToString(state);
     std::string topic               = "state/" + buttonStateString;
     std::string valueString         = "activated";
+    Serial << "   variables got, send Message; topic: " << topic << " - valueString: " << valueString << endl;
     publishMQTTMessage(topic, valueString);
 
     // Debugging output

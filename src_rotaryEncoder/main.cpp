@@ -88,7 +88,9 @@ void setup() {
       Serial << "CLICKED state activation callback" << endl;
       leds->stopEffect();
 
+      Serial << "   setPower to " << (int) !leds->getPowerStatus() << endl;
       leds->setPower(!leds->getPowerStatus());
+      Serial << "   power set" << endl;
     };
     auto clickedValueChangeCallback = [&](int value) {
       Serial << "CLICKED value change callback - Do nothing" << endl;
@@ -102,6 +104,8 @@ void setup() {
   {
     auto doubleClickedButtonStateActivatedCallback = []() {
       Serial << "DOUBLE_CLICKED state activation callback" << endl;
+      leds->stopEffect();
+
       leds->setPower(false);
       delay(250);
       leds->setPower(true);

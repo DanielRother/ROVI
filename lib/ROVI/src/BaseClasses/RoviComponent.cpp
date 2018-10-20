@@ -11,7 +11,7 @@
 #include <EnumUtils.hpp>
 
 RoviComponent::RoviComponent(const std::string& name) 
-    : name(name)
+    : name(toLower(name))
     {};
 
 void RoviComponent::redirectedMqttMessage(const std::string& topic, const std::string& payload) {
@@ -30,6 +30,7 @@ void RoviComponent::redirectedMqttMessage(const std::string& topic, const std::s
 
     if(h == handler.end()) {
         Serial << "  No such component action (" << name << "::" << mqttParts[1] << "). Returning" << endl;
+        delay(50);
         return;
     }
 
@@ -55,13 +56,16 @@ void RoviComponent::publishMQTTMessage(std::string& subtopic, std::string& paylo
     auto baseTopic = getMqttBaseTopic();
     std::string topic = baseTopic + "/" + subtopic;
 
+    Serial << "Publish message \"" << payload << "\" to topic \"" << topic << "\"" << endl;  
     std::transform(topic.begin(),   topic.end(),   topic.begin(),   ::tolower);
     std::transform(payload.begin(), payload.end(), payload.begin(), ::tolower);
-
-    // Serial << "Publish message \"" << payload << "\" to topic \"" << topic << "\"" << endl;  
+    Serial << "Publish message \"" << payload << "\" (length = " << strlen(payload.c_str()) << " ) to topic \"" << topic << "\" (length = " << strlen(topic.c_str()) << ")" << endl;  
 
     if(device != nullptr) {
-        device->iot.mqtt.publish(topic.c_str(), to_underlying(RoviDevice::MQTTQoSClasses::AT_LEAST_ONE), false, payload.c_str());
+        Serial << "Try to send" << endl;
+        auto packetID = device->iot.mqtt.publish(topic.c_str(), to_underlying(RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, payload.c_str());
+        Serial << "PacketID: " << packetID << endl;
+        delay(50);
     } else {
         Serial << "Publishing of MQTT message not possible, because there is no device connected..." << endl;
     }
