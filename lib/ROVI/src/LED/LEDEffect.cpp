@@ -26,3 +26,7 @@ float LEDEffect::getCurrentBrightness() {
 void LEDEffect::stop() {
     isStopped = true;
 }
+
+void LEDEffect::start() {
+    isStopped = false;
+}

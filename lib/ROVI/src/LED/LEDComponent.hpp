@@ -50,7 +50,6 @@ public:
     std::shared_ptr<Color> lastColor;
     bool powerStatus;
 
-    std::thread t;
     std::shared_ptr<LEDEffect> effect;
 };
 

@@ -12,9 +12,10 @@
 #include "BaseClasses/RoviComponent.hpp"
 #include "LED/ColorTypes.h"
 #include "LEDEffectFactory.hpp"
+#include "Effects/AllEffects.hpp"
 
 LEDComponent::LEDComponent(const std::string& name) 
-: RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<LEDEffect>(this)) {
+: RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<WhiteStatic>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
         stopEffect();
@@ -103,20 +104,7 @@ void LEDComponent::setEffectMQTT(const std::string& payload) {
 }
 
 void LEDComponent::stopEffect() {
-
-    std::cout << "Asking Task to Stop" << std::endl;
-    // Stop the Task
     effect->stop();
-    std::cout << "Asking Thread to Join" << std::endl;
-
-    //Waiting for thread to join
-    if(t.joinable()) {
-        t.join();
-    }
-    std::cout << "Thread Joined" << std::endl;
-
-    effect = std::make_shared<LEDEffect>(this);         // <- Otherwise effect->stop() crashes the next time this method is called
-                                                        // TODO: Find a better solution
 }
 
 void LEDComponent::update() {
@@ -126,12 +114,6 @@ void LEDComponent::update() {
 void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
     stopEffect();
     effect = selectedEffect;
-
-    //Creating a thread to execute our task
-    t = std::thread([&]()
-    {
-        effect->run();
-    });
 }
 
 

@@ -20,7 +20,7 @@ std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const std::string& select
     }
 
     Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;
-    return std::make_shared<LEDEffect>(led, delay_ms);
+    return std::make_shared<WhiteStatic>(led, delay_ms);
 }
 
 std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const uint32_t effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent

@@ -16,11 +16,12 @@ public:
                                                                 // because the ref counter accedently drops to zero... :( 
 
     void update();
+    void start();
     void stop();
 
 protected:
 	// Function to be implemented by actual effect
-    virtual void step();
+    virtual void step() = 0;
 
     float getCurrentBrightness();
 
