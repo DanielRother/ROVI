@@ -8,51 +8,66 @@
 
 class RandomColor : public LEDEffect {
 public:
+    enum class EffectState {
+        INIT,
+        FADE_IN_1,
+        FADE_IN_2,
+        FADE_OUT_1,
+        FADE_OUT_2
+    };
+
     RandomColor(LEDComponent* led, uint32_t delay_ms = 100)
-        : LEDEffect(led, delay_ms), generator(std::chrono::system_clock::now().time_since_epoch().count()), distribution(0,360)
+        : LEDEffect(led, delay_ms), 
+        generator(std::chrono::system_clock::now().time_since_epoch().count()), distribution(0,360),
+        currentColor(0), state(EffectState::INIT), currentSaturation(0.0f)
         {}
 
-    void run() {
-        // TODO: Move to subclass
-        Serial << "RandomColor start" << endl;
-
+    void step() {
         // Get current brightness
-        float brightness = getCurrentBrightness();
-        Serial << "brightness: " << brightness << endl;
+        auto currentBrightness = getCurrentBrightness();
+        led->setColor(std::make_shared<HSVColor>(currentColor, currentSaturation, currentBrightness));
+    
+        switch (state) {
+            case EffectState::INIT:
+                currentColor = distribution(generator);
+                state = EffectState::FADE_IN_1;
 
-        // Check if thread is requested to stop ?
-        while(stopRequested() == false) {
-            int color = distribution(generator);
-            Serial << "Color: " << color << endl;
-
-            // Fade in
-            Serial << "Fade in" << endl;
-            for(float saturation = 0.0f; saturation < 0.5f && stopRequested() == false; saturation += 0.01f) {
-                led->setColor(std::make_shared<HSVColor>(color, saturation, brightness));
-                delay(delay_ms);
-            }
-            for(float saturation = 0.5f; saturation < 1.0f && stopRequested() == false; saturation += 0.01f) {
-                led->setColor(std::make_shared<HSVColor>(color, saturation, brightness));
-                delay(delay_ms*2);
-            }
-
-            // Fade out
-            Serial << "Fade out" << endl;
-            for(float saturation = 1.0f; saturation > 0.5f && stopRequested() == false; saturation -= 0.01f) {
-                led->setColor(std::make_shared<HSVColor>(color, saturation, brightness));
-                delay(delay_ms*2);
-            }
-            for(float saturation = 0.5f; saturation > 0.0f && stopRequested() == false; saturation -= 0.01f) {
-                led->setColor(std::make_shared<HSVColor>(color, saturation, brightness));
-                delay(delay_ms);
-            }        
-        }
-        Serial << "Task End" << endl;
+                Serial << "RandomColor" << endl;
+                Serial << "Color: " << currentColor << endl;
+                Serial << "brightness: " << currentBrightness << endl;
+                break;
+            case EffectState::FADE_IN_1:
+                currentSaturation += 0.01;
+                if(currentSaturation >= 0.5f) {
+                    state = EffectState::FADE_IN_2;
+                }
+            case EffectState::FADE_IN_2:
+                currentSaturation += 0.005;
+                if(currentSaturation >= 1.0f) {
+                    state = EffectState::FADE_OUT_1;
+                }
+            case EffectState::FADE_OUT_1:
+                currentSaturation -= 0.005;
+                if(currentSaturation <= 0.5f) {
+                    state = EffectState::FADE_OUT_2;
+                }
+            case EffectState::FADE_OUT_2:
+                currentSaturation -= 0.01;
+                if(currentSaturation >= 0.0f) {
+                    state = EffectState::INIT;
+                }
+            default:
+                break;
+        }     
     }
 
 protected:
     std::default_random_engine          generator;
     std::uniform_int_distribution<int>  distribution;
+
+    int currentColor;
+    EffectState state;
+    float currentSaturation;
 };
 
 

@@ -9,15 +9,10 @@ public:
         : LEDEffect(led, delay_ms)
         {}
 
-    void run() {
-        Serial << "ColorStatic start" << endl;
-
-        float brightness = getCurrentBrightness();
+    void step() {
+        auto brightness = getCurrentBrightness();
         led->setColor(std::make_shared<HSVColor>(0.0f, 1.0f, brightness));
-
-        Serial << "ColorStatic End" << endl;
     }
-
 };
 
 

@@ -119,6 +119,10 @@ void LEDComponent::stopEffect() {
                                                         // TODO: Find a better solution
 }
 
+void LEDComponent::update() {
+    effect->update();
+}
+
 void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
     stopEffect();
     effect = selectedEffect;

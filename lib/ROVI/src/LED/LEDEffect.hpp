@@ -7,8 +7,7 @@ class LEDEffect;
 /*
  * A Task class that extends the Stoppable Task
  */
-class LEDEffect : public Stoppable
-{
+class LEDEffect {
 public:
     // LEDEffect(std::shared_ptr<LEDComponent> led);
     LEDEffect(LEDComponent* led, uint32_t delay_ms = 100);       // <- Currently a raw pointer, because I'm not able to create a 
@@ -16,15 +15,21 @@ public:
                                                                 // With the latests tries the object was delete together with this class
                                                                 // because the ref counter accedently drops to zero... :( 
 
-	// Function to be implemented by actual effect
-	virtual void run();
+    void update();
+    void stop();
 
 protected:
+	// Function to be implemented by actual effect
+    virtual void step();
+
+    float getCurrentBrightness();
+
     // std::shared_ptr<LEDComponent> led;      // TODO: Synchronize access
     LEDComponent* led;      // TODO: Synchronize access
     uint32_t delay_ms;
+    unsigned long lastUpdate_ms;   
 
-    float getCurrentBrightness();
+    bool isStopped;
 };
 
 #endif /* __LED_EFFECT_H__ */

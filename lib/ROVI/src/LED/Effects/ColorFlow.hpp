@@ -6,30 +6,18 @@
 class ColorFlow : public LEDEffect {
 public:
     ColorFlow(LEDComponent* led, uint32_t delay_ms = 100)
-        : LEDEffect(led, delay_ms)
+        : LEDEffect(led, delay_ms), currentColor(0)
         {}
 
-    void run() {
-        Serial << "ColorFlow start" << endl;
+    void step() {
+        auto brightness = getCurrentBrightness();
+        led->setColor(std::make_shared<HSVColor>(currentColor, 1.0f, brightness));
 
-        float brightness = getCurrentBrightness();
-
-        // Check if thread is requested to stop ?
-        while(stopRequested() == false) {
-            for(double h = 0.0; h < 360.0; ++h) {
-                if(stopRequested() == true) {
-                    break;
-                }
-
-                led->setColor(std::make_shared<HSVColor>(h, 1.0f, brightness));
-                delay(delay_ms);
-            }
-
-            Serial << "ColorFlow finished" << endl;
-        }
-        Serial << "Task End" << endl;
+        currentColor = (++currentColor) % 360;
     }
 
+protected:
+    uint32_t currentColor;  
 };
 
 

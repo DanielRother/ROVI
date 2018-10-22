@@ -178,6 +178,7 @@ void loop() {
   ArduinoOTA.handle();
 
   rotary->update();
+  leds->update();
 
   // sleep(5);
   // // Serial << "--- loop() ---" << endl;
