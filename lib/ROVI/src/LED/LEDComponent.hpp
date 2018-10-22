@@ -44,6 +44,7 @@ public:
 
     std::shared_ptr<Color> getLastColor() const ;
     bool getPowerStatus() const;
+    void startEffect();
     void stopEffect();
 
 // protected:

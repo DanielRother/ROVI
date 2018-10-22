@@ -41,21 +41,25 @@ public:
                 if(currentSaturation >= 0.5f) {
                     state = EffectState::FADE_IN_2;
                 }
+                break;
             case EffectState::FADE_IN_2:
                 currentSaturation += 0.005;
                 if(currentSaturation >= 1.0f) {
                     state = EffectState::FADE_OUT_1;
                 }
+                break;
             case EffectState::FADE_OUT_1:
                 currentSaturation -= 0.005;
                 if(currentSaturation <= 0.5f) {
                     state = EffectState::FADE_OUT_2;
                 }
+                break;
             case EffectState::FADE_OUT_2:
                 currentSaturation -= 0.01;
-                if(currentSaturation >= 0.0f) {
+                if(currentSaturation <= 0.0f) {
                     state = EffectState::INIT;
                 }
+                break;
             default:
                 break;
         }     

@@ -57,8 +57,6 @@ void setup() {
   leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
 
   // Setup rotary
-  // TBD/TODO: Must the effect thread be stopped before changing (at least the color, i.e. DOUBLE_CLICK)
-  //           Is the brightness change used by the effect thread?
     rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
   // NORMAL
   {
@@ -86,11 +84,15 @@ void setup() {
   {
     auto clickedButtonStateActivatedCallback = []() {
       Serial << "CLICKED state activation callback" << endl;
-      leds->stopEffect();
 
-      Serial << "   setPower to " << (int) !leds->getPowerStatus() << endl;
-      leds->setPower(!leds->getPowerStatus());
-      Serial << "   power set" << endl;
+      auto nextPowerStatus = !leds->getPowerStatus();
+      if(nextPowerStatus) {
+        leds->startEffect();
+      } else {
+        leds->stopEffect();
+      }
+
+      leds->setPower(nextPowerStatus);
     };
     auto clickedValueChangeCallback = [&](int value) {
       Serial << "CLICKED value change callback - Do nothing" << endl;
@@ -135,7 +137,6 @@ void setup() {
     auto holdedValueChangeCallback = [&](int value) {
       Serial << "HOLDED value change callback - New value = " << value << endl;
       
-      leds->stopEffect();
       auto selectedEffect = LEDEffectFactory::getEffect(value, leds.get());
       leds->setEffect(selectedEffect);
     };
@@ -179,41 +180,5 @@ void loop() {
 
   rotary->update();
   leds->update();
-
-  // sleep(5);
-  // // Serial << "--- loop() ---" << endl;
-  // // String temp = getTemp();
-  // // Serial << "  Temperatur: " << temp << endl;
-  // // iot.mqtt.publish("example/temp/", 1, true, temp.c_str());
-
-  // // iot.mqtt.publish("example/foo/", 1, true, "OTA hat geklappt :)");
-  // iot.mqtt.publish(myRovi.statusTopic.c_str(), 1, false, "online");
-
-  // Serial << "  myRovi " << myRovi.name  << " is in room " << myRovi.room << endl;
 }
-
- 
-
-
-// Minimal example
-// RotaryEncoderWithButton rotary(pinA, pinB, pinButton);
-
-// void setup()
-// {
-  
-//   Serial.begin (115200);
-//       delay(10);
-//     delay(10);
-
-
-
-//   Serial.println("Start");
-// }
- 
-// void loop()
-// {
-//   rotary.update();
-
-//   delay(10);
-// } 
 

@@ -4,9 +4,6 @@
 class LEDEffect;
 #include "LEDComponent.hpp"
 
-/*
- * A Task class that extends the Stoppable Task
- */
 class LEDEffect {
 public:
     // LEDEffect(std::shared_ptr<LEDComponent> led);

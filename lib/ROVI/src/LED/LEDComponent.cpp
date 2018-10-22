@@ -18,16 +18,13 @@ LEDComponent::LEDComponent(const std::string& name)
 : RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<WhiteStatic>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
-        stopEffect();
         setPowerMQTT(payload);};
     handler[std::string("setColor")]        = [this](const std::string payload){
         stopEffect();
         setColorMQTT(payload);};
     handler[std::string("setBrightness")]   = [this](const std::string payload){
-        stopEffect();
         setBrightnessMQTT(payload);};
     handler[std::string("setEffect")]       = [this](const std::string payload){
-        stopEffect();
         setEffectMQTT(payload);};
 }
 
@@ -42,8 +39,6 @@ LEDComponent::~LEDComponent() {
 // But the actual action have to be implemented in an derived class
 // Names due to overloaded function and bind make problems and would led to long typecasts...
 void LEDComponent::setPowerMQTT(const std::string& payload) {
-    stopEffect();           // <- TODO: in Handler einbauen...
-
     Serial << "  setPower() " << endl;
 
     // Convert to lower cases
@@ -51,16 +46,16 @@ void LEDComponent::setPowerMQTT(const std::string& payload) {
     std::transform(localPayload.begin(), localPayload.end(), localPayload.begin(),::tolower);
 
     bool power = false;
+    effect->stop();
     if(payload == "on" || payload == "true" || payload == "1") {
         power = true;
+        effect->start();
     }
 
     setPower(power);
 }
 
 void LEDComponent::setColorMQTT(const std::string& payload) {
-    stopEffect();           // <- TODO: in Handler einbauen...
-
     Serial << "  setColor() " << endl;
     lastColor = Color::createColor(payload);
 
@@ -72,8 +67,6 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setBrightnessMQTT(const std::string& payload) {
-    stopEffect();           // <- TODO: in Handler einbauen...
-
     Serial << "  setBrightness() " << endl;
 
     uint8_t brightness = 255;
@@ -95,12 +88,14 @@ void LEDComponent::setBrightnessMQTT(const std::string& payload) {
 }
 
 void LEDComponent::setEffectMQTT(const std::string& payload) {
-    stopEffect();           // <- TODO: in Handler einbauen...
-
     Serial << "  LEDComponent::setEffect() " << endl;
 
     auto selectedEffect = LEDEffectFactory::getEffect(payload, this);   // TODO: Better use shared_ptr instead of this
     setEffect(selectedEffect);
+}
+
+void LEDComponent::startEffect() {
+    effect->start();
 }
 
 void LEDComponent::stopEffect() {
@@ -112,14 +107,11 @@ void LEDComponent::update() {
 }
 
 void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
-    stopEffect();
     effect = selectedEffect;
 }
 
 
 std::shared_ptr<Color> LEDComponent::getLastColor() const {
-    Serial << "--- LEDComponent::getLastColor(): " << lastColor->toString() << endl;
-
     return lastColor;
 }
 
