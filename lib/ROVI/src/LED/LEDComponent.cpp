@@ -15,7 +15,7 @@
 #include "Effects/AllEffects.hpp"
 
 LEDComponent::LEDComponent(const std::string& name) 
-: RoviComponent(name), lastColor(std::make_shared<RGBColor>(128,128,128)), effect(std::make_shared<WhiteStatic>(this)) {
+: RoviComponent(name), lastColor(std::make_shared<HSVColor>(0,0,0.2)), effect(std::make_shared<WhiteStatic>(this)) {
     // Always stop a possibly running effect thread first
     handler[std::string("setPower")]        = [this](const std::string payload){
         setPowerMQTT(payload);};

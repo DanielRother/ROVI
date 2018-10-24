@@ -32,12 +32,12 @@ RoviDevice myRovi(iot);
 
 
 // RotaryEncoder
-uint8_t pinA = 13;
-uint8_t pinB = 12;
+uint8_t pinA = 12;
+uint8_t pinB = 13;
 uint8_t pinButton = 14;
 
 // LED
-uint16_t nbNeoPixelLEDs = 12;
+uint16_t nbNeoPixelLEDs = 20;
 uint8_t  neoPixelPin    = 15;
 
 std::shared_ptr<RotaryEncoderWithButton> rotary;
@@ -55,6 +55,11 @@ void setup() {
 
   // Setup LED
   leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
+  auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
+  for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
+    swapRGValues[pixelIdx] = 1;
+  }
+  leds->setSwapRGValues(swapRGValues);
 
   // Setup rotary
     rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
@@ -144,6 +149,8 @@ void setup() {
     bool holdedPreventOverflow = false;
     rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
   }
+  leds->setBrightness(30);
+
 
 
   myRovi.addComponent(leds);
