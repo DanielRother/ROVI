@@ -98,6 +98,14 @@ void setup() {
       }
 
       leds->setPower(nextPowerStatus);
+
+      auto powerTopic = (myRovi.getBaseTopic() + "/power").c_str();
+      auto powerPayload = std::string{"off"};
+      if(nextPowerStatus) {
+        powerPayload = std::string{"on"};
+      }
+      auto packetID = iot.mqtt.publish(powerTopic, to_underlying(RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, powerPayload.c_str());
+
     };
     auto clickedValueChangeCallback = [&](int value) {
       Serial << "CLICKED value change callback - Do nothing" << endl;
@@ -149,7 +157,7 @@ void setup() {
     bool holdedPreventOverflow = false;
     rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
   }
-  leds->setBrightness(30);
+  leds->setBrightness(0);
 
 
 

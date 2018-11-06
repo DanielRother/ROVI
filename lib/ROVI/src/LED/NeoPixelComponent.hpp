@@ -48,6 +48,10 @@ public:
                 pixels.setPixelColor(pixelIdx, rgb->g, rgb->r, rgb->b);
             }
         }
+
+        // Possible workaround to prevent flickering
+        // See https://github.com/adafruit/Adafruit_NeoPixel/issues/139 for more details
+        delay(1);
         pixels.show();
 
         lastColor = rgb;
