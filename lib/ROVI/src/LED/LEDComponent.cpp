@@ -59,11 +59,14 @@ void LEDComponent::setColorMQTT(const std::string& payload) {
     Serial << "  setColor() " << endl;
     lastColor = Color::createColor(payload);
 
-    // TODO: Reset brightness if this was changed internaly (e.g. by a rotary encoder)
-
-    Serial << "    Color: " << lastColor->toString().c_str() << endl;
+    auto brightness = static_cast<uint8_t>(std::min(std::max(lastColor->toHSV()->v * 255.0f, 0.0f), 2551.0f));
+    setBrightness(brightness);
 
     setColor(lastColor);
+
+    Serial << "    Color:      " << lastColor->toString().c_str() << endl;
+    Serial << "    Brightness: " << brightness << endl;
+
 }
 
 void LEDComponent::setBrightnessMQTT(const std::string& payload) {

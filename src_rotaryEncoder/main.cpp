@@ -74,10 +74,16 @@ void setup() {
       }
     };
     auto normalValueChangeCallback = [&](int value) {
-      Serial << "NORMAL value change callback - New value = " << value << endl;
+      uint8_t brightness = value * 10;
 
-      leds->setBrightness(value * 10);
-      leds->setColor(leds->getLastColor());     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
+      Serial << "NORMAL value change callback - New value = " << value << endl;
+      Serial << "  setBrightness to " << (brightness) << endl;
+      leds->setBrightness(brightness);
+
+      auto lastColor = leds->getLastColor();
+      auto color = lastColor->toHSV();
+      color->v = (float) brightness / 255.0f;
+      leds->setColor(color);     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
                                                 // TODO: Check, if this is also required and/or working for the RGB_LEDs
     };
     int normalMaxRotaryValue = 25;
