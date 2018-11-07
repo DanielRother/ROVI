@@ -93,7 +93,9 @@ void LEDComponent::setBrightnessMQTT(const std::string& payload) {
 void LEDComponent::setEffectMQTT(const std::string& payload) {
     Serial << "  LEDComponent::setEffect() " << endl;
 
-    auto selectedEffect = LEDEffectFactory::getEffect(payload, this);   // TODO: Better use shared_ptr instead of this
+    auto effectNumber = atoi(payload.c_str());
+
+    auto selectedEffect = LEDEffectFactory::getEffect(effectNumber, this);   // TODO: Better use shared_ptr instead of this
     setEffect(selectedEffect);
 }
 
