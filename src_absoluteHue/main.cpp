@@ -1,7 +1,3 @@
-// TODO:
-// - Kombination mit LED  
-// - Cleanup (vorallem debugging)
-
 #include <Arduino.h>
 
 #include <string>
