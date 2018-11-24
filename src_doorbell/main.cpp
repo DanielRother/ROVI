@@ -82,7 +82,7 @@ void setup() {
   myDFPlayer.stop();
   delay(100);
   Serial << "Player stoped" << endl;
-  // esp_deep_sleep_start();
+  // esp_deep_sleep_start();    // TODO: Reavtivate!
   Serial.println("This will never be printed");
 }
 
