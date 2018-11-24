@@ -9,17 +9,19 @@
 #include <prettyprint.hpp>
 #include <ArduinoIostream.hpp>
 
-#include "DFRobotDFPlayerMini.h"
+#include <DFRobotDFPlayerMini.h>
 
 //***************************************************************************//
 // Basecamp and Rovi initialize 
 //***************************************************************************//
-// #include <Basecamp.hpp>
-// // Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
-// Basecamp iot{
-//   Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
-// };
-// RoviDevice myRovi(iot);
+#include <Basecamp.hpp>
+#include <BaseClasses/RoviDevice.hpp>
+#include <EnumUtils.hpp>
+// Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
+Basecamp iot{
+  Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
+};
+RoviDevice myRovi(iot);
 
 HardwareSerial mySoftwareSerial(1);
 DFRobotDFPlayerMini myDFPlayer;
@@ -35,20 +37,7 @@ void setup() {
   mySoftwareSerial.begin(9600, SERIAL_8N1, pinPlayerRX, pinPlayerTX); // speed, type, RX, TX
  
 //   sleep(5);
-  Serial << "--- setup() ---" << endl;
-
-//   iot.begin();
-//   Serial << "myRovi.baseTopic" << myRovi.getBaseTopic() << endl;
-
-//   // TODO: Is there an easier way to connect to methods???
-//   iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
-//   iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {myRovi.mqttSubscribed(packetId, qos);});
-//   iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
-//     size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
-//   iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
-
-
-  
+ 
   Serial << endl << "DFRobot DFPlayer Mini Demo" << endl;
   Serial << "Initializing DFPlayer ... (May take 3~5 seconds)" << endl;
   
@@ -56,6 +45,7 @@ void setup() {
     Serial << "Unable to begin:" << endl;
     Serial << "1.Please recheck the connection!" << endl;
     Serial << "2.Please insert the SD card!" << endl;
+    delay(100);
     while(true);
   }
   Serial << "DFPlayer Mini online." << endl;
@@ -68,13 +58,31 @@ void setup() {
   myDFPlayer.play(songID);
   Serial << "Playing song #" << songID << endl;
 
+    
+  Serial << "Start MQTT/Rovi" << endl;
+  iot.begin();
+  myRovi.setupRovi();
+  Serial << "myRovi.baseTopic" << myRovi.getBaseTopic() << endl;
+
+  // TODO: Is there an easier way to connect to methods???
+  iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
+  iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {
+    myRovi.mqttSubscribed(packetId, qos);
+    iot.mqtt.publish((myRovi.getBaseTopic() + "/status").c_str(), 
+    to_underlying(RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, 
+    "dingdong");
+    });
+  iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
+    size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
+  iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
+
   // Wait for n seconds before going to sleep
   sleep(10);
   Serial << "Go to sleep - Stop player" << endl;
   myDFPlayer.stop();
-  delay(150);
+  delay(100);
   Serial << "Player stoped" << endl;
-  esp_deep_sleep_start();
+  // esp_deep_sleep_start();
   Serial.println("This will never be printed");
 }
 
