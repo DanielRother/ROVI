@@ -55,7 +55,7 @@ void setup() {
   }
   Serial << "DFPlayer Mini online." << endl;
   
-  myDFPlayer.volume(10);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(25);  //Set volume value. From 0 to 30
 
   //Play a random mp3
   auto nbSongs = myDFPlayer.readFileCounts();
