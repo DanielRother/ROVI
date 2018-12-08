@@ -27,6 +27,7 @@ HardwareSerial mySoftwareSerial(1);
 DFRobotDFPlayerMini myDFPlayer;
 uint8_t pinPlayerTX = 12;
 uint8_t pinPlayerRX = 13;
+uint8_t pinPower    = 14;
 void printDetail(uint8_t type, int value);
 
 //***************************************************************************//
@@ -37,6 +38,10 @@ void setup() {
   mySoftwareSerial.begin(9600, SERIAL_8N1, pinPlayerRX, pinPlayerTX); // speed, type, RX, TX
  
 //   sleep(5);
+  // Activate power supply of DFRobot
+  pinMode(pinPower, OUTPUT);
+  digitalWrite(pinPower, HIGH);
+  delay(20);
  
   Serial << endl << "DFRobot DFPlayer Mini Demo" << endl;
   Serial << "Initializing DFPlayer ... (May take 3~5 seconds)" << endl;
@@ -81,8 +86,14 @@ void setup() {
   Serial << "Go to sleep - Stop player" << endl;
   myDFPlayer.stop();
   delay(100);
+  
+  // Deactivate power supply of DFRobot
+  digitalWrite(pinPower, LOW);
+  delay(20);
+
+  // Go to sleep
   Serial << "Player stoped" << endl;
-  // esp_deep_sleep_start();    // TODO: Reavtivate!
+  esp_deep_sleep_start();
   Serial.println("This will never be printed");
 }
 
