@@ -25,9 +25,10 @@ RoviDevice myRovi(iot);
 
 HardwareSerial mySoftwareSerial(1);
 DFRobotDFPlayerMini myDFPlayer;
-uint8_t pinPlayerTX = 12;
-uint8_t pinPlayerRX = 13;
-uint8_t pinPower    = 14;
+uint8_t pinPlayerTX = 26;
+uint8_t pinPlayerRX = 27;
+uint8_t pinPower    = 25;
+auto pinWakeup   = GPIO_NUM_33;
 void printDetail(uint8_t type, int value);
 
 //***************************************************************************//
@@ -41,7 +42,10 @@ void setup() {
   // Activate power supply of DFRobot
   pinMode(pinPower, OUTPUT);
   digitalWrite(pinPower, HIGH);
-  delay(20);
+
+  // Activate Wakeup pin
+  pinMode(pinWakeup, INPUT_PULLUP);
+  delay(50);
  
   Serial << endl << "DFRobot DFPlayer Mini Demo" << endl;
   Serial << "Initializing DFPlayer ... (May take 3~5 seconds)" << endl;
@@ -82,7 +86,7 @@ void setup() {
   iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
 
   // Wait for n seconds before going to sleep
-  sleep(10);
+  sleep(15);
   Serial << "Go to sleep - Stop player" << endl;
   myDFPlayer.stop();
   delay(100);
@@ -92,6 +96,7 @@ void setup() {
   delay(20);
 
   // Go to sleep
+  esp_sleep_enable_ext0_wakeup(pinWakeup,0); //1 = High, 0 = Low
   Serial << "Player stoped" << endl;
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
