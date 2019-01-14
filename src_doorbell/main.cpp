@@ -17,6 +17,8 @@
 
 #include <DFRobotDFPlayerMini.h>
 
+#include "PayloadDataTypes.h"
+
 // //***************************************************************************//
 // // Basecamp and Rovi initialize 
 // //***************************************************************************//
@@ -41,6 +43,9 @@ void printDetail(uint8_t type, int value);
 // Arduino setup()
 //***************************************************************************//
 void setup() {
+  // Just testing Homie... Move somewhere else!!!
+  auto s = Rovi::Homie::String{"abcd"};
+
   Serial.begin(115200);
   mySoftwareSerial.begin(9600, SERIAL_8N1, pinPlayerRX, pinPlayerTX); // speed, type, RX, TX
  
