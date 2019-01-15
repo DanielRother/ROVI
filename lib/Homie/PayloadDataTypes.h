@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include <memory>
+#include <set>
 
 #include "FileIOUtils.hpp"
 
@@ -12,16 +13,34 @@ namespace Rovi {
         template<typename T>
         class PayloadDatatype {
         public:
-            T value() const {
-                return data;
+            virtual bool validateValue(const std::string& value) const = 0;
+            virtual T fromString(const std::string& payload) const = 0;
+            virtual std::string toString(const T& value) const = 0;
+
+            bool validateT(const T& value) {                    // TODO: typetraits o.ä. für T == string
+                valid = validateValue(valueString(value);
+            }
+            bool validate(const std::string& value) {
+                valid = validateValue(value);
             }
             bool isValid() const {
                 return valid;
             }
+            T value() const {
+                return data;
+            }
+            std::string valueString() const {
+                return toString(data);
+            }
+            void setValue(const T& newValue) {
+                setValue(toString(newValue));
+            }
+            void setValue(const std::string& newValue) {
+                validate(valueString);
+                setValue(valueString);
+            }
 
-            virtual bool validate(const T& value) = 0; // TBD: Datatype of argument
-            virtual void fromString(const std::string& payload) = 0;
-            virtual std::string toString() const = 0;
+
 
         protected:
             PayloadDatatype() : valid(false) {
@@ -42,43 +61,67 @@ namespace Rovi {
                 fromString(payload);
             }
 
-            virtual bool validate(const std::string& value) override {
-                valid = value.size() >= 0 && value.size() < 268435456;
-                return valid;
+            virtual bool validateValue(const std::string& value) const override {
+                return value.size() >= 0 && value.size() <= 268435456;;
             }
 
-            virtual void fromString(const std::string& payload) override {
-                validate(payload);
+            virtual void fromString(const std::string& payload) const override {
+                validateValue(payload);
                 data = payload;
             }
 
-            virtual std::string toString() const override {
-                return data;
+            virtual std::string toString(const std::string& value) const override {
+                return value;
             }       
         };
 
-        class Integer : public PayloadDatatype<std::uint64_t> {
+        class Integer : public PayloadDatatype<uint64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
                 fromString(payload);
             }
 
-            virtual bool validate(const uint64_t& value) override {
+            virtual bool validateValue(const std::string& value) override {
                 // TODO: Add check
+                // Hier macht ein String als Argument mehr Sinn..
                 // isValid = payload.size() >= 0 && payload.size() < 268435456;
                 valid = true;
                 return valid;
             }
 
             virtual void fromString(const std::string& payload) override {
+                validateValue(payload);
                 auto value = atoll(payload.c_str());
-                validate(value);
                 data = value;
             }
 
-            virtual std::string toString() const override {
-                return to_string(data);
+            virtual std::string toString(const uint64_t& value) const override {
+                return to_string(value);
             }       
+        };
+
+        class Enumeration : public PayloadDatatype<std::string> {
+        public:
+            Enumeration(const std::set<std::string>& enumValues) : PayloadDatatype(), enumValues(enumValues) {
+            }
+
+            virtual bool validateValue(const std::string& payload) override {
+                valid = payload.size() > 0 && enumValues.find(payload) != enumValues.end();
+                valid = true;
+                return valid;
+            }
+
+            virtual void fromString(const std::string& payload) override {
+                validateValue(payload);
+                data = payload;
+            }
+
+            virtual std::string toString(const std::string& value) const override {
+                return value;
+            }   
+
+        protected:
+            std::set<std::string> enumValues; 
         };
     }
 }
