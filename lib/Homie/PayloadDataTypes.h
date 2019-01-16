@@ -13,12 +13,14 @@ namespace Rovi {
         template<typename T>
         class PayloadDatatype {
         public:
+            using ValueType = T;
+
             virtual bool validateValue(const std::string& value) const = 0;
-            virtual T fromString(const std::string& payload) const = 0;
-            virtual std::string toString(const T& value) const = 0;
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const = 0;
 
             bool validateT(const T& value) {                    // TODO: typetraits o.ä. für T == string
-                valid = validateValue(valueString(value);
+                valid = validateValue(valueToString(value));
             }
             bool validate(const std::string& value) {
                 valid = validateValue(value);
@@ -26,18 +28,18 @@ namespace Rovi {
             bool isValid() const {
                 return valid;
             }
-            T value() const {
+            ValueType value() const {
                 return data;
             }
-            std::string valueString() const {
-                return toString(data);
+            std::string toString() const {
+                return valueToString(data);
             }
-            void setValue(const T& newValue) {
-                setValue(toString(newValue));
+            void setValueT(const ValueType& value) {        // s.o.
+                setValue(valueToString(value));
             }
-            void setValue(const std::string& newValue) {
-                validate(valueString);
-                setValue(valueString);
+            void setValue(const std::string& value) {
+                validate(value);
+                setValue(value);
             }
 
 
@@ -46,7 +48,7 @@ namespace Rovi {
             PayloadDatatype() : valid(false) {
             }
 
-            T data;
+            ValueType data;
             bool valid;
         };
 
@@ -58,19 +60,18 @@ namespace Rovi {
         class String : public PayloadDatatype<std::string> {
         public:
             String(const std::string& payload = "") : PayloadDatatype() {
-                fromString(payload);
+                setValue(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
                 return value.size() >= 0 && value.size() <= 268435456;;
             }
 
-            virtual void fromString(const std::string& payload) const override {
-                validateValue(payload);
-                data = payload;
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                return payload;
             }
 
-            virtual std::string toString(const std::string& value) const override {
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
                 return value;
             }       
         };
@@ -78,24 +79,21 @@ namespace Rovi {
         class Integer : public PayloadDatatype<uint64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
-                fromString(payload);
+                valueFromString(payload); // TBD
             }
 
-            virtual bool validateValue(const std::string& value) override {
+            virtual bool validateValue(const std::string& value) const override {
                 // TODO: Add check
                 // Hier macht ein String als Argument mehr Sinn..
                 // isValid = payload.size() >= 0 && payload.size() < 268435456;
-                valid = true;
-                return valid;
+                return true;
             }
 
-            virtual void fromString(const std::string& payload) override {
-                validateValue(payload);
-                auto value = atoll(payload.c_str());
-                data = value;
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                return atoll(payload.c_str());
             }
 
-            virtual std::string toString(const uint64_t& value) const override {
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
                 return to_string(value);
             }       
         };
@@ -105,18 +103,15 @@ namespace Rovi {
             Enumeration(const std::set<std::string>& enumValues) : PayloadDatatype(), enumValues(enumValues) {
             }
 
-            virtual bool validateValue(const std::string& payload) override {
-                valid = payload.size() > 0 && enumValues.find(payload) != enumValues.end();
-                valid = true;
-                return valid;
+            virtual bool validateValue(const std::string& payload) const override {
+                return payload.size() > 0 && enumValues.find(payload) != enumValues.end();
             }
 
-            virtual void fromString(const std::string& payload) override {
-                validateValue(payload);
-                data = payload;
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                return payload;
             }
 
-            virtual std::string toString(const std::string& value) const override {
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
                 return value;
             }   
 
