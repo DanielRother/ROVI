@@ -21,9 +21,11 @@ namespace Rovi {
 
             bool validateT(const T& value) {                    // TODO: typetraits o.ä. für T == string
                 valid = validateValue(valueToString(value));
+                return valid;
             }
             bool validate(const std::string& value) {
                 valid = validateValue(value);
+                return valid;
             }
             bool isValid() const {
                 return valid;
@@ -52,11 +54,6 @@ namespace Rovi {
             bool valid;
         };
 
-        // template<typename T>
-        // std::shared_ptr<PayloadDatatype> createPayload(const std::string& payload) {
-
-        // }
-
         class String : public PayloadDatatype<std::string> {
         public:
             String(const std::string& payload = "") : PayloadDatatype() {
@@ -79,14 +76,20 @@ namespace Rovi {
         class Integer : public PayloadDatatype<uint64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
-                valueFromString(payload); // TBD
+                setValue(payload);
+            }
+            Integer(const PayloadDatatype::ValueType& payload = 0) : PayloadDatatype() {
+                setValueT(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
                 // TODO: Add check
-                // Hier macht ein String als Argument mehr Sinn..
-                // isValid = payload.size() >= 0 && payload.size() < 268435456;
-                return true;
+                bool isValid = true;
+                // isValid &= rangeCheck();                     // TODO: Is this possible at this point? What is returned by atoll?
+                // isValid &= TODO: regex für [0123456789-]*    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
+                isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
+                isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
+                return isValid;
             }
 
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
@@ -97,6 +100,37 @@ namespace Rovi {
                 return to_string(value);
             }       
         };
+
+        class Float : public PayloadDatatype<double> {
+        public:
+            Float(const std::string& payload = "0") : PayloadDatatype() {
+                setValue(payload); // TBD
+            }
+            Float(const PayloadDatatype::ValueType& payload = 0.0) : PayloadDatatype() {
+                setValueT(payload);
+            }
+
+            virtual bool validateValue(const std::string& value) const override {
+                // TODO: Add check
+                bool isValid = true;
+                // isValid &= rangeCheck();                     // TODO: Is this possible at this point?
+                // isValid &= TODO: regex für [0123456789-eE.]*    // The payload may only contain whole numbers, the negation character “-”, the exponent character “e” or “E” and the decimal separator “.”, no other characters, including spaces (” “) are permitted
+                                                                // This included: Representations of numeric concepts such as “NaN” (Not a Number) and “Infinity” are not a valid payload
+                // isValid &= count(value, ".") <= 1;                    // TODO: The dot character (“.”) is the decimal separator (used if necessary) and may only have a single instance present in the payload
+                isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
+                isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
+                return isValid;
+            }
+
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                return atof(payload.c_str());       // TBD: Richtig?
+            }
+
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
+                return to_string(value);
+            }       
+        };
+
 
         class Enumeration : public PayloadDatatype<std::string> {
         public:
