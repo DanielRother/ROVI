@@ -127,10 +127,43 @@ namespace Rovi {
             }
 
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
-                return to_string(value);
+                return to_string(value);        // TBD: Welche darstellung nutzt der? 123.456 oder 123e456?
             }       
         };
 
+        class Boolean : public PayloadDatatype<bool> {
+        public:
+            Boolean(const std::string& payload = "false") : PayloadDatatype() {
+                setValue(payload); // TBD
+            }
+            Boolean(const PayloadDatatype::ValueType& payload = false) : PayloadDatatype() {
+                setValueT(payload);
+            }
+
+            virtual bool validateValue(const std::string& value) const override {
+                bool isValid = true;
+                isValid &= (value == "true" || value == "false");           // Booleans must be converted to the string literals “true” or “false”
+                                                                            // Representation is case sensitive, e.g. “TRUE” or “FALSE” are not valid payloads.
+                                                                            // An empty string (“”) is not a valid payload
+                return isValid;
+            }
+
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                bool value = false;
+                if(payload == "true") {
+                    value = true;
+                }
+                return value;
+            }
+
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
+                std::string payload = "false";
+                if(value == true) {
+                    payload == "true";
+                }
+                return payload;
+            }       
+        };
 
         class Enumeration : public PayloadDatatype<std::string> {
         public:
