@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <set>
+#include <algorithm>
 
 #include "FileIOUtils.hpp"
 
@@ -87,6 +88,7 @@ namespace Rovi {
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point? What is returned by atoll?
                 // isValid &= TODO: regex für [0123456789-]*    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
+                isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-"));
                 isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
                 isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
                 return isValid;
@@ -116,7 +118,8 @@ namespace Rovi {
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point?
                 // isValid &= TODO: regex für [0123456789-eE.]*    // The payload may only contain whole numbers, the negation character “-”, the exponent character “e” or “E” and the decimal separator “.”, no other characters, including spaces (” “) are permitted
                                                                 // This included: Representations of numeric concepts such as “NaN” (Not a Number) and “Infinity” are not a valid payload
-                // isValid &= count(value, ".") <= 1;                    // TODO: The dot character (“.”) is the decimal separator (used if necessary) and may only have a single instance present in the payload
+                isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-eE."));
+                isValid &= std::count(value.begin(), value.end(), '.') <= 1;                    // The dot character (“.”) is the decimal separator (used if necessary) and may only have a single instance present in the payload
                 isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
                 isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
                 return isValid;
@@ -175,7 +178,6 @@ namespace Rovi {
                 // Enum payloads are case sensitive, e.g. “Car” will not match a format definition of “car”
                 // Payloads should have leading and trailing whitespace removed
                 // An empty string (“”) is not a valid payload
-
                 return payload.size() > 0 && enumValues.find(payload) != enumValues.end();
             }
 
@@ -196,13 +198,12 @@ namespace Rovi {
             HSV
         };
 
-        // TODO
         class Color : public PayloadDatatype<std::tuple<int64_t, int64_t, int64_t>> {
         public:
-            Color(const ColorFormat format, const std::string& payload = "0,0,0") : PayloadDatatype(), format(format) {
+            Color(const ColorFormat format, const std::string& payload = "0,0,0") : PayloadDatatype(), m_format(format) {
                 setValue(payload); // TBD
             }
-            Color(const ColorFormat format, const PayloadDatatype::ValueType& payload = {0,0,0}) : PayloadDatatype(), format(format) {
+            Color(const ColorFormat format, const PayloadDatatype::ValueType& payload) : PayloadDatatype(), m_format(format) {
                 setValueT(payload);
             }
 
@@ -213,30 +214,31 @@ namespace Rovi {
                 // Payloads for type “rgb” contains 3 comma separated values of numbers with a valid range between 0 and 255. e.g. 100,100,100
                 // Payloads for type “hsv” contains 3 comma separated values of numbers. The first number has a range of 0 to 360, the second and third numbers have a range of 0 to 100. e.g. 300,50,75
                 // An empty string (“”) is not a valid payload
-
                 bool isValid = true;
                 isValid &= (value.size() > 0 && value.size() <= 11);  // max "100,100,100" -> 11 chars
-
+                isValid &= checkStringForAllowedCharacters(value, std::string("01234567890,"));
+                
+                // Return if string already is invalid. Otherwise, convertion will fail...
+                if(!isValid) {
+                    return isValid;
+                }
                 auto convValue = valueFromString(value);
-                switch(format) {
-                    case ColorFormat::RGB:
+                switch(m_format) {
+                    case ColorFormat::RGB: {
                         auto r = std::get<0>(convValue);
                         auto g = std::get<1>(convValue);
                         auto b = std::get<2>(convValue);
                         isValid &= r > 0 && r <= 255;
                         isValid &= g > 0 && g <= 255;
-                        isValid &= b > 0 && b <= 255;
+                        isValid &= b > 0 && b <= 255; }
                         break;
-                    case ColorFormat::HSV:
+                    case ColorFormat::HSV: {
                         auto h = std::get<0>(convValue);
                         auto s = std::get<1>(convValue);
                         auto v = std::get<2>(convValue);
                         isValid &= h > 0 && h <= 360;
                         isValid &= s > 0 && s <= 100;
-                        isValid &= v > 0 && v <= 100;
-                        break;
-                    default:
-                        isValid = false;
+                        isValid &= v > 0 && v <= 100; }
                         break;
                 }
 
@@ -245,20 +247,23 @@ namespace Rovi {
 
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 auto values = splitString(payload, ',');
-                return PayloadDatatype::ValueType{values[0], values[1], values[2]};
+                return PayloadDatatype::ValueType{atoll(values[0].c_str()), atoll(values[1].c_str()), atoll(values[2].c_str())};
             }
 
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
-                // TODO
-                std::string payload = "false";
-                if(value == true) {
-                    payload == "true";
-                }
-                return payload;
-            }     
+                return to_string(std::get<0>(value)) + "," + to_string(std::get<1>(value)) + "," + to_string(std::get<2>(value));
+            }    
+
+            ColorFormat format() const {
+                return m_format;
+            } 
+
+            void setFormat(const ColorFormat format) {
+                m_format = format;
+            }
 
             protected:
-            ColorFormat format;  
+                ColorFormat m_format;  
         };
     }
 }

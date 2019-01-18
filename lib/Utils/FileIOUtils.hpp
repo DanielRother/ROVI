@@ -47,4 +47,17 @@ static std::string toLower(const std::string& in) {
     return lower;
 }
 
+
+bool checkStringForAllowedCharacters(const std::string& inputString, const std::string& allowedChars) {
+    bool ok = true;
+    for(auto& character : inputString) {
+        ok = allowedChars.find(character) != std::string::npos;
+        if(!ok) {
+            break;
+        }
+    }
+
+    return ok;
+}
+
 #endif /* __FILEIOUTILS_H__ */
