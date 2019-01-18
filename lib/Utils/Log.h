@@ -6,10 +6,13 @@
 
 #include "ArduinoIostream.hpp"
 
-namespace Rovi {
-    namespace Utils {
+// namespace Rovi {
+//     namespace Utils {
         void LOG_FATAL(const std::string& msg) {}
-    }
-}
+        void LOG_DEBUG(const std::string& msg) {
+            Serial << "DEBUG: " << msg << endl;
+        }
+//     }
+// }
 
 #endif // ROVI_UTILS_LOH_H

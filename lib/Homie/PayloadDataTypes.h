@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "FileIOUtils.hpp"
+#include "Log.h"
 
 namespace Rovi {
     namespace  Homie {
@@ -25,6 +26,7 @@ namespace Rovi {
                 return valid;
             }
             bool validate(const std::string& value) {
+                LOG_DEBUG("setValue");
                 valid = validateValue(value);
                 return valid;
             }
@@ -38,11 +40,14 @@ namespace Rovi {
                 return valueToString(data);
             }
             void setValueT(const ValueType& value) {        // s.o.
-                setValue(valueToString(value));
+                auto convValue = valueToString(value);
+                LOG_DEBUG("setValueT(" + convValue + ")");
+                setValue(convValue);
             }
             void setValue(const std::string& value) {
+                LOG_DEBUG("setValue");
                 validate(value);
-                setValue(value);
+                data = valueFromString(value);
             }
 
 
@@ -77,9 +82,11 @@ namespace Rovi {
         class Integer : public PayloadDatatype<int64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
+                LOG_DEBUG("Integer::ctor(string)");
                 setValue(payload);
             }
             Integer(const PayloadDatatype::ValueType& payload = 0) : PayloadDatatype() {
+                LOG_DEBUG("Integer::ctor(int)");
                 setValueT(payload);
             }
 

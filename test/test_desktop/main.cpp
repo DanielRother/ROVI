@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include <ArduinoUnit.h>
 
+#include <ArduinoIostream.hpp>
 #include "Utils/testFileIOUtils.h"
+#include "Homie/testPayloadDataTypes.h"
 
 test(ok) 
 {
@@ -20,8 +22,10 @@ test(bad)
 void setup()
 {
   Serial.begin(115200);
-  sleep(2);               // To allow serial monitor setup
+  Serial << "Wait for serial monitor setup" << endl;
+  sleep(2);
   while(!Serial) {}       // Portability for Leonardo/Micro
+  Serial << "Start unit tests" << endl;
 }
 
 void loop()
