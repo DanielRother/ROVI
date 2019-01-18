@@ -73,7 +73,7 @@ namespace Rovi {
             }       
         };
 
-        class Integer : public PayloadDatatype<uint64_t> {
+        class Integer : public PayloadDatatype<int64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
                 setValue(payload);
@@ -171,6 +171,11 @@ namespace Rovi {
             }
 
             virtual bool validateValue(const std::string& payload) const override {
+                // Enum payloads must be one of the values specified in the format definition of the property
+                // Enum payloads are case sensitive, e.g. “Car” will not match a format definition of “car”
+                // Payloads should have leading and trailing whitespace removed
+                // An empty string (“”) is not a valid payload
+
                 return payload.size() > 0 && enumValues.find(payload) != enumValues.end();
             }
 
@@ -184,6 +189,76 @@ namespace Rovi {
 
         protected:
             std::set<std::string> enumValues; 
+        };
+
+        enum class ColorFormat {
+            RGB,
+            HSV
+        };
+
+        // TODO
+        class Color : public PayloadDatatype<std::tuple<int64_t, int64_t, int64_t>> {
+        public:
+            Color(const ColorFormat format, const std::string& payload = "0,0,0") : PayloadDatatype(), format(format) {
+                setValue(payload); // TBD
+            }
+            Color(const ColorFormat format, const PayloadDatatype::ValueType& payload = {0,0,0}) : PayloadDatatype(), format(format) {
+                setValueT(payload);
+            }
+
+            virtual bool validateValue(const std::string& value) const override {
+                // Color payload validity varies depending on the property format definition of either “rgb” or “hsv”
+                // Both payload types contain comma separated whole numbers of differing restricted ranges
+                // The encoded string may only contain whole numbers and the comma character “,”, no other characters are permitted, including spaces (” “)
+                // Payloads for type “rgb” contains 3 comma separated values of numbers with a valid range between 0 and 255. e.g. 100,100,100
+                // Payloads for type “hsv” contains 3 comma separated values of numbers. The first number has a range of 0 to 360, the second and third numbers have a range of 0 to 100. e.g. 300,50,75
+                // An empty string (“”) is not a valid payload
+
+                bool isValid = true;
+                isValid &= (value.size() > 0 && value.size() <= 11);  // max "100,100,100" -> 11 chars
+
+                auto convValue = valueFromString(value);
+                switch(format) {
+                    case ColorFormat::RGB:
+                        auto r = std::get<0>(convValue);
+                        auto g = std::get<1>(convValue);
+                        auto b = std::get<2>(convValue);
+                        isValid &= r > 0 && r <= 255;
+                        isValid &= g > 0 && g <= 255;
+                        isValid &= b > 0 && b <= 255;
+                        break;
+                    case ColorFormat::HSV:
+                        auto h = std::get<0>(convValue);
+                        auto s = std::get<1>(convValue);
+                        auto v = std::get<2>(convValue);
+                        isValid &= h > 0 && h <= 360;
+                        isValid &= s > 0 && s <= 100;
+                        isValid &= v > 0 && v <= 100;
+                        break;
+                    default:
+                        isValid = false;
+                        break;
+                }
+
+                return isValid;
+            }
+
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+                auto values = splitString(payload, ',');
+                return PayloadDatatype::ValueType{values[0], values[1], values[2]};
+            }
+
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
+                // TODO
+                std::string payload = "false";
+                if(value == true) {
+                    payload == "true";
+                }
+                return payload;
+            }     
+
+            protected:
+            ColorFormat format;  
         };
     }
 }
