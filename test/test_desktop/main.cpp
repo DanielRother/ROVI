@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ArduinoUnit.h>
+#include <AUnit.h>
 
 #include <ArduinoIostream.hpp>
 #include "Utils/testFileIOUtils.h"
@@ -30,5 +30,5 @@ void setup()
 
 void loop()
 {
-  Test::run();
+  aunit::TestRunner::run();
 }
