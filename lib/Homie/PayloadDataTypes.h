@@ -52,6 +52,11 @@ namespace Rovi {
                 }
                 return isValid;
             }
+            // Required!!! Otherwise Boolean.setValue("some string") will call the Boolean.setValue(bool) which is not intendent!
+            bool setValue(const char* value) {
+                return setValue(std::string{value});
+            }
+
 
             bool operator==(const PayloadDatatype<T>& rhs) const {
                 return value() == rhs.value();
@@ -74,6 +79,10 @@ namespace Rovi {
             }
             bool validate(const std::string& value) const {
                 return validateValue(value);
+            }
+            // s.o.
+            bool validate(const char* value) const {
+                return validateValue(std::string{value});
             }
 
             ValueType data;
@@ -133,18 +142,10 @@ namespace Rovi {
         class Float : public PayloadDatatype<double> {
         public:
             Float(const std::string& payload = "0") : PayloadDatatype() {
-                auto set = setValue(payload); // TBD
-                // Serial << "Float(string) - payload " << payload << " set " << set << endl;
+                setValue(payload);
             }
             Float(const PayloadDatatype::ValueType& payload = 0.0) : PayloadDatatype() {
-                auto set = setValue(payload);
-                // Serial << "Float(float) - payload " << payload << " set " << set << endl;
-                auto payload_str = valueToString(payload);
-                // Serial << "Float(float) - payload_str " << payload_str << endl;
-                // Serial << "checkStringForAllowedCharacters: " << checkStringForAllowedCharacters(payload_str, std::string("01234567890-eE.")) << endl;
-                // Serial << "count: " << (std::count(payload_str.begin(), payload_str.end(), '.') <= 1) << endl;
-                // Serial << "(value == "-"): " << (payload_str == "-") << endl;
-                // Serial << "!(value == ""): " << !(payload_str == "") << endl;
+                setValue(payload);
             }
             virtual ~Float(){};
 
@@ -248,6 +249,7 @@ namespace Rovi {
             HSV
         };
 
+        using ColorTuple = std::tuple<int64_t, int64_t, int64_t>;
         class Color : public PayloadDatatype<std::tuple<int64_t, int64_t, int64_t>> {
         public:
             Color(const ColorFormat format, const std::string& payload = "0,0,0") : PayloadDatatype(), m_format(format) {
@@ -268,6 +270,7 @@ namespace Rovi {
                 bool isValid = true;
                 isValid &= (value.size() > 0 && value.size() <= 11);  // max "100,100,100" -> 11 chars
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890,"));
+                isValid &= std::count(value.begin(), value.end(), ',') == 2;
                 
                 // Return if string already is invalid. Otherwise, convertion will fail...
                 if(!isValid) {
@@ -279,17 +282,17 @@ namespace Rovi {
                         auto r = std::get<0>(convValue);
                         auto g = std::get<1>(convValue);
                         auto b = std::get<2>(convValue);
-                        isValid &= r > 0 && r <= 255;
-                        isValid &= g > 0 && g <= 255;
-                        isValid &= b > 0 && b <= 255; }
+                        isValid &= (r >= 0 && r <= 255);
+                        isValid &= (g >= 0 && g <= 255);
+                        isValid &= (b >= 0 && b <= 255); }
                         break;
                     case ColorFormat::HSV: {
                         auto h = std::get<0>(convValue);
                         auto s = std::get<1>(convValue);
                         auto v = std::get<2>(convValue);
-                        isValid &= h > 0 && h <= 360;
-                        isValid &= s > 0 && s <= 100;
-                        isValid &= v > 0 && v <= 100; }
+                        isValid &= (h >= 0 && h <= 360);
+                        isValid &= (s >= 0 && s <= 100);
+                        isValid &= (v >= 0 && v <= 100); }
                         break;
                 }
 
