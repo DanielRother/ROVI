@@ -68,9 +68,14 @@ namespace Rovi {
             assertTrue(Float{"-123.456"} == Float{-123.456});
             assertTrue(Float{".456"} == Float{.456});
             assertTrue(Float{"-.456"} == Float{-.456});
+            // Serial << "Float 2e8 - string: " << Float{"2e8"}.toString() << ", float: " << Float{2e8}.toString() << endl;
             assertTrue(Float{"2e8"} == Float{2e8});
+            // TODO: e000 checken
+            // TODO: toString entsprechend anpassen
             assertTrue(Float{"2E8"} == Float{2E8});
             assertTrue(Float{"-2E8"} == Float{-2E8});
+            assertTrue(Float{"2E-8"} == Float{2E-8});
+            assertTrue(Float{"-2E-8"} == Float{-2E-8});
             assertTrue(Float{"123"} != Float{456.789});
 
             assertTrue("123" == Float{123}.toString());
@@ -79,9 +84,9 @@ namespace Rovi {
             assertTrue("0.456" == Float{.456}.toString());
             assertTrue("-123.456" == Float{-123.456}.toString());
             assertTrue("-0.456" == Float{-.456}.toString());
-            assertTrue("2e+08" == Float{2e8}.toString());
-            assertTrue("2e+08" == Float{2E8}.toString());
-            assertTrue("-2e+08" == Float{-2E8}.toString());
+            assertTrue("2e08" == Float{2e8}.toString());
+            assertTrue("2e08" == Float{2E8}.toString());
+            assertTrue("-2e08" == Float{-2E8}.toString());
         }
 
         test(Homie_PayploadDataTypes, Boolean) {
@@ -114,5 +119,44 @@ namespace Rovi {
             assertTrue("false" == Boolean{false}.toString());
         }
 
+        test(Homie_PayploadDataTypes, Enumeration) {
+            // Enum payloads must be one of the values specified in the format definition of the property
+            // Enum payloads are case sensitive, e.g. “Car” will not match a format definition of “car”
+            // Payloads should have leading and trailing whitespace removed
+            // An empty string (“”) is not a valid payload
+            auto value = Enumeration{{"Red", "Green", "Blue", " White ", "blue and green"}};
+
+            assertTrue(value.validateValue("Red"));
+            assertTrue(value.validateValue("Green"));
+            assertTrue(value.validateValue("Blue"));
+            assertTrue(value.validateValue("White"));
+            assertTrue(value.validateValue("blue and green"));
+            assertFalse(value.validateValue("red"));
+            assertFalse(value.validateValue("RED"));
+            assertFalse(value.validateValue("black"));
+            assertFalse(value.validateValue(""));
+            assertFalse(value.validateValue(" "));
+
+            assertTrue(value.value() == "");
+            assertFalse(value.isValid());
+
+            auto successful = value.setValue("Red");
+            assertTrue(value.value() == "Red");
+            assertTrue(value.toString() == "Red");
+            assertTrue(value.isValid());
+            assertTrue(successful);
+           
+            successful = value.setValue("black");
+            assertTrue(value.value() == "Red");
+            assertTrue(value.toString() == "Red");
+            assertTrue(value.isValid());
+            assertFalse(successful);
+
+            successful = value.setValue("blue and green");
+            assertTrue(value.value() == "blue and green");
+            assertTrue(value.toString() == "blue and green");
+            assertTrue(value.isValid());
+            assertTrue(successful);
+        }
     }
 }

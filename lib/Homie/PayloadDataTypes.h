@@ -40,13 +40,17 @@ namespace Rovi {
 
             // Only activate if T != std::string. Otherwise there would be two time the same method signbature
             template <typename = std::enable_if<std::is_same<T, std::string>::value == false>>
-            void setValue(const ValueType& value) {
+            bool setValue(const ValueType& value) {
                 auto convValue = valueToString(value);
-                setValue(convValue);
+                return setValue(convValue);
             }
-            void setValue(const std::string& value) {
-                validate(value);
-                data = valueFromString(value);
+            bool setValue(const std::string& value) {
+                auto isValid = validate(value);
+                if(isValid) {
+                    data = valueFromString(value);
+                    valid = true;
+                }
+                return isValid;
             }
 
             bool operator==(const PayloadDatatype<T>& rhs) const {
@@ -65,13 +69,11 @@ namespace Rovi {
 
             // s.o.
             template <typename = std::enable_if<std::is_same<T, std::string>::value == false>>
-            bool validate(const T& value) {
-                valid = validateValue(valueToString(value));
-                return valid;
+            bool validate(const T& value) const {
+                return validateValue(valueToString(value));
             }
-            bool validate(const std::string& value) {
-                valid = validateValue(value);
-                return valid;
+            bool validate(const std::string& value) const {
+                return validateValue(value);
             }
 
             ValueType data;
@@ -131,10 +133,18 @@ namespace Rovi {
         class Float : public PayloadDatatype<double> {
         public:
             Float(const std::string& payload = "0") : PayloadDatatype() {
-                setValue(payload); // TBD
+                auto set = setValue(payload); // TBD
+                // Serial << "Float(string) - payload " << payload << " set " << set << endl;
             }
             Float(const PayloadDatatype::ValueType& payload = 0.0) : PayloadDatatype() {
-                setValue(payload);
+                auto set = setValue(payload);
+                // Serial << "Float(float) - payload " << payload << " set " << set << endl;
+                auto payload_str = valueToString(payload);
+                // Serial << "Float(float) - payload_str " << payload_str << endl;
+                // Serial << "checkStringForAllowedCharacters: " << checkStringForAllowedCharacters(payload_str, std::string("01234567890-eE.")) << endl;
+                // Serial << "count: " << (std::count(payload_str.begin(), payload_str.end(), '.') <= 1) << endl;
+                // Serial << "(value == "-"): " << (payload_str == "-") << endl;
+                // Serial << "!(value == ""): " << !(payload_str == "") << endl;
             }
             virtual ~Float(){};
 
@@ -150,11 +160,12 @@ namespace Rovi {
 
         protected:
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
-                return atof(payload.c_str());       // TBD: Richtig?
+                return atof(payload.c_str());
             }
 
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
-                return to_string(value);        // TBD: Welche darstellung nutzt der? 123.456 oder 123e456?
+                auto value_str = to_string(value);
+                return removeCharsFromString(value_str, "+");
             }       
         };
 
@@ -204,7 +215,11 @@ namespace Rovi {
 
         class Enumeration : public PayloadDatatype<std::string> {
         public:
-            Enumeration(const std::set<std::string>& enumValues) : PayloadDatatype(), enumValues(enumValues) {
+            Enumeration(const std::set<std::string>& enumValues) : PayloadDatatype() {
+                for(auto& value : enumValues) {
+                    // Remove whitespace
+                    m_enumValues.insert(trim(value));
+                }
             }
             virtual ~Enumeration(){};
 
@@ -213,7 +228,7 @@ namespace Rovi {
                 // Enum payloads are case sensitive, e.g. “Car” will not match a format definition of “car”
                 // Payloads should have leading and trailing whitespace removed
                 // An empty string (“”) is not a valid payload
-                return payload.size() > 0 && enumValues.find(payload) != enumValues.end();
+                return payload.size() > 0 && m_enumValues.find(payload) != m_enumValues.end();
             }
 
         protected:
@@ -225,7 +240,7 @@ namespace Rovi {
                 return value;
             }   
 
-            std::set<std::string> enumValues; 
+            std::set<std::string> m_enumValues; 
         };
 
         enum class ColorFormat {

@@ -40,3 +40,9 @@ test(fileIOUtils, checkStringForAllowedCharacters) {
     assertFalse(checkStringForAllowedCharacters("12.3", allowedCharacters));
     assertFalse(checkStringForAllowedCharacters("12,3f", allowedCharacters));
 }
+
+test(fileIOUtils, trim) {
+    assertTrue(trim("   aaa bbbb  cc     ") == "aaa bbbb  cc");
+}
+
+// TODO: Testcase for removeCharsFromString
