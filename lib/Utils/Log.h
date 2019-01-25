@@ -6,11 +6,13 @@
 
 #include "ArduinoIostream.hpp"
 
+// TODO: Implement some real logging
+
 // namespace Rovi {
 //     namespace Utils {
         void LOG_FATAL(const std::string& msg) {}
         void LOG_DEBUG(const std::string& msg) {
-            Serial << "DEBUG: " << msg << endl;
+            // Serial << "DEBUG: " << msg << endl;
         }
 //     }
 // }

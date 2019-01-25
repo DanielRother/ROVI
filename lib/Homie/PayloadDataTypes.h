@@ -17,6 +17,11 @@ namespace Rovi {
         public:
             using ValueType = T;
 
+            // TODO:
+            // Making these function static would allow for a more intuitive interface
+            // which could be achieved using temnplates.
+            // Unfortunately, the Enum and Color types require access to some member variables
+            // making the implenentation NOT straight forward.... :()
             virtual bool validateValue(const std::string& value) const = 0;
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const = 0;
@@ -49,12 +54,15 @@ namespace Rovi {
                 validate(value);
                 data = valueFromString(value);
             }
-
+            bool operator==(const PayloadDatatype<T>& rhs) const {
+                return value() == rhs.value();
+            }
 
 
         protected:
             PayloadDatatype() : valid(false) {
             }
+
 
             ValueType data;
             bool valid;
@@ -76,7 +84,7 @@ namespace Rovi {
 
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
                 return value;
-            }       
+            }     
         };
 
         class Integer : public PayloadDatatype<int64_t> {
@@ -94,8 +102,7 @@ namespace Rovi {
                 // TODO: Add check
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point? What is returned by atoll?
-                // isValid &= TODO: regex für [0123456789-]*    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
-                isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-"));
+                isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-"));    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
                 isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
                 isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
                 return isValid;
@@ -123,8 +130,6 @@ namespace Rovi {
                 // TODO: Add check
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point?
-                // isValid &= TODO: regex für [0123456789-eE.]*    // The payload may only contain whole numbers, the negation character “-”, the exponent character “e” or “E” and the decimal separator “.”, no other characters, including spaces (” “) are permitted
-                                                                // This included: Representations of numeric concepts such as “NaN” (Not a Number) and “Infinity” are not a valid payload
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-eE."));
                 isValid &= std::count(value.begin(), value.end(), '.') <= 1;                    // The dot character (“.”) is the decimal separator (used if necessary) and may only have a single instance present in the payload
                 isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
