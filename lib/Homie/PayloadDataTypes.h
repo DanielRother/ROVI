@@ -6,6 +6,7 @@
 #include <memory>
 #include <set>
 #include <algorithm>
+#include <type_traits>
 
 #include "FileIOUtils.hpp"
 #include "Log.h"
@@ -18,23 +19,12 @@ namespace Rovi {
             using ValueType = T;
 
             // TODO:
-            // Making these function static would allow for a more intuitive interface
+            // Making this function static would allow for a more intuitive interface
             // which could be achieved using temnplates.
             // Unfortunately, the Enum and Color types require access to some member variables
             // making the implenentation NOT straight forward.... :()
             virtual bool validateValue(const std::string& value) const = 0;
-            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
-            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const = 0;
 
-            bool validateT(const T& value) {                    // TODO: typetraits o.ä. für T == string
-                valid = validateValue(valueToString(value));
-                return valid;
-            }
-            bool validate(const std::string& value) {
-                LOG_DEBUG("setValue");
-                valid = validateValue(value);
-                return valid;
-            }
             bool isValid() const {
                 return valid;
             }
@@ -44,13 +34,14 @@ namespace Rovi {
             std::string toString() const {
                 return valueToString(data);
             }
-            void setValueT(const ValueType& value) {        // s.o.
+
+            // Only activate if T != std::string. Otherwise there would be two time the same method signbature
+            template <typename = std::enable_if<std::is_same<T, std::string>::value == false>>
+            void setValue(const ValueType& value) {
                 auto convValue = valueToString(value);
-                LOG_DEBUG("setValueT(" + convValue + ")");
                 setValue(convValue);
             }
             void setValue(const std::string& value) {
-                LOG_DEBUG("setValue");
                 validate(value);
                 data = valueFromString(value);
             }
@@ -58,11 +49,22 @@ namespace Rovi {
                 return value() == rhs.value();
             }
 
-
         protected:
             PayloadDatatype() : valid(false) {
             }
 
+            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
+            virtual std::string valueToString(const PayloadDatatype::ValueType& value) const = 0;
+
+            template <typename = std::enable_if<std::is_same<T, std::string>::value == false>>
+            bool validate(const T& value) {
+                valid = validateValue(valueToString(value));
+                return valid;
+            }
+            bool validate(const std::string& value) {
+                valid = validateValue(value);
+                return valid;
+            }
 
             ValueType data;
             bool valid;
@@ -78,6 +80,7 @@ namespace Rovi {
                 return value.size() >= 0 && value.size() <= 268435456;;
             }
 
+        protected:
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 return payload;
             }
@@ -95,7 +98,7 @@ namespace Rovi {
             }
             Integer(const PayloadDatatype::ValueType& payload = 0) : PayloadDatatype() {
                 LOG_DEBUG("Integer::ctor(int)");
-                setValueT(payload);
+                setValue(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
@@ -108,7 +111,8 @@ namespace Rovi {
                 return isValid;
             }
 
-            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+         protected:
+           virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 return atoll(payload.c_str());
             }
 
@@ -123,7 +127,7 @@ namespace Rovi {
                 setValue(payload); // TBD
             }
             Float(const PayloadDatatype::ValueType& payload = 0.0) : PayloadDatatype() {
-                setValueT(payload);
+                setValue(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
@@ -137,6 +141,7 @@ namespace Rovi {
                 return isValid;
             }
 
+        protected:
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 return atof(payload.c_str());       // TBD: Richtig?
             }
@@ -152,7 +157,7 @@ namespace Rovi {
                 setValue(payload); // TBD
             }
             Boolean(const PayloadDatatype::ValueType& payload = false) : PayloadDatatype() {
-                setValueT(payload);
+                setValue(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
@@ -163,7 +168,8 @@ namespace Rovi {
                 return isValid;
             }
 
-            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+         protected:
+           virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 bool value = false;
                 if(payload == "true") {
                     value = true;
@@ -193,6 +199,7 @@ namespace Rovi {
                 return payload.size() > 0 && enumValues.find(payload) != enumValues.end();
             }
 
+        protected:
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 return payload;
             }
@@ -201,7 +208,6 @@ namespace Rovi {
                 return value;
             }   
 
-        protected:
             std::set<std::string> enumValues; 
         };
 
@@ -216,7 +222,7 @@ namespace Rovi {
                 setValue(payload); // TBD
             }
             Color(const ColorFormat format, const PayloadDatatype::ValueType& payload) : PayloadDatatype(), m_format(format) {
-                setValueT(payload);
+                setValue(payload);
             }
 
             virtual bool validateValue(const std::string& value) const override {
@@ -257,7 +263,8 @@ namespace Rovi {
                 return isValid;
             }
 
-            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
+        protected:
+           virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
                 auto values = splitString(payload, ',');
                 return PayloadDatatype::ValueType{atoll(values[0].c_str()), atoll(values[1].c_str()), atoll(values[2].c_str())};
             }
@@ -274,7 +281,6 @@ namespace Rovi {
                 m_format = format;
             }
 
-            protected:
                 ColorFormat m_format;  
         };
     }
