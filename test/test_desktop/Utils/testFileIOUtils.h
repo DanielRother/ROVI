@@ -45,4 +45,6 @@ test(fileIOUtils, trim) {
     assertTrue(trim("   aaa bbbb  cc     ") == "aaa bbbb  cc");
 }
 
-// TODO: Testcase for removeCharsFromString
+test(fileIOUtils, removeCharsFromString) {
+    assertTrue(removeCharsFromString("abcd  11+aas- ( aoomw897 &", "+-&") == "abcd  11aas ( aoomw897 ");
+}

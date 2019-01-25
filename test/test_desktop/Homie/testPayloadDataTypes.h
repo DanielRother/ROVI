@@ -1,8 +1,6 @@
 #include <PayloadDataTypes.h>
 #include <AUnit.h>
 
-// TODO: setValue einbauen
-
 namespace Rovi {
     namespace Homie {
         test(Homie_PayploadDataTypes, String) {

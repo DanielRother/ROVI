@@ -28,14 +28,13 @@ namespace Rovi {
             virtual bool validateValue(const std::string& value) const = 0;
 
             bool isValid() const {
-                return valid;
+                return m_valid;
             }
             ValueType value() const {
-                // Serial << "value()=" << toString() << endl;
-                return data;
+                return m_value;
             }
             std::string toString() const {
-                return valueToString(data);
+                return valueToString(m_value);
             }
 
             // Only activate if T != std::string. Otherwise there would be two time the same method signbature
@@ -47,8 +46,8 @@ namespace Rovi {
             bool setValue(const std::string& value) {
                 auto isValid = validate(value);
                 if(isValid) {
-                    data = valueFromString(value);
-                    valid = true;
+                    m_value = valueFromString(value);
+                    m_valid = true;
                 }
                 return isValid;
             }
@@ -66,7 +65,7 @@ namespace Rovi {
             }
 
         protected:
-            PayloadDatatype() : valid(false) {
+            PayloadDatatype() : m_valid(false) {
             }
 
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
@@ -85,8 +84,8 @@ namespace Rovi {
                 return validateValue(std::string{value});
             }
 
-            ValueType data;
-            bool valid;
+            ValueType m_value;
+            bool m_valid;
         };
 
         class String : public PayloadDatatype<std::string> {
@@ -124,8 +123,8 @@ namespace Rovi {
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point? What is returned by atoll?
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-"));    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
-                isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
-                isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
+                isValid &= !(value == "-");                     // A string with just a negation sign (“-”) is not a m_valid payload
+                isValid &= !(value == "");                      // An empty string (“”) is not a m_valid payload
                 return isValid;
             }
 
@@ -154,8 +153,8 @@ namespace Rovi {
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point?
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-eE."));
                 isValid &= std::count(value.begin(), value.end(), '.') <= 1;                    // The dot character (“.”) is the decimal separator (used if necessary) and may only have a single instance present in the payload
-                isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a valid payload
-                isValid &= !(value == "");                      // An empty string (“”) is not a valid payload
+                isValid &= !(value == "-");                    // A string with just a negation sign (“-”) is not a m_valid payload
+                isValid &= !(value == "");                      // An empty string (“”) is not a m_valid payload
                 return isValid;
             }
 
@@ -187,8 +186,8 @@ namespace Rovi {
             virtual bool validateValue(const std::string& value) const override {
                 bool isValid = true;
                 isValid &= (value == "true" || value == "false");           // Booleans must be converted to the string literals “true” or “false”
-                                                                            // Representation is case sensitive, e.g. “TRUE” or “FALSE” are not valid payloads.
-                                                                            // An empty string (“”) is not a valid payload
+                                                                            // Representation is case sensitive, e.g. “TRUE” or “FALSE” are not m_valid payloads.
+                                                                            // An empty string (“”) is not a m_valid payload
                 return isValid;
             }
 
@@ -228,7 +227,7 @@ namespace Rovi {
                 // Enum payloads must be one of the values specified in the format definition of the property
                 // Enum payloads are case sensitive, e.g. “Car” will not match a format definition of “car”
                 // Payloads should have leading and trailing whitespace removed
-                // An empty string (“”) is not a valid payload
+                // An empty string (“”) is not a m_valid payload
                 return payload.size() > 0 && m_enumValues.find(payload) != m_enumValues.end();
             }
 
@@ -264,9 +263,9 @@ namespace Rovi {
                 // Color payload validity varies depending on the property format definition of either “rgb” or “hsv”
                 // Both payload types contain comma separated whole numbers of differing restricted ranges
                 // The encoded string may only contain whole numbers and the comma character “,”, no other characters are permitted, including spaces (” “)
-                // Payloads for type “rgb” contains 3 comma separated values of numbers with a valid range between 0 and 255. e.g. 100,100,100
+                // Payloads for type “rgb” contains 3 comma separated values of numbers with a m_valid range between 0 and 255. e.g. 100,100,100
                 // Payloads for type “hsv” contains 3 comma separated values of numbers. The first number has a range of 0 to 360, the second and third numbers have a range of 0 to 100. e.g. 300,50,75
-                // An empty string (“”) is not a valid payload
+                // An empty string (“”) is not a m_valid payload
                 bool isValid = true;
                 isValid &= (value.size() > 0 && value.size() <= 11);  // max "100,100,100" -> 11 chars
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890,"));
