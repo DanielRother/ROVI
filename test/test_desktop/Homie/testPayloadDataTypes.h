@@ -30,6 +30,7 @@ namespace Rovi {
             assertTrue(Integer{"123"} == Integer{123});
             assertTrue(Integer{"-123"} == Integer{-123});
             assertFalse(Integer{"123"} == Integer{-123});
+            assertTrue(Integer{"123"} != Integer{456});
 
             assertTrue("123" == Integer{123}.toString());
             assertTrue("-123" == Integer{-123}.toString());
@@ -70,7 +71,48 @@ namespace Rovi {
             assertTrue(Float{"2e8"} == Float{2e8});
             assertTrue(Float{"2E8"} == Float{2E8});
             assertTrue(Float{"-2E8"} == Float{-2E8});
+            assertTrue(Float{"123"} != Float{456.789});
 
+            assertTrue("123" == Float{123}.toString());
+            assertTrue("123.456" == Float{123.456}.toString());
+            assertTrue("-123" == Float{-123}.toString());
+            assertTrue("0.456" == Float{.456}.toString());
+            assertTrue("-123.456" == Float{-123.456}.toString());
+            assertTrue("-0.456" == Float{-.456}.toString());
+            assertTrue("2e+08" == Float{2e8}.toString());
+            assertTrue("2e+08" == Float{2E8}.toString());
+            assertTrue("-2e+08" == Float{-2E8}.toString());
         }
+
+        test(Homie_PayploadDataTypes, Boolean) {
+            // Booleans must be converted to the string literals “true” or “false”
+            // Representation is case sensitive, e.g. “TRUE” or “FALSE” are not valid payloads.
+            // An empty string (“”) is not a valid payload
+            auto value = Boolean{false};
+
+            assertTrue(value.validateValue("true"));
+            assertTrue(value.validateValue("false"));
+            assertFalse(value.validateValue("True"));
+            assertFalse(value.validateValue("False"));
+            assertFalse(value.validateValue("TRUE"));
+            assertFalse(value.validateValue("FALSE"));
+            assertFalse(value.validateValue("0"));
+            assertFalse(value.validateValue("1"));
+            assertFalse(value.validateValue("123"));
+            assertFalse(value.validateValue("123.456"));
+            assertFalse(value.validateValue("abc"));
+            assertFalse(value.validateValue("-"));
+            assertFalse(value.validateValue(""));
+            assertFalse(value.validateValue(" "));
+
+            assertTrue(Boolean{"true"} == Boolean{true});
+            assertTrue(Boolean{"false"} == Boolean{false});
+            assertTrue(Boolean{"true"} != Boolean{false});
+            assertTrue(Boolean{"false"} != Boolean{true});
+
+            assertTrue("true" == Boolean{true}.toString());
+            assertTrue("false" == Boolean{false}.toString());
+        }
+
     }
 }

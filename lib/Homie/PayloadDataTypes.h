@@ -18,6 +18,8 @@ namespace Rovi {
         public:
             using ValueType = T;
 
+            virtual ~PayloadDatatype(){};
+
             // TODO:
             // Making this function static would allow for a more intuitive interface
             // which could be achieved using temnplates.
@@ -29,6 +31,7 @@ namespace Rovi {
                 return valid;
             }
             ValueType value() const {
+                // Serial << "value()=" << toString() << endl;
                 return data;
             }
             std::string toString() const {
@@ -45,8 +48,12 @@ namespace Rovi {
                 validate(value);
                 data = valueFromString(value);
             }
+
             bool operator==(const PayloadDatatype<T>& rhs) const {
                 return value() == rhs.value();
+            }
+            bool operator!=(const PayloadDatatype<T>& rhs) const {
+                return value() != rhs.value();
             }
 
         protected:
@@ -56,6 +63,7 @@ namespace Rovi {
             virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const = 0;
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const = 0;
 
+            // s.o.
             template <typename = std::enable_if<std::is_same<T, std::string>::value == false>>
             bool validate(const T& value) {
                 valid = validateValue(valueToString(value));
@@ -75,6 +83,7 @@ namespace Rovi {
             String(const std::string& payload = "") : PayloadDatatype() {
                 setValue(payload);
             }
+            virtual ~String(){};
 
             virtual bool validateValue(const std::string& value) const override {
                 return value.size() >= 0 && value.size() <= 268435456;;
@@ -93,16 +102,14 @@ namespace Rovi {
         class Integer : public PayloadDatatype<int64_t> {
         public:
             Integer(const std::string& payload = "0") : PayloadDatatype() {
-                LOG_DEBUG("Integer::ctor(string)");
                 setValue(payload);
             }
             Integer(const PayloadDatatype::ValueType& payload = 0) : PayloadDatatype() {
-                LOG_DEBUG("Integer::ctor(int)");
                 setValue(payload);
             }
+            virtual ~Integer(){};
 
             virtual bool validateValue(const std::string& value) const override {
-                // TODO: Add check
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point? What is returned by atoll?
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-"));    // The payload may only contain whole numbers and the negation character “-”. No other characters including spaces (” “) are permitted
@@ -129,9 +136,9 @@ namespace Rovi {
             Float(const PayloadDatatype::ValueType& payload = 0.0) : PayloadDatatype() {
                 setValue(payload);
             }
+            virtual ~Float(){};
 
             virtual bool validateValue(const std::string& value) const override {
-                // TODO: Add check
                 bool isValid = true;
                 // isValid &= rangeCheck();                     // TODO: Is this possible at this point?
                 isValid &= checkStringForAllowedCharacters(value, std::string("01234567890-eE."));
@@ -154,11 +161,16 @@ namespace Rovi {
         class Boolean : public PayloadDatatype<bool> {
         public:
             Boolean(const std::string& payload = "false") : PayloadDatatype() {
-                setValue(payload); // TBD
+                setValue(payload);
+            }
+            // Required!!! Otherwise Boolean("some string") will call the Boolean(bool) which is not intendent!
+            Boolean(const char* payload) : Boolean(std::string{payload}) {
+                ;
             }
             Boolean(const PayloadDatatype::ValueType& payload = false) : PayloadDatatype() {
                 setValue(payload);
             }
+            virtual ~Boolean(){};
 
             virtual bool validateValue(const std::string& value) const override {
                 bool isValid = true;
@@ -170,17 +182,21 @@ namespace Rovi {
 
          protected:
            virtual PayloadDatatype::ValueType valueFromString(const std::string& payload) const override {
-                bool value = false;
+                bool value;
                 if(payload == "true") {
                     value = true;
+                } else {
+                    value = false;
                 }
                 return value;
             }
 
             virtual std::string valueToString(const PayloadDatatype::ValueType& value) const override {
-                std::string payload = "false";
+                std::string payload;
                 if(value == true) {
-                    payload == "true";
+                    payload = "true";
+                } else {
+                    payload = "false";
                 }
                 return payload;
             }       
@@ -190,6 +206,7 @@ namespace Rovi {
         public:
             Enumeration(const std::set<std::string>& enumValues) : PayloadDatatype(), enumValues(enumValues) {
             }
+            virtual ~Enumeration(){};
 
             virtual bool validateValue(const std::string& payload) const override {
                 // Enum payloads must be one of the values specified in the format definition of the property
@@ -224,6 +241,7 @@ namespace Rovi {
             Color(const ColorFormat format, const PayloadDatatype::ValueType& payload) : PayloadDatatype(), m_format(format) {
                 setValue(payload);
             }
+            virtual ~Color(){};
 
             virtual bool validateValue(const std::string& value) const override {
                 // Color payload validity varies depending on the property format definition of either “rgb” or “hsv”
