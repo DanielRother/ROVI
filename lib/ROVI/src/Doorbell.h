@@ -26,10 +26,21 @@ class Doorbell {
         m_playerVolume(playerVolume), m_pinWakeup(pinWakeup),
         m_playerInitialized(false)
       {
+        Serial << "Initialize doorbell" << endl;
+        Serial << "Configuration:" << endl 
+          << "  Player pins - Power: " << m_playerPinPower << ", TX: " << m_playerPinTX << ", RX: " << m_playerPinRX << endl
+          << "  Volume: " << m_playerVolume << endl
+          << "  Wakeup pin: " << m_pinWakeup << endl
+          << "  UART: " << SERIAL_UART_NUMBER << endl;
         pinMode(m_playerPinPower, OUTPUT);
+        
+        Serial << "Activate player power supply" << endl;
+        activatePlayerPowerSupply();
+
+        Serial << "Start serial connection to player" << endl;
         m_serial.begin(SERIAL_BAUD_RATE, SERIAL_CONFIG, m_playerPinRX, m_playerPinTX);
 
-        activatePlayerPowerSupply();
+        Serial << "Activate player" << endl;
         activatePlayer();
       }
       ~Doorbell() {
@@ -38,7 +49,7 @@ class Doorbell {
       }
 
       void gotoSleep() {
-        Serial << "Go to sleep" << endl;
+        Serial << endl << "Go to sleep" << endl;
         if(m_playerInitialized) {
           deactivatePlayer();
         }
@@ -55,7 +66,7 @@ class Doorbell {
       activatePlayerPowerSupply();
 
       // Initialize DFPlayer
-      Serial << endl << "DFRobot DFPlayer Mini Demo" << endl;
+      Serial << endl << "DFRobot DFPlayer Mini" << endl;
       Serial << "Initializing DFPlayer ... (May take 3~5 seconds)" << endl;
       auto playerInitOK = m_player.begin(m_serial);
       
@@ -190,9 +201,9 @@ class Doorbell {
 
     bool m_playerInitialized;
 
-    const uint8_t SERIAL_UART_NUMBER = 1;
-    const uint32_t SERIAL_BAUD_RATE = 9600;
-    const uint32_t SERIAL_CONFIG = SERIAL_8N1;
+    static const uint8_t SERIAL_UART_NUMBER = 1;
+    static const uint32_t SERIAL_BAUD_RATE = 9600;
+    static const uint32_t SERIAL_CONFIG = SERIAL_8N1;
 };
 
 #endif /* __DOORBELL_H__ */
