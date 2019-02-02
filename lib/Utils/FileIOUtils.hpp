@@ -10,6 +10,8 @@
 #include <vector>
 #include <algorithm>
 
+// TODO: Namespace
+
 static std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
     std::string ret = baseDirectory;
 
@@ -33,7 +35,7 @@ static std::vector<std::string> splitString(const std::string& s, char delimiter
 }
 
 template<typename T>
-static std::string to_string(T value) {
+static std::string to_string(T value) {     //TODO: Andere Methoden haben keine '_'
     std::stringstream ss;
     ss << value;
     return ss.str();

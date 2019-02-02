@@ -5,6 +5,8 @@
 #include "Utils/testFileIOUtils.h"
 #include "Homie/testPayloadDataTypes.h"
 
+#include <Device.h>
+
 void setup()
 {
   Serial.begin(115200);
