@@ -12,7 +12,7 @@
 
 // TODO: Namespace
 
-static std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
+inline std::string fullfile(const std::string& baseDirectory, const std::string& additionDirectoryOrFile) {
     std::string ret = baseDirectory;
 
     // Check if the baseDirectory ends with an slash and add one if not 
@@ -23,7 +23,7 @@ static std::string fullfile(const std::string& baseDirectory, const std::string&
     return ret + additionDirectoryOrFile;
 }
 
-static std::vector<std::string> splitString(const std::string& s, char delimiter) {
+inline std::vector<std::string> splitString(const std::string& s, char delimiter) {
    std::vector<std::string> tokens;
    std::string token;
    std::istringstream tokenStream(s);
@@ -35,13 +35,13 @@ static std::vector<std::string> splitString(const std::string& s, char delimiter
 }
 
 template<typename T>
-static std::string to_string(T value) {     //TODO: Andere Methoden haben keine '_'
+inline std::string to_string(T value) {     //TODO: Andere Methoden haben keine '_'
     std::stringstream ss;
     ss << value;
     return ss.str();
 }
 
-static std::string toLower(const std::string& in) {
+inline std::string toLower(const std::string& in) {
     std::string lower;
     lower.resize(in.size());                         // allocate space
     std::transform(in.begin(), in.end(), lower.begin(), ::tolower);
@@ -50,7 +50,7 @@ static std::string toLower(const std::string& in) {
 }
 
 
-bool checkStringForAllowedCharacters(const std::string& inputString, const std::string& allowedChars) {
+inline bool checkStringForAllowedCharacters(const std::string& inputString, const std::string& allowedChars) {
     bool ok = true;
     for(auto& character : inputString) {
         ok = allowedChars.find(character) != std::string::npos;
@@ -62,7 +62,7 @@ bool checkStringForAllowedCharacters(const std::string& inputString, const std::
     return ok;
 }
 
-std::string trim(const std::string& str, const std::string& whitespace = " \t")
+inline std::string trim(const std::string& str, const std::string& whitespace = " \t")
 {
     const auto strBegin = str.find_first_not_of(whitespace);
     if (strBegin == std::string::npos)
@@ -74,7 +74,7 @@ std::string trim(const std::string& str, const std::string& whitespace = " \t")
     return str.substr(strBegin, strRange);
 }
 
-std::string removeCharsFromString(const std::string& str, const std::string& charsToRemove) {
+inline std::string removeCharsFromString(const std::string& str, const std::string& charsToRemove) {
     auto retStr = str;
     for ( unsigned int i = 0; i < charsToRemove.size(); ++i ) {
         retStr.erase( remove(retStr.begin(), retStr.end(), charsToRemove[i]), retStr.end() );

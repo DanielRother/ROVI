@@ -4,8 +4,8 @@
 #include <ArduinoIostream.hpp>
 #include "Utils/testFileIOUtils.h"
 #include "Homie/testPayloadDataTypes.h"
+#include "Homie/testDevice.h"
 
-#include <Device.h>
 
 void setup()
 {
