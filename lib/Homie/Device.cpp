@@ -111,7 +111,7 @@ namespace Rovi {
                     break;                    
                 case Attributes::state:
                     // TODO:
-                    str = "Not implemented yet";
+                    str = "Not implemented yet!";
                     break;                    
                 case Attributes::localip:
                     str = m_localip;
