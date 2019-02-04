@@ -15,13 +15,16 @@ namespace Rovi {
             const uint8_t statsInterval_s)
             : m_deviceID{nameToTopic(deviceName) + "-" + macToTopic(hwInfo)}, 
                 m_homie{3, 0, 1}, m_name{deviceName}, 
+                m_state(State::init),
                 m_localip{hwInfo.ip()}, m_mac{hwInfo.mac()},
                 m_fw_name{firmwareName}, m_fw_version{firmwareVersion}, 
                 m_implementation{hwInfo.implementation()}, m_statsInterval_s{statsInterval_s}
-            {}
+            {
+                m_state = State::ready; // TODO: Where to init?
+            }
 
 
-        std::vector<Device::AttributeType> Device::refresh() const {
+        std::vector<Device::AttributeType> Device::connectionInitialized()  {
             // TODO: Wo wird das Intervall gecheckt?        default = 60
             auto deviceAttributes = std::vector<AttributeType>{};
             deviceAttributes.emplace_back(attribute(Attributes::homie));
@@ -34,6 +37,8 @@ namespace Rovi {
             deviceAttributes.emplace_back(attribute(Attributes::implementation));
             deviceAttributes.emplace_back(attribute(Attributes::stats));
             deviceAttributes.emplace_back(attribute(Attributes::statsInterval_s));
+
+            m_state = State::ready;
             deviceAttributes.emplace_back(attribute(Attributes::state));      // TODO: Andere Fälle
 
             return deviceAttributes;
@@ -110,8 +115,7 @@ namespace Rovi {
                     str = m_name;
                     break;                    
                 case Attributes::state:
-                    // TODO:
-                    str = "Not implemented yet!";
+                    str = stateToValue(m_state);
                     break;                    
                 case Attributes::localip:
                     str = m_localip;
@@ -157,6 +161,37 @@ namespace Rovi {
             auto convertedMac = toLower(mac);
             convertedMac.erase(std::remove(convertedMac.begin(), convertedMac.end(), ':'), convertedMac.end());
             return convertedMac;
+        }
+
+
+        std::string Device::stateToValue(const State& state) const {
+            auto str = std::string{};
+            switch (state)
+            {
+                case State::init:
+                    str = "init";
+                    break;
+                case State::ready:
+                    str = "ready";
+                    break;
+                case State::disconnected:
+                    str = "disconnected";
+                    break;
+                case State::sleeping:
+                    str = "sleeping";
+                    break;
+                case State::lost:
+                    str = "lost";
+                    break;
+                case State::alert:
+                    str = "alert";
+                    break;
+            
+                default:
+                    break;
+            }
+
+            return str;
         }
 
 

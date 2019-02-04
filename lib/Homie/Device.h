@@ -31,11 +31,21 @@ namespace Rovi {
                     statsInterval_s
                 };
 
+                // TODO: Implement state changes (requires MQTT...)
+                enum class State {
+                    init,
+                    ready,
+                    disconnected,
+                    sleeping,
+                    lost,
+                    alert
+                };
+
                 Device(const std::string deviceName, const HWInfo& hwInfo, 
                     const std::string& firmwareName, const Version& firmwareVersion,
                     const uint8_t statsInterval_s);
 
-                std::vector<AttributeType> refresh() const;     // TBD: name?
+                std::vector<AttributeType> connectionInitialized();
 
                 AttributeType attribute(const Attributes& attribute) const;
                 TopicType topic(const Attributes& attribute) const;
@@ -57,13 +67,15 @@ namespace Rovi {
             protected:
                 std::string nameToTopic(const std::string& topic) const;
                 std::string macToTopic(const HWInfo& hwInfo) const;
+                std::string stateToValue(const State& state) const;
                 AttributeType deviceAttribute(const TopicType& topic, const ValueType& value) const;
+
 
                 TopicID m_deviceID;
                 // $device-attribute
                 Version m_homie;
                 std::string m_name;
-                //TODO: state
+                State m_state;              // TODO: state changes
                 std::string m_localip;
                 std::string m_mac;
                 TopicID m_fw_name;

@@ -34,7 +34,7 @@ namespace Rovi {
                 // TODO 
                 auto attribute = device.attribute(Device::Attributes::state);
                 assertTrue(mqttPathToString(attribute.first) == baseMqttPath + std::string{"$state/"});
-                assertTrue(attribute.second == std::string{"Not implemented yet!"});
+                assertTrue(attribute.second == std::string{"ready"});
             } 
             {
                 auto attribute = device.attribute(Device::Attributes::localip);
@@ -80,7 +80,7 @@ namespace Rovi {
             } 
         }
 
-        test(Homie_Device, refresh) {
+        test(Homie_Device, connectionInitialized) {
             auto deviceName = std::string{"Super car"};
             auto deviceMAC = std::string{"DE:AD:BE:EF:FE:ED"};
             auto deviceIP = std::string{"192.168.0.10"};
@@ -92,10 +92,17 @@ namespace Rovi {
 
             auto device = Device(deviceName, hwInfo, firmwareName, firmwareVersion, statsInterval_s);
 
-            auto mqttRawData = device.refresh();
+            auto mqttRawData = device.connectionInitialized();
             // printMqttMessages(mqttRawData);
 
             // TODO: Add testcase
+            assertTrue(false);
         }
+
+        test(Homie_Device, stateChanges) {
+            // TODO: Imlement
+            assertTrue(false);
+        }
+
     }
 }
