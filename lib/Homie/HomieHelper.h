@@ -48,6 +48,20 @@ namespace Rovi {
                 std::string implementation() const { return m_implementation; }
                 std::string toString() const;
 
+                // TODO: Implement (hardware specific)
+                // Signal strength in %
+                uint32_t signalStrength() const { return 100; }
+                // CPU Temperature in °C
+                uint32_t cpuTemperature() const { return 50; }
+                // CPU Load in %. Average of last $interval including all CPUs 
+                uint32_t cpuLoad() const { return 0; }
+                // Battery level in %
+                uint32_t batteryLevel() const { return 100; }
+                // Free heap in bytes
+                uint32_t freeheap() const { return 5*1024*1024; }
+                // Supply Voltage in V
+                float supplyVoltage() const { return 3.3f; }
+
             protected:
                 std::string m_mac;      // TODO: Type=A1:B2:C3:D4:E5:F6
                 std::string m_ip;

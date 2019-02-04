@@ -12,20 +12,23 @@ namespace Rovi {
     namespace  Homie {
         Device::Device(const std::string deviceName, const HWInfo& hwInfo, 
             const std::string& firmwareName, const Version& firmwareVersion,
-            const uint8_t statsInterval_s)
-            : m_deviceID{nameToTopic(deviceName) + "-" + macToTopic(hwInfo)}, 
+            const std::chrono::seconds statsInterval)
+              : m_hwInfo{hwInfo},
+                m_deviceID{nameToTopic(deviceName) + "-" + macToTopic(hwInfo)}, 
                 m_homie{3, 0, 1}, m_name{deviceName}, 
                 m_state(State::init),
                 m_localip{hwInfo.ip()}, m_mac{hwInfo.mac()},
                 m_fw_name{firmwareName}, m_fw_version{firmwareVersion}, 
-                m_implementation{hwInfo.implementation()}, m_statsInterval_s{statsInterval_s}
+                m_implementation{hwInfo.implementation()}, m_statsInterval{statsInterval},
+                m_start{std::chrono::system_clock::now()}
             {
-                m_state = State::ready; // TODO: Where to init?
+                // TODO: Make this dynamic depanding on the hwInfo
+                // something likd if(hwInfo.supportsStatisc(Stats stat)) availableStats.push_back(stat);
+                m_availableStats = {Stats::uptime, Stats::signal, Stats::cputemp, Stats::cpuload, Stats::battery, Stats::freeheap, Stats::supply};
             }
 
 
         std::vector<Device::AttributeType> Device::connectionInitialized()  {
-            // TODO: Wo wird das Intervall gecheckt?        default = 60
             auto deviceAttributes = std::vector<AttributeType>{};
             deviceAttributes.emplace_back(attribute(Attributes::homie));
             deviceAttributes.emplace_back(attribute(Attributes::name));
@@ -43,6 +46,18 @@ namespace Rovi {
 
             return deviceAttributes;
         }
+
+        std::vector<Device::AttributeType> Device::update() const {
+            // TODO: Wo wird das Intervall gecheckt?        default = 60
+
+            auto deviceStatistic = std::vector<AttributeType>{};
+            for(auto& stat : m_availableStats) {
+                deviceStatistic.emplace_back(statictic(stat));
+            }
+          
+            return deviceStatistic;
+        }
+
 
 
         Device::AttributeType Device::attribute(const Attributes& attribute) const {
@@ -136,16 +151,92 @@ namespace Rovi {
                     str = m_implementation;
                     break;                    
                 case Attributes::stats:
-                    str = "Not implemented yet!";
+                    str = availableStatsToValue(m_availableStats);
                     break;                    
                 case Attributes::statsInterval_s:
-                    str = to_string((uint32_t) m_statsInterval_s);
-                    break;                    
+                    str = to_string(m_statsInterval.count());
+                    break;
                 default:
                     break;
             }
 
             return str;
+        }
+
+        Device::AttributeType Device::statictic(const Stats& stat) const {
+            auto statsBaseTopic = topic(Attributes::stats);
+            auto statsSubtopic = topic(stat);
+            statsBaseTopic.splice(statsBaseTopic.end(), statsSubtopic);
+            return deviceAttribute(statsBaseTopic, value(stat));
+        }
+
+        Device::TopicType Device::topic(const Stats& stat) const {
+           auto ret = TopicType{};
+            switch (stat)
+            {
+                case Stats::uptime:
+                    ret.emplace_back("uptime");
+                    break;                    
+                case Stats::signal:
+                    ret.emplace_back("signal");
+                    break;                    
+                case Stats::cputemp:
+                    ret.emplace_back("cputemp");
+                    break;                    
+                case Stats::cpuload:
+                    ret.emplace_back("cpuload");
+                    break;                    
+                case Stats::battery:
+                    ret.emplace_back("battery");
+                    break;                    
+                case Stats::freeheap:
+                    ret.emplace_back("freeheap");
+                    break;                    
+                case Stats::supply:
+                    ret.emplace_back("supply");
+                    break;                               
+                default:
+                    break;
+            }
+
+            return ret;
+        }
+
+        Device::ValueType Device::value(const Stats& stat) const {
+            auto str = ValueType{};
+            switch (stat)
+            {
+                case Stats::uptime:
+                    str = to_string(uptime().count());
+                    break;
+                case Stats::signal:
+                    str = to_string(m_hwInfo.signalStrength());
+                    break;
+                case Stats::cputemp:
+                    str = to_string(m_hwInfo.cpuTemperature());
+                    break;
+                case Stats::cpuload:
+                    str = to_string(m_hwInfo.cpuLoad());
+                    break;
+                case Stats::battery:
+                    str = to_string(m_hwInfo.batteryLevel());
+                    break;
+                case Stats::freeheap:
+                    str = to_string(m_hwInfo.freeheap());
+                    break;
+                case Stats::supply:
+                    str = to_string(m_hwInfo.supplyVoltage());
+                    break;
+                default:
+                    break;
+            }                  
+
+            return str;
+        }
+
+
+        std::chrono::seconds Device::uptime() const {
+            return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now()- m_start);
         }
 
 
@@ -200,6 +291,22 @@ namespace Rovi {
             deviceTopicPath.insert(deviceTopicPath.end(), topic.begin(), topic.end());
             return make_pair(deviceTopicPath, value);
         }
+
+
+        std::string Device::availableStatsToValue(const std::list<Stats>& stats) const {
+            auto str = std::string{};
+            for(auto& stat : stats) {
+                auto statTopic = topic(stat);
+                if(statTopic.size() != 1) {
+                    Serial << "WARNING: statTopic.size() != 1" << endl;
+                }
+                str += statTopic.front() + ",";
+            }
+            str.pop_back();        // Remove last ","
+
+            return str;
+        }
+
 
 
 

@@ -3,19 +3,19 @@
 
 namespace Rovi {
     namespace Homie {
-        test(Homie_Device, attributes) {
-            auto deviceName = std::string{"Super car"};
-            auto deviceMAC = std::string{"DE:AD:BE:EF:FE:ED"};
-            auto deviceIP = std::string{"192.168.0.10"};
-            auto implementation = std::string{"esp32"};
-            auto firmwareName = std::string{"weatherstation-firmware"};
-            auto firmwareVersion = Version{1, 0, 0};
-            auto statsInterval_s = uint8_t{60};
-            auto hwInfo = HWInfo{deviceMAC, deviceIP, implementation};
+        const auto deviceName = std::string{"Super car"};
+        const auto deviceMAC = std::string{"DE:AD:BE:EF:FE:ED"};
+        const auto deviceIP = std::string{"192.168.0.10"};
+        const auto implementation = std::string{"esp32"};
+        const auto firmwareName = std::string{"weatherstation-firmware"};
+        const auto firmwareVersion = Version{1, 0, 0};
+        const auto statsInterval_s = std::chrono::seconds{60};
+        const auto hwInfo = HWInfo{deviceMAC, deviceIP, implementation};
 
-            auto device = Device(deviceName, hwInfo, firmwareName, firmwareVersion, statsInterval_s);
-            
-            const auto baseMqttPath = std::string{"homie/super-car-deadbeeffeed/"};
+        auto device = Device(deviceName, hwInfo, firmwareName, firmwareVersion, statsInterval_s);
+        const auto baseMqttPath = std::string{"homie/super-car-deadbeeffeed/"};
+
+        test(Homie_Device, attributes) {         
             {
                 auto attribute = device.attribute(Device::Attributes::deviceID);
                 assertTrue(attribute.second == std::string{"super-car-deadbeeffeed"});
@@ -34,7 +34,7 @@ namespace Rovi {
                 // TODO 
                 auto attribute = device.attribute(Device::Attributes::state);
                 assertTrue(mqttPathToString(attribute.first) == baseMqttPath + std::string{"$state/"});
-                assertTrue(attribute.second == std::string{"ready"});
+                assertTrue(attribute.second == std::string{"init"});
             } 
             {
                 auto attribute = device.attribute(Device::Attributes::localip);
@@ -68,10 +68,10 @@ namespace Rovi {
                 assertTrue(attribute.second == implementation);
             } 
             {
-                // TODO:
                 auto attribute = device.attribute(Device::Attributes::stats);
                 assertTrue(mqttPathToString(attribute.first) == baseMqttPath + std::string{"$stats/"});
-                assertTrue(attribute.second == std::string{"Not implemented yet!"});
+                Serial << "second: " << attribute.second << endl;
+                assertTrue(attribute.second == std::string{"uptime,signal,cputemp,cpuload,battery,freeheap,supply"});
             } 
             {
                 auto attribute = device.attribute(Device::Attributes::statsInterval_s);
@@ -81,17 +81,6 @@ namespace Rovi {
         }
 
         test(Homie_Device, connectionInitialized) {
-            auto deviceName = std::string{"Super car"};
-            auto deviceMAC = std::string{"DE:AD:BE:EF:FE:ED"};
-            auto deviceIP = std::string{"192.168.0.10"};
-            auto implementation = std::string{"esp32"};
-            auto firmwareName = std::string{"weatherstation-firmware"};
-            auto firmwareVersion = Version{1, 0, 0};
-            auto statsInterval_s = uint8_t{60};
-            auto hwInfo = HWInfo{deviceMAC, deviceIP, implementation};
-
-            auto device = Device(deviceName, hwInfo, firmwareName, firmwareVersion, statsInterval_s);
-
             auto mqttRawData = device.connectionInitialized();
             // printMqttMessages(mqttRawData);
 
@@ -100,9 +89,54 @@ namespace Rovi {
         }
 
         test(Homie_Device, stateChanges) {
+            auto intervall = std::chrono::seconds{60};
             // TODO: Imlement
             assertTrue(false);
         }
 
+        test(Homie_Device, statistic) {
+            {
+                auto stat = device.statictic(Device::Stats::uptime);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/uptime/"});
+                assertTrue(atoll(stat.second.c_str()) >= 0);
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::signal);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/signal/"});
+                assertTrue(stat.second == "100");
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::cputemp);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/cputemp/"});
+                assertTrue(stat.second == "50");
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::cpuload);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/cpuload/"});
+                assertTrue(stat.second == "0");
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::battery);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/battery/"});
+                assertTrue(stat.second == "100");
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::freeheap);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/freeheap/"});
+                assertTrue(stat.second == "5242880");
+            }  
+            {
+                auto stat = device.statictic(Device::Stats::supply);
+                assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/supply/"});
+                assertTrue(stat.second == "3.3");
+            }  
+        }
+
+        test(Homie_Device, update) {
+            auto mqttRawData = device.update();
+            // printMqttMessages(mqttRawData);
+
+            assertTrue(false);
+        }
     }
 }
