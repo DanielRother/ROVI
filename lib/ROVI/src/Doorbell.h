@@ -42,8 +42,10 @@ class Doorbell {
 
         Serial << "Activate player" << endl;
         activatePlayer();
+        Serial << "Doorbell setup complete" << endl;
       }
       ~Doorbell() {
+        Serial << "Destroy doorbell object" << endl;
         deactivatePlayerPowerSupply();
         gotoSleep();
       }
@@ -96,11 +98,13 @@ class Doorbell {
     }
 
     void activatePlayerPowerSupply() {
+      Serial << "Activate power supply" << endl;
       digitalWrite(m_playerPinPower, HIGH);
       delay(50);
     }
 
     void deactivatePlayerPowerSupply() {
+      Serial << "Deactivate power supply" << endl;
       digitalWrite(m_playerPinPower, LOW);
     }
 

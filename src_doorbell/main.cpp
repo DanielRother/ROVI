@@ -22,7 +22,9 @@ void setup() {
   auto doorbell = Doorbell(playerPinPower, playerPinTX, playerPinRX, playerVolume, pinWakeup);
 
   // Wait for n seconds before going to sleep
+  Serial << "Play song for " << (int) playerPlaytime_s << " seconds" << endl; 
   sleep(playerPlaytime_s);
+  Serial << (int) playerPlaytime_s << " seconds over. Go to sleep" << endl;
   doorbell.gotoSleep();
 }
 
