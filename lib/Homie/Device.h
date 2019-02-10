@@ -12,18 +12,11 @@
 
 namespace Rovi {
     namespace  Homie {
-        enum class Stats {
-            uptime,
-            signal,
-            cputemp,
-            cpuload,
-            battery,
-            freeheap,
-            supply
-        };
+
 
         class TopicID;
         class Version;
+        enum class Stats;
         class HWInfo;
 
         class Device {

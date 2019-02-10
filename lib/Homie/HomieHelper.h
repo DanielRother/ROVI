@@ -40,8 +40,16 @@ namespace Rovi {
                 uint8_t m_revision;
         };
 
-        enum class Stats;
-        
+        enum class Stats {
+            uptime,
+            signal,
+            cputemp,
+            cpuload,
+            battery,
+            freeheap,
+            supply
+        };    
+            
         // TODO: Move to some MQTT and/or ESP32 interface
         class HWInfo {
             public:
