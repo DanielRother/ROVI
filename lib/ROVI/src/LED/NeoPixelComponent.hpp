@@ -74,7 +74,7 @@ public:
     };
 
     virtual void setBrightness(uint8_t brightness) override {
-        Serial << "--- NeoPixel::setBrightness" << endl;
+        Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
         powerStatus = true;
 
         pixels.setBrightness(brightness);
