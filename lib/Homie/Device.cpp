@@ -57,6 +57,7 @@ namespace Rovi {
 
 
         void Device::addNode(const std::shared_ptr<Node>& node) {
+            // TODO: Check, if node is already connected/ID existing
             m_nodes[node->value(Node::Attributes::nodeID)] = node;
             node->setDevice(shared_from_this());
         }

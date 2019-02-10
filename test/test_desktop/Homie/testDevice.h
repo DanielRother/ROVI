@@ -1,3 +1,6 @@
+#ifndef __TEST_DEVICE_H__
+#define __TEST_DEVICE_H__
+
 #include <Device.h>
 #include <AUnit.h>
 
@@ -141,3 +144,5 @@ namespace Rovi {
         }
     }
 }
+
+#endif /* __TEST_DEVICE_H__ */

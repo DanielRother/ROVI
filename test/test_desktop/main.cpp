@@ -5,6 +5,7 @@
 #include "Utils/testFileIOUtils.h"
 #include "Homie/testPayloadDataTypes.h"
 #include "Homie/testDevice.h"
+#include "Homie/testNode.h"
 
 
 void setup()

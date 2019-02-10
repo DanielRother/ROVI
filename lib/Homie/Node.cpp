@@ -4,14 +4,21 @@
 
 namespace Rovi {
     namespace Homie {
-        Node::Node(const std::shared_ptr<TopicID>& nodeID, const std::string& name, 
-            const std::string type, const size_t arraySize)
-            : m_nodeID(nodeID), m_name(name), m_type(type), m_arraySize(arraySize) {
+        Node::Node(const std::string& name, const std::string type, const size_t arraySize)
+            : m_nodeID{std::make_shared<TopicID>(nameToID(name))}, m_name(name), m_type(type), m_arraySize(arraySize) {
+            }
+
+        Node::Node(const std::string& name, const std::string type)
+            : Node(name, type, 1) {               
             }
 
 
         void Node::setDevice(const std::shared_ptr<Device> device) {
             m_device = device;
+            // TODO: Test adding
+            if(m_device->node(m_nodeID->toString()) == nullptr) {
+                m_device->addNode(shared_from_this());
+            }
         }
 
 
@@ -88,10 +95,16 @@ namespace Rovi {
 
 
         AttributeType Node::nodeAttribute(const TopicType& topic, const ValueType& value) const {
-            // TODO
+            // TODO: An node anpassen
             auto deviceTopicPath = TopicType{std::string{"homie"}, m_device->deviceID()->toString()};
             deviceTopicPath.insert(deviceTopicPath.end(), topic.begin(), topic.end());
             return make_pair(deviceTopicPath, value);
+        }
+
+        std::string Node::nameToID(const std::string& topic) const {
+            auto convertedTopic = toLower(topic);
+            std::replace( convertedTopic.begin(), convertedTopic.end(), ' ', '-');
+            return convertedTopic;
         }
             
     }
