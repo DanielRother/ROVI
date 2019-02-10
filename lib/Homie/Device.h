@@ -11,6 +11,20 @@
 
 namespace Rovi {
     namespace  Homie {
+        enum class Stats {
+            uptime,
+            signal,
+            cputemp,
+            cpuload,
+            battery,
+            freeheap,
+            supply
+        };
+
+        class TopicID;
+        class Version;
+        class HwInfo;
+
         class Device {
             public:
                 using TopicType = std::list<std::string>;
@@ -42,16 +56,6 @@ namespace Rovi {
                     alert
                 };
 
-                enum class Stats {
-                    uptime,
-                    signal,
-                    cputemp,
-                    cpuload,
-                    battery,
-                    freeheap,
-                    supply
-                };
-
                 Device(const std::string deviceName, const HWInfo& hwInfo, 
                     const std::string& firmwareName, const Version& firmwareVersion,
                     const std::chrono::seconds statsInterval_s);
@@ -81,7 +85,6 @@ namespace Rovi {
                 //TODO: nodes
                 std::string implementation() const { return m_implementation; };
                 std::chrono::seconds statsInterval_s() const { return m_statsInterval; };
-                std::chrono::seconds uptime() const;
 
             protected:
                 std::string nameToTopic(const std::string& topic) const;
@@ -104,7 +107,6 @@ namespace Rovi {
                 std::string m_implementation;
                 std::chrono::seconds m_statsInterval;
 
-                std::chrono::system_clock::time_point m_start;
                 std::list<Stats> m_availableStats;
         };
 

@@ -1,4 +1,7 @@
 #include "HomieHelper.h"
+#include "Device.h"
+
+#include <algorithm>
 
 #include <ArduinoIostream.hpp>
 #include <FileIOUtils.hpp>
@@ -55,8 +58,29 @@ namespace Rovi {
         {} 
 
 
+        bool HWInfo::supports(const Stats& stat) const {
+            auto supported = supportedStats();
+            auto it = std::find(supported.begin(), supported.end(), stat);
+            return it != supported.end();
+        }
+
+
+        std::list<Stats> HWInfo::supportedStats() const {
+            return {Stats::uptime, Stats::signal, Stats::cputemp, Stats::cpuload, Stats::battery, Stats::freeheap, Stats::supply};
+        }
+
+
+        std::chrono::seconds HWInfo::uptime() const {
+            return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now()- m_start);
+        }
+
+
         std::string HWInfo::toString() const {
             return std::string{"MAC: "} + m_mac + std::string{", IP: "} + m_ip + std::string{", implementation: "} + m_implementation;
         }
+
+
+        const std::chrono::system_clock::time_point HWInfo::m_start = std::chrono::system_clock::now();
+
     }
 }

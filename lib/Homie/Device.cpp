@@ -19,12 +19,9 @@ namespace Rovi {
                 m_state(State::init),
                 m_localip{hwInfo.ip()}, m_mac{hwInfo.mac()},
                 m_fw_name{firmwareName}, m_fw_version{firmwareVersion}, 
-                m_implementation{hwInfo.implementation()}, m_statsInterval{statsInterval},
-                m_start{std::chrono::system_clock::now()}
+                m_implementation{hwInfo.implementation()}, m_statsInterval{statsInterval}
             {
-                // TODO: Make this dynamic depanding on the hwInfo
-                // something likd if(hwInfo.supportsStatisc(Stats stat)) availableStats.push_back(stat);
-                m_availableStats = {Stats::uptime, Stats::signal, Stats::cputemp, Stats::cpuload, Stats::battery, Stats::freeheap, Stats::supply};
+                m_availableStats = hwInfo.supportedStats();
             }
 
 
@@ -207,7 +204,7 @@ namespace Rovi {
             switch (stat)
             {
                 case Stats::uptime:
-                    str = to_string(uptime().count());
+                    str = to_string(m_hwInfo.uptime().count());
                     break;
                 case Stats::signal:
                     str = to_string(m_hwInfo.signalStrength());
@@ -232,11 +229,6 @@ namespace Rovi {
             }                  
 
             return str;
-        }
-
-
-        std::chrono::seconds Device::uptime() const {
-            return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now()- m_start);
         }
 
 

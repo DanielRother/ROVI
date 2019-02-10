@@ -96,43 +96,44 @@ namespace Rovi {
 
         test(Homie_Device, statistic) {
             {
-                auto stat = device.statictic(Device::Stats::uptime);
+                auto stat = device.statictic(Stats::uptime);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/uptime/"});
                 assertTrue(atoll(stat.second.c_str()) >= 0);
             }  
             {
-                auto stat = device.statictic(Device::Stats::signal);
+                auto stat = device.statictic(Stats::signal);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/signal/"});
                 assertTrue(stat.second == "100");
             }  
             {
-                auto stat = device.statictic(Device::Stats::cputemp);
+                auto stat = device.statictic(Stats::cputemp);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/cputemp/"});
                 assertTrue(stat.second == "50");
             }  
             {
-                auto stat = device.statictic(Device::Stats::cpuload);
+                auto stat = device.statictic(Stats::cpuload);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/cpuload/"});
                 assertTrue(stat.second == "0");
             }  
             {
-                auto stat = device.statictic(Device::Stats::battery);
+                auto stat = device.statictic(Stats::battery);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/battery/"});
                 assertTrue(stat.second == "100");
             }  
             {
-                auto stat = device.statictic(Device::Stats::freeheap);
+                auto stat = device.statictic(Stats::freeheap);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/freeheap/"});
                 assertTrue(stat.second == "5242880");
             }  
             {
-                auto stat = device.statictic(Device::Stats::supply);
+                auto stat = device.statictic(Stats::supply);
                 assertTrue(mqttPathToString(stat.first) == baseMqttPath + std::string{"$stats/supply/"});
                 assertTrue(stat.second == "3.3");
             }  
         }
 
         test(Homie_Device, update) {
+            // sleep(2);
             auto mqttRawData = device.update();
             // printMqttMessages(mqttRawData);
 

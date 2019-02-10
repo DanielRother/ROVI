@@ -3,6 +3,8 @@
 
 #include <string>
 #include <stdint.h>
+#include <list>
+#include <chrono>
 
 namespace Rovi {
     namespace Homie{
@@ -35,9 +37,8 @@ namespace Rovi {
                 uint8_t m_minor;
                 uint8_t m_revision;
         };
-        
 
-
+        enum class Stats;
         // TODO: Move to some MQTT and/or ESP32 interface
         class HWInfo {
             public:
@@ -48,24 +49,33 @@ namespace Rovi {
                 std::string implementation() const { return m_implementation; }
                 std::string toString() const;
 
+                bool supports(const Stats& stat) const;
+
+                // Make this function pure virtual
+                virtual std::list<Stats> supportedStats() const; 
+
+                std::chrono::seconds uptime() const;
                 // TODO: Implement (hardware specific)
                 // Signal strength in %
-                uint32_t signalStrength() const { return 100; }
+                virtual uint32_t signalStrength() const { return 100; }
                 // CPU Temperature in °C
-                uint32_t cpuTemperature() const { return 50; }
+                virtual uint32_t cpuTemperature() const { return 50; }
                 // CPU Load in %. Average of last $interval including all CPUs 
-                uint32_t cpuLoad() const { return 0; }
+                virtual uint32_t cpuLoad() const { return 0; }
                 // Battery level in %
-                uint32_t batteryLevel() const { return 100; }
+                virtual uint32_t batteryLevel() const { return 100; }
                 // Free heap in bytes
-                uint32_t freeheap() const { return 5*1024*1024; }
+                virtual uint32_t freeheap() const { return 5*1024*1024; }
                 // Supply Voltage in V
-                float supplyVoltage() const { return 3.3f; }
+                virtual float supplyVoltage() const { return 3.3f; }
+
 
             protected:
                 std::string m_mac;      // TODO: Type=A1:B2:C3:D4:E5:F6
                 std::string m_ip;
                 std::string m_implementation;
+
+                const static std::chrono::system_clock::time_point m_start;
         };
     }
 }
