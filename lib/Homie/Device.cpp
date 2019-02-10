@@ -25,7 +25,7 @@ namespace Rovi {
             }
 
 
-        std::vector<Device::AttributeType> Device::connectionInitialized()  {
+        std::vector<AttributeType> Device::connectionInitialized()  {
             auto deviceAttributes = std::vector<AttributeType>{};
             deviceAttributes.emplace_back(attribute(Attributes::homie));
             deviceAttributes.emplace_back(attribute(Attributes::name));
@@ -44,7 +44,7 @@ namespace Rovi {
             return deviceAttributes;
         }
 
-        std::vector<Device::AttributeType> Device::update() const {
+        std::vector<AttributeType> Device::update() const {
             // TODO: Wo wird das Intervall gecheckt?        default = 60
 
             auto deviceStatistic = std::vector<AttributeType>{};
@@ -56,13 +56,28 @@ namespace Rovi {
         }
 
 
+        void Device::addNode(const std::shared_ptr<Node>& node) {
+            m_nodes[node->value(Node::Attributes::nodeID)] = node;
+            // TODO: set parent
+        }
 
-        Device::AttributeType Device::attribute(const Attributes& attribute) const {
+
+        std::shared_ptr<Node> Device::node(const std::string& nodeID) const {
+            std::shared_ptr<Node> node;
+            auto it = m_nodes.find(nodeID);
+            if(it != m_nodes.end()) {
+                node = it->second; 
+            }
+            return node;
+        }
+
+
+        AttributeType Device::attribute(const Attributes& attribute) const {
             return deviceAttribute(topic(attribute), value(attribute));
         }
 
 
-        Device::TopicType Device::topic(const Attributes& attribute) const {
+        TopicType Device::topic(const Attributes& attribute) const {
             auto ret = TopicType{};
             switch (attribute)
             {
@@ -113,7 +128,7 @@ namespace Rovi {
         }
 
 
-        Device::ValueType Device::value(const Attributes& attribute) const {
+        ValueType Device::value(const Attributes& attribute) const {
             auto str = ValueType{};
             switch (attribute)
             {
@@ -160,14 +175,14 @@ namespace Rovi {
             return str;
         }
 
-        Device::AttributeType Device::statictic(const Stats& stat) const {
+        AttributeType Device::statictic(const Stats& stat) const {
             auto statsBaseTopic = topic(Attributes::stats);
             auto statsSubtopic = topic(stat);
             statsBaseTopic.splice(statsBaseTopic.end(), statsSubtopic);
             return deviceAttribute(statsBaseTopic, value(stat));
         }
 
-        Device::TopicType Device::topic(const Stats& stat) const {
+        TopicType Device::topic(const Stats& stat) const {
            auto ret = TopicType{};
             switch (stat)
             {
@@ -199,7 +214,7 @@ namespace Rovi {
             return ret;
         }
 
-        Device::ValueType Device::value(const Stats& stat) const {
+        ValueType Device::value(const Stats& stat) const {
             auto str = ValueType{};
             switch (stat)
             {
@@ -278,7 +293,7 @@ namespace Rovi {
         }
 
 
-        Device::AttributeType Device::deviceAttribute(const TopicType& topic, const ValueType& value) const {
+        AttributeType Device::deviceAttribute(const TopicType& topic, const ValueType& value) const {
             auto deviceTopicPath = TopicType{std::string{"homie"}, m_deviceID->toString()};
             deviceTopicPath.insert(deviceTopicPath.end(), topic.begin(), topic.end());
             return make_pair(deviceTopicPath, value);
@@ -305,7 +320,7 @@ namespace Rovi {
         //*******************************************************************//
         // TBD
         //*******************************************************************//
-        std::string mqttPathToString(const Device::TopicType mqttPath) {
+        std::string mqttPathToString(const TopicType mqttPath) {
             const auto seperator = std::string{"/"};
             auto path = std::string{};
             for(auto& mqttDir : mqttPath) {
@@ -316,7 +331,7 @@ namespace Rovi {
         }
 
 
-        void printMqttMessages(const std::vector<Device::AttributeType>& attributes) {
+        void printMqttMessages(const std::vector<AttributeType>& attributes) {
             for(auto& attribute : attributes) {
                 auto path = mqttPathToString(attribute.first);
                 Serial << path << " -> " << attribute.second << endl;

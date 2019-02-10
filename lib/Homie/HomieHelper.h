@@ -6,10 +6,12 @@
 #include <list>
 #include <chrono>
 
-#include "Device.h"
-
 namespace Rovi {
     namespace Homie{
+        using TopicType = std::list<std::string>;
+        using ValueType = std::string;
+        using AttributeType = std::pair<TopicType, ValueType>;
+
         class TopicID {
             public:
                 TopicID(const std::string& id);
@@ -49,7 +51,7 @@ namespace Rovi {
             freeheap,
             supply
         };    
-            
+
         // TODO: Move to some MQTT and/or ESP32 interface
         class HWInfo {
             public:

@@ -7,24 +7,22 @@
 #include <list>
 #include <chrono>
 #include <memory>
+#include <map>
 
 #include "HomieHelper.h"
+#include "Node.h"
 
 namespace Rovi {
     namespace  Homie {
-
 
         class TopicID;
         class Version;
         enum class Stats;
         class HWInfo;
+        class Node;
 
         class Device {
             public:
-                using TopicType = std::list<std::string>;
-                using ValueType = std::string;
-                using AttributeType = std::pair<TopicType, ValueType>;
-
                 enum class Attributes {
                     deviceID,
                     homie,
@@ -57,6 +55,9 @@ namespace Rovi {
                 // TBD: Visibility 
                 std::vector<AttributeType> connectionInitialized();
                 std::vector<AttributeType> update() const;
+
+                void addNode(const std::shared_ptr<Node>& node);
+                std::shared_ptr<Node> node(const std::string& nodeID) const;
 
                 AttributeType attribute(const Attributes& attribute) const;
                 TopicType topic(const Attributes& attribute) const;
@@ -97,7 +98,7 @@ namespace Rovi {
                 std::string m_mac;
                 std::shared_ptr<TopicID> m_fw_name;
                 std::shared_ptr<Version> m_fw_version;
-                //TODO: nodes
+                std::map<std::string, std::shared_ptr<Node>> m_nodes;
                 std::string m_implementation;
                 std::chrono::seconds m_statsInterval;
 
@@ -105,8 +106,8 @@ namespace Rovi {
         };
 
         // TODO: Move somewhere else
-        extern std::string mqttPathToString(const Device::TopicType mqttPath);
-        extern void printMqttMessages(const std::vector<Device::AttributeType>& attributes);
+        extern std::string mqttPathToString(const TopicType mqttPath);
+        extern void printMqttMessages(const std::vector<AttributeType>& attributes);
     }
 }
 
