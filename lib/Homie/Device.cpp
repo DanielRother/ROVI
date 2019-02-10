@@ -10,18 +10,18 @@
 
 namespace Rovi {
     namespace  Homie {
-        Device::Device(const std::string deviceName, const HWInfo& hwInfo, 
-            const std::string& firmwareName, const Version& firmwareVersion,
+        Device::Device(const std::string deviceName, const std::shared_ptr<HWInfo>& hwInfo, 
+            const std::string& firmwareName, const std::shared_ptr<Version>& firmwareVersion,
             const std::chrono::seconds statsInterval)
               : m_hwInfo{hwInfo},
-                m_deviceID{nameToTopic(deviceName) + "-" + macToTopic(hwInfo)}, 
-                m_homie{3, 0, 1}, m_name{deviceName}, 
+                m_deviceID{std::make_shared<TopicID>(nameToTopic(deviceName) + "-" + macToTopic(hwInfo))}, 
+                m_homie{std::make_shared<Version>(3, 0, 1)}, m_name{deviceName}, 
                 m_state(State::init),
-                m_localip{hwInfo.ip()}, m_mac{hwInfo.mac()},
-                m_fw_name{firmwareName}, m_fw_version{firmwareVersion}, 
-                m_implementation{hwInfo.implementation()}, m_statsInterval{statsInterval}
+                m_localip{hwInfo->ip()}, m_mac{hwInfo->mac()},
+                m_fw_name{std::make_shared<TopicID>(firmwareName)}, m_fw_version{firmwareVersion}, 
+                m_implementation{hwInfo->implementation()}, m_statsInterval{statsInterval}
             {
-                m_availableStats = hwInfo.supportedStats();
+                m_availableStats = hwInfo->supportedStats();
             }
 
 
@@ -118,10 +118,10 @@ namespace Rovi {
             switch (attribute)
             {
                 case Attributes::deviceID:
-                    str = m_deviceID.toString();
+                    str = m_deviceID->toString();
                     break;                    
                 case Attributes::homie:
-                    str = m_homie.toString();
+                    str = m_homie->toString();
                     break;                    
                 case Attributes::name:
                     str = m_name;
@@ -136,10 +136,10 @@ namespace Rovi {
                     str = m_mac;
                     break;                    
                 case Attributes::firmwareName:
-                    str = m_fw_name.toString();
+                    str = m_fw_name->toString();
                     break;                    
                 case Attributes::firmwareVersion:
-                    str = m_fw_version.toString();
+                    str = m_fw_version->toString();
                     break;                    
                 case Attributes::nodes:
                     str = "Not implemented yet!";
@@ -204,25 +204,25 @@ namespace Rovi {
             switch (stat)
             {
                 case Stats::uptime:
-                    str = to_string(m_hwInfo.uptime().count());
+                    str = to_string(m_hwInfo->uptime().count());
                     break;
                 case Stats::signal:
-                    str = to_string(m_hwInfo.signalStrength());
+                    str = to_string(m_hwInfo->signalStrength());
                     break;
                 case Stats::cputemp:
-                    str = to_string(m_hwInfo.cpuTemperature());
+                    str = to_string(m_hwInfo->cpuTemperature());
                     break;
                 case Stats::cpuload:
-                    str = to_string(m_hwInfo.cpuLoad());
+                    str = to_string(m_hwInfo->cpuLoad());
                     break;
                 case Stats::battery:
-                    str = to_string(m_hwInfo.batteryLevel());
+                    str = to_string(m_hwInfo->batteryLevel());
                     break;
                 case Stats::freeheap:
-                    str = to_string(m_hwInfo.freeheap());
+                    str = to_string(m_hwInfo->freeheap());
                     break;
                 case Stats::supply:
-                    str = to_string(m_hwInfo.supplyVoltage());
+                    str = to_string(m_hwInfo->supplyVoltage());
                     break;
                 default:
                     break;
@@ -239,8 +239,8 @@ namespace Rovi {
         }
 
 
-        std::string Device::macToTopic(const HWInfo& hwInfo) const {
-            auto mac = hwInfo.mac();
+        std::string Device::macToTopic(const std::shared_ptr<HWInfo>& hwInfo) const {
+            auto mac = hwInfo->mac();
             auto convertedMac = toLower(mac);
             convertedMac.erase(std::remove(convertedMac.begin(), convertedMac.end(), ':'), convertedMac.end());
             return convertedMac;
@@ -279,7 +279,7 @@ namespace Rovi {
 
 
         Device::AttributeType Device::deviceAttribute(const TopicType& topic, const ValueType& value) const {
-            auto deviceTopicPath = TopicType{std::string{"homie"}, m_deviceID.toString()};
+            auto deviceTopicPath = TopicType{std::string{"homie"}, m_deviceID->toString()};
             deviceTopicPath.insert(deviceTopicPath.end(), topic.begin(), topic.end());
             return make_pair(deviceTopicPath, value);
         }

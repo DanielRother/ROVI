@@ -6,6 +6,8 @@
 #include <list>
 #include <chrono>
 
+#include "Device.h"
+
 namespace Rovi {
     namespace Homie{
         class TopicID {
@@ -39,6 +41,7 @@ namespace Rovi {
         };
 
         enum class Stats;
+        
         // TODO: Move to some MQTT and/or ESP32 interface
         class HWInfo {
             public:

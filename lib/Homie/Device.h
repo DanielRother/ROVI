@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <chrono>
+#include <memory>
 
 #include "HomieHelper.h"
 
@@ -23,7 +24,7 @@ namespace Rovi {
 
         class TopicID;
         class Version;
-        class HwInfo;
+        class HWInfo;
 
         class Device {
             public:
@@ -56,8 +57,8 @@ namespace Rovi {
                     alert
                 };
 
-                Device(const std::string deviceName, const HWInfo& hwInfo, 
-                    const std::string& firmwareName, const Version& firmwareVersion,
+                Device(const std::string deviceName, const std::shared_ptr<HWInfo>& hwInfo, 
+                    const std::string& firmwareName, const std::shared_ptr<Version>& firmwareVersion,
                     const std::chrono::seconds statsInterval_s);
 
                 // TBD: Visibility 
@@ -74,35 +75,35 @@ namespace Rovi {
 
 
                 // TBD: Required?
-                TopicID deviceID() const { return m_deviceID; };
-                Version homie() const { return m_homie; };
+                std::shared_ptr<TopicID> deviceID() const { return m_deviceID; };
+                std::shared_ptr<Version> homie() const { return m_homie; };
                 std::string name() const { return m_name; };
                 State state() const { return m_state; };
                 std::string localip() const { return m_localip; };
                 std::string mac() const { return m_mac; };
-                TopicID firmwareName() const { return m_fw_name; };
-                Version firmwareVersion() const { return m_fw_version; };
+                std::shared_ptr<TopicID> firmwareName() const { return m_fw_name; };
+                std::shared_ptr<Version> firmwareVersion() const { return m_fw_version; };
                 //TODO: nodes
                 std::string implementation() const { return m_implementation; };
                 std::chrono::seconds statsInterval_s() const { return m_statsInterval; };
 
             protected:
                 std::string nameToTopic(const std::string& topic) const;
-                std::string macToTopic(const HWInfo& hwInfo) const;
+                std::string macToTopic(const std::shared_ptr<HWInfo>& hwInfo) const;
                 std::string stateToValue(const State& state) const;
                 AttributeType deviceAttribute(const TopicType& topic, const ValueType& value) const;
                 std::string availableStatsToValue(const std::list<Stats>& stats) const;
 
-                HWInfo m_hwInfo;
-                TopicID m_deviceID;
+                std::shared_ptr<HWInfo> m_hwInfo;
+                std::shared_ptr<TopicID> m_deviceID;
                 // $device-attribute
-                Version m_homie;
+                std::shared_ptr<Version> m_homie;
                 std::string m_name;
                 State m_state;
                 std::string m_localip;
                 std::string m_mac;
-                TopicID m_fw_name;
-                Version m_fw_version;
+                std::shared_ptr<TopicID> m_fw_name;
+                std::shared_ptr<Version> m_fw_version;
                 //TODO: nodes
                 std::string m_implementation;
                 std::chrono::seconds m_statsInterval;

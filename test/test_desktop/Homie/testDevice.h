@@ -8,9 +8,9 @@ namespace Rovi {
         const auto deviceIP = std::string{"192.168.0.10"};
         const auto implementation = std::string{"esp32"};
         const auto firmwareName = std::string{"weatherstation-firmware"};
-        const auto firmwareVersion = Version{1, 0, 0};
+        const auto firmwareVersion = std::make_shared<Version>(1, 0, 0);
         const auto statsInterval_s = std::chrono::seconds{60};
-        const auto hwInfo = HWInfo{deviceMAC, deviceIP, implementation};
+        const auto hwInfo = std::make_shared<HWInfo>(deviceMAC, deviceIP, implementation);
 
         auto device = Device(deviceName, hwInfo, firmwareName, firmwareVersion, statsInterval_s);
         const auto baseMqttPath = std::string{"homie/super-car-deadbeeffeed/"};
