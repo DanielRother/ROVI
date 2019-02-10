@@ -58,7 +58,7 @@ namespace Rovi {
 
         void Device::addNode(const std::shared_ptr<Node>& node) {
             m_nodes[node->value(Node::Attributes::nodeID)] = node;
-            // TODO: set parent
+            node->setDevice(shared_from_this());
         }
 
 

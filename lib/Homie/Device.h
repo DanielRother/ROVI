@@ -21,7 +21,7 @@ namespace Rovi {
         class HWInfo;
         class Node;
 
-        class Device {
+        class Device : public std::enable_shared_from_this<Device> {
             public:
                 enum class Attributes {
                     deviceID,
