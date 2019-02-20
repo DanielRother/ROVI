@@ -1,6 +1,7 @@
 #include "Node.h"
 
 #include <FileIOUtils.hpp>
+#include <ArduinoIostream.hpp>
 
 namespace Rovi {
     namespace Homie {
@@ -14,8 +15,10 @@ namespace Rovi {
 
 
         void Node::setDevice(const std::shared_ptr<Device> device) {
+            Serial << "Set device " << device->value(Device::Attributes::name) << " for node " << m_name << endl;
             m_device = device;
             // TODO: Test adding
+
             if(m_device->node(m_nodeID->toString()) == nullptr) {
                 m_device->addNode(shared_from_this());
             }
@@ -28,7 +31,7 @@ namespace Rovi {
 
 
         AttributeType Node::attribute(const Attributes& attribute) const {
-            return nodeAttribute(topic(attribute), value(attribute));
+            return nodeAttribute(topic(attribute), value(attribute));;
         }
 
 
@@ -95,8 +98,13 @@ namespace Rovi {
 
 
         AttributeType Node::nodeAttribute(const TopicType& topic, const ValueType& value) const {
-            // TODO: An node anpassen
-            auto deviceTopicPath = TopicType{std::string{"homie"}, m_device->deviceID()->toString()};
+            // TODO: Testen
+            auto deviceTopicPath = TopicType{};
+            if(m_device != nullptr) {
+                deviceTopicPath = TopicType{std::string{"homie"}, m_device->deviceID()->toString(), m_nodeID->toString()};
+            } else {
+                deviceTopicPath = TopicType{"undefinded-device"};
+            }
             deviceTopicPath.insert(deviceTopicPath.end(), topic.begin(), topic.end());
             return make_pair(deviceTopicPath, value);
         }

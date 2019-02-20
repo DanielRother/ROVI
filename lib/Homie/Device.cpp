@@ -57,8 +57,12 @@ namespace Rovi {
 
 
         void Device::addNode(const std::shared_ptr<Node>& node) {
+            Serial << "Adding node " << node->value(Node::Attributes::name) << " to device " << m_name << endl;
+
             // TODO: Check, if node is already connected/ID existing
             m_nodes[node->value(Node::Attributes::nodeID)] = node;
+            // TODO: shared_from_this only works, if there is already a shared_ptr owning this otherwise it crashes
+            //       Find a solution if this is not the case, e.g. https://mortoray.com/2013/08/02/safely-using-enable_shared_from_this/
             node->setDevice(shared_from_this());
         }
 
@@ -158,7 +162,17 @@ namespace Rovi {
                     str = m_fw_version->toString();
                     break;                    
                 case Attributes::nodes:
-                    str = "Not implemented yet!";
+                    for(auto& node : m_nodes) {
+                        str += node.first;
+                        if(node.second->isArray()) {
+                            str += "[]";
+                        }
+                        str += ",";
+                    }
+                    if(!str.empty()) {
+                        str.pop_back();     // Remove tailing ','
+                    }
+                    // str = "Not implemented yet!";
                     break;                    
                 case Attributes::implementation:
                     str = m_implementation;
