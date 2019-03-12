@@ -8,20 +8,25 @@
 #include "BaseClasses/RoviComponent.hpp"
 #include "OneButtonFork.h"
 
+// TODO: Cleanup nomenclature
+
 class RotaryValue {
 public:
   RotaryValue();
-  RotaryValue(const int maxValue, const bool preventOverflow = false);
+  RotaryValue(const int maxValue, const int minValue = 0, const bool preventOverflow = false);
 
 int incrementByValue(const int increment);
 
-int getValue() const;
+int value() const;
+int setValue(const int value);
 
 protected:
-  int value;
-  int maxValue;
-  bool preventOverflow;
+  int m_value;
+  int m_maxValue;
+  int m_minValue;
+  bool m_preventOverflow;
 };
+
 
 class RotaryEncoder {
 public:
@@ -61,6 +66,7 @@ protected:
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
 };
 
+
 class RotaryEncoderWithButton : public RoviComponent {
 public:
   enum class ButtonStates {
@@ -75,8 +81,13 @@ public:
   virtual ~RotaryEncoderWithButton() = default;
 
   void update();
-  void setupState(const ButtonStates state, int maxValue, bool preventOverflow,
+  void setupState(const ButtonStates state, const int minValue, const int maxValue, const int increment, const bool preventOverflow,
     const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback);
+  void setupState(const ButtonStates state, const int maxValue, const bool preventOverflow,
+    const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback);
+
+  int value(const ButtonStates state) /* const */;    // TODO: Re-add const
+  int setValue(const ButtonStates state, const int value);
 
 protected:
   //*************************************************************************************************//
@@ -109,6 +120,8 @@ protected:
   std::map<ButtonStates, RotaryValue> rotaryValuePerState;
   std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
   std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
+
+  int m_increment;
 
   static const uint16_t BUTTON_STATE_TIMEOUT_MS;
 };

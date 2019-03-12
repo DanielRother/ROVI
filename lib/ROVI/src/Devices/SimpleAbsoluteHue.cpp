@@ -36,9 +36,11 @@ void SimpleAbsoluteHue::setupNormal() {
                                 // TODO: Check, if this is also required and/or working for the RGB_LEDs
     };
 
-    int normalMaxRotaryValue = 25;
-    bool normalPreventOverflow = true;
-    rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
+    const auto minRotaryValue = 0;
+    const auto maxRotaryValue = 255;
+    const auto increment = 10;
+    const auto preventOverflow = true;
+    rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
 }
 
 

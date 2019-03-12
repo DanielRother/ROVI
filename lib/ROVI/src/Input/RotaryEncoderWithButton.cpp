@@ -11,32 +11,46 @@
 
 
 RotaryValue::RotaryValue()
-: value(0), maxValue(255), preventOverflow(false) {
+: RotaryValue(255, 0, false) {
 }
 
-RotaryValue::RotaryValue(const int maxValue, const bool preventOverflow)
-: value(0), maxValue(maxValue), preventOverflow(preventOverflow) {
+RotaryValue::RotaryValue(const int maxValue, const int minValue, const bool preventOverflow)
+: m_value(0), m_maxValue(maxValue), m_minValue(minValue), m_preventOverflow(preventOverflow) {
 }
 
 int RotaryValue::incrementByValue(const int increment) {
-  int tmpValue = value + increment;
+  auto tmpValue = m_value + increment;
+ 
+  return setValue(tmpValue);
+}
 
-  if(preventOverflow) {
-    tmpValue = std::max(std::min(tmpValue, maxValue), 0);
+
+int RotaryValue::value() const {
+  return m_value;
+}
+
+
+int RotaryValue::setValue(const int value) {
+  auto tmpValue = value;
+  if(m_preventOverflow) {
+    tmpValue = std::max(std::min(value, m_maxValue), m_minValue);        // TODO: clamp()
   } else {
-    tmpValue = tmpValue % (maxValue + 1);
+    // TODO: test negative overflow?
+    auto range = m_minValue + m_maxValue;
+    tmpValue += m_minValue;
+    tmpValue = tmpValue % (range + 1);
+    tmpValue -= m_minValue;
+
     if(tmpValue < 0) {
-        tmpValue += maxValue + 1;
+        tmpValue += range + 1;
     }
   }
 
-  value = tmpValue;
-  return value;
+  m_value = tmpValue;
+  return m_value;
 }
 
-int RotaryValue::getValue() const {
-  return value;
-}
+
 
 RotaryEncoder::RotaryEncoder(const uint8_t pinA, const uint8_t pinB)
   : pinA(pinA), pinB(pinB), 
@@ -112,7 +126,7 @@ const uint16_t RotaryEncoder::ENCODER_TICK_UPDATE_TIMEOUT_MS = 100;
 
 RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name)
   : RoviComponent(name), rotary(pinA, pinB), button(pinButton, true),
-    buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
+    buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()), m_increment(1) {
       // Setup button, i.e. callbacks
       button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));
       button.attachDoubleClick(std::bind(&RotaryEncoderWithButton::onDoubleClick, this));
@@ -144,20 +158,39 @@ void RotaryEncoderWithButton::update() {
     button.tick();
     auto curButtonState = getCurrentButtonState();
     auto tick = rotary.getRotaryTick();
+    auto newValue = tick * m_increment;
 
     if(tick != 0) {
         lastButtonStateUpdate_ms = millis();
-        auto stateValue = incrementStateValueByValue(curButtonState, tick);
+        auto stateValue = incrementStateValueByValue(curButtonState, newValue);
         invokeRotaryValueChangeCallback(curButtonState, stateValue);
     }
 }
 
-void RotaryEncoderWithButton::setupState(const ButtonStates state, int maxValue, bool preventOverflow,
+
+void RotaryEncoderWithButton::setupState(const ButtonStates state, const int minValue, const int maxValue, const int increment, const bool preventOverflow, 
   const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback) {
-    rotaryValuePerState[state] = RotaryValue(maxValue, preventOverflow);
+    rotaryValuePerState[state] = RotaryValue(maxValue, minValue, preventOverflow);
     buttonStateActivatedCallbacks[state] = stateActivatedCallback;
     rotaryValueChangedCallbacks[state] = stateValueChangedCallback;
 }
+
+
+void RotaryEncoderWithButton::setupState(const ButtonStates state, const int maxValue, const bool preventOverflow,
+  const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback) {
+    return setupState(state, 0, maxValue, 1, preventOverflow, stateActivatedCallback, stateValueChangedCallback);
+}
+
+
+int RotaryEncoderWithButton::value(const ButtonStates state) /* const */ {
+    return rotaryValuePerState[state].value();
+}
+
+
+int RotaryEncoderWithButton::setValue(const ButtonStates state, const int value) {
+    return rotaryValuePerState[state].setValue(value);
+}
+
 
 
 //*************************************************************************************************//
