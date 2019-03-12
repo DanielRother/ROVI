@@ -13,10 +13,12 @@ class SimpleAbsoluteHue {
 
     protected:
         void setupNormal();
+        void setupClick();
         void setupDoubleClick();
         void setupHold();
 
-        void blink();
+        void blink(const uint32_t delay_ms = 250);
+        void doubleBlink(const uint32_t delay_ms = 250);
 
         std::shared_ptr<RotaryEncoderWithButton> rotary;
         std::shared_ptr<NeoPixelComponent> leds;

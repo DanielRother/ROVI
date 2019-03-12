@@ -178,7 +178,9 @@ void RotaryEncoderWithButton::setupState(const ButtonStates state, const int min
 
 void RotaryEncoderWithButton::setupState(const ButtonStates state, const int maxValue, const bool preventOverflow,
   const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback) {
-    return setupState(state, 0, maxValue, 1, preventOverflow, stateActivatedCallback, stateValueChangedCallback);
+      auto minValue = 0;
+      auto increment = 1;
+    return setupState(state, minValue, maxValue, increment, preventOverflow, stateActivatedCallback, stateValueChangedCallback);
 }
 
 
