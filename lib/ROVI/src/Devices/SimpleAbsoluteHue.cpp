@@ -98,14 +98,8 @@ namespace Rovi {
             };
 
             auto valueChangeCallback = [&](int effectNumber) {
-                // TODO: Hier weiter
                 Serial << "HOLDED value change callback - New value = " << effectNumber << endl;
-                
-                m_on = true;
-                leds->setPower(m_on);
-                auto selectedEffect = LEDEffectFactory::getEffect(effectNumber, leds.get());
-                leds->setEffect(selectedEffect);
-                leds->startEffect();
+                setEffect(effectNumber);
             };
 
             const auto minRotaryValue = 0;
@@ -150,7 +144,8 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setBrightness(const int brightness) {
-            auto limitedBrightness = Utils::clamp(brightness, 0, 255);
+            setOn(true);
+            auto limitedBrightness = Utils::clamp(brightness, 0, 255);      // TBD: Move to Color class?
             m_brightness = limitedBrightness;
             leds->setBrightness(m_brightness);
         }
@@ -160,6 +155,7 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setColor(const std::shared_ptr<Color>& color) {
+            setOn(true);
             m_color = color;
             leds->setColor(m_color);
         }
@@ -169,9 +165,26 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setHue(float hue) {
+            setOn(true);
             auto hsvColor = m_color->toHSV();
-            hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);
+            hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);      // TODO: Move to Color class
             setColor(hsvColor);
+        }
+
+        std::shared_ptr<LEDEffect> SimpleAbsoluteHue::setEffect() const {
+            return m_effect;
+        }
+
+        void SimpleAbsoluteHue::setEffect(int effectNumber) {
+            auto effectName = LEDEffectFactory::convertEffectNumberToName(effectNumber);
+            setEffect(effectName);      
+        }
+
+        void SimpleAbsoluteHue::setEffect(const std::string& effectName) {
+            setOn(true);
+            m_effect = LEDEffectFactory::getEffect(effectName, leds.get());    
+            leds->setEffect(m_effect); 
+            leds->startEffect();    // TBD: Required?                 
         }
     }
 }

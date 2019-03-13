@@ -22,6 +22,9 @@ namespace Rovi {
                 void setColor(const std::shared_ptr<Color>& color);
                 float hue() const;
                 void setHue(float hue);
+                std::shared_ptr<LEDEffect> setEffect() const;
+                void setEffect(int effectNumber);
+                void setEffect(const std::string& effectName);
 
             protected:
                 void setupNormal();
@@ -35,9 +38,11 @@ namespace Rovi {
                 std::shared_ptr<RotaryEncoderWithButton> rotary;
                 std::shared_ptr<NeoPixelComponent> leds;
 
+                // TODO: Default values
                 bool m_on;
                 uint8_t m_brightness;
                 std::shared_ptr<Color> m_color;
+                std::shared_ptr<LEDEffect> m_effect;
         };
     }
 }

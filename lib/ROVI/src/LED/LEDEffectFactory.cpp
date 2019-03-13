@@ -23,20 +23,35 @@ std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const std::string& select
     return std::make_shared<WhiteStatic>(led, delay_ms);
 }
 
-std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const uint32_t effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
+std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const int effectNumber, LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent
     Serial << "   getEffect(" << effectNumber << ")" << endl;
     
-    auto effectString = std::string("");
-
-    if(effectNumber < getNumberOfEffects()) {
-        effectString = effectNames[effectNumber];
-    }
-
-    return getEffect(effectString, led);
+    auto effectName = convertEffectNumberToName(effectNumber);
+    return getEffect(effectName, led);
 }
 
 size_t LEDEffectFactory::getNumberOfEffects() {
     return effectNames.size();
+}
+
+std::string LEDEffectFactory::convertEffectNumberToName(const int effectNumber) {
+    auto name = std::string{""};
+    if(effectNumber >= 0 && effectNumber < getNumberOfEffects()) {
+        name = effectNames[effectNumber];
+    }
+
+    return name;
+}
+
+int LEDEffectFactory::convertEffectNameToNumber(const std::string& effectName) {
+    // TODO: Test me
+    auto effectNumber = -1;
+    auto effectIter = std::find(begin(effectNames), end(effectNames), effectName);
+    if(effectIter != end(effectNames)) {
+        effectNumber = std::distance(begin(effectNames), effectIter);
+    }
+
+    return effectNumber;
 }
 
 uint32_t LEDEffectFactory::getDelay(const std::string& selectedEffect) {

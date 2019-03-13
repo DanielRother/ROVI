@@ -42,6 +42,11 @@ std::shared_ptr<NeoPixelComponent> leds;
 // Arduino setup()
 //***************************************************************************//
 void setup() {
+  // TODO:
+  //    Test:
+  //        RotaryEncoder
+  //        LEDFactory
+
   Serial << "--- setup() ---" << endl;
 
   sleep(5);

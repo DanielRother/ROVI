@@ -11,7 +11,10 @@
 class LEDEffectFactory {
 public:
     static std::shared_ptr<LEDEffect> getEffect(const std::string& selectedEffect, LEDComponent* led);
-    static std::shared_ptr<LEDEffect> getEffect(const uint32_t effectNumber, LEDComponent* led);
+    static std::shared_ptr<LEDEffect> getEffect(const int effectNumber, LEDComponent* led);
+
+    static std::string convertEffectNumberToName(const int effectNumber);
+    static int convertEffectNameToNumber(const std::string& effectName);
 
     static size_t getNumberOfEffects();
 
