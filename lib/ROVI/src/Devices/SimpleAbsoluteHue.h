@@ -4,27 +4,42 @@
 #include <memory>
 
 #include "../Input/RotaryEncoderWithButton.hpp"     // TODO: Simplfy, i.e. remove MQTT
+#include "../LED/ColorTypes.h"
 #include "../LED/NeoPixelComponent.hpp"             // TODO: Simplfy, i.e. remove MQTT
 
-class SimpleAbsoluteHue {
-    public:
-        SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
-                          const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs);
+namespace Rovi {
+    namespace Devicec {
+        class SimpleAbsoluteHue {
+            public:
+                SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
+                                const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs);
 
-    protected:
-        void setupNormal();
-        void setupClick();
-        void setupDoubleClick();
-        void setupHold();
+                bool on() const;
+                void setOn(const bool on);
+                uint8_t brightness() const;
+                void setBrightness(const int brightness);
+                std::shared_ptr<Color> color() const;
+                void setColor(const std::shared_ptr<Color>& color);
+                float hue() const;
+                void setHue(float hue);
 
-        void blink(const uint32_t delay_ms = 250);
-        void doubleBlink(const uint32_t delay_ms = 250);
+            protected:
+                void setupNormal();
+                void setupClick();
+                void setupDoubleClick();
+                void setupHold();
 
-        std::shared_ptr<RotaryEncoderWithButton> rotary;
-        std::shared_ptr<NeoPixelComponent> leds;
+                void blink(const uint32_t delay_ms = 250);
+                void doubleBlink(const uint32_t delay_ms = 250);
 
-        bool m_on;
-        uint8_t m_brightness;
-};
+                std::shared_ptr<RotaryEncoderWithButton> rotary;
+                std::shared_ptr<NeoPixelComponent> leds;
+
+                bool m_on;
+                uint8_t m_brightness;
+                std::shared_ptr<Color> m_color;
+        };
+    }
+}
 
 #endif
