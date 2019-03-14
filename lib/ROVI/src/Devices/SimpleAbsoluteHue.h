@@ -8,11 +8,13 @@
 #include "../LED/NeoPixelComponent.hpp"             // TODO: Simplfy, i.e. remove MQTT
 
 namespace Rovi {
-    namespace Devicec {
+    namespace Devices {
         class SimpleAbsoluteHue {
             public:
                 SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
                                 const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs);
+                                
+                void update();
 
                 bool on() const;
                 void setOn(const bool on);
@@ -25,6 +27,7 @@ namespace Rovi {
                 std::shared_ptr<LEDEffect> setEffect() const;
                 void setEffect(int effectNumber);
                 void setEffect(const std::string& effectName);
+                void setEffect(const std::shared_ptr<LEDEffect>& effect);
 
             protected:
                 void setupNormal();
@@ -38,7 +41,6 @@ namespace Rovi {
                 std::shared_ptr<RotaryEncoderWithButton> rotary;
                 std::shared_ptr<NeoPixelComponent> leds;
 
-                // TODO: Default values
                 bool m_on;
                 uint8_t m_brightness;
                 std::shared_ptr<Color> m_color;

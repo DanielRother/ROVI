@@ -6,11 +6,19 @@
 #include "../LED/LEDEffectFactory.hpp"
 
 namespace Rovi {
-    namespace Devicec {
+    namespace Devices {
         SimpleAbsoluteHue::SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
         const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs)
         : rotary{std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton)},
-        leds{std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)} {
+          leds{std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)},
+          m_on{true},
+          m_brightness{128},
+          m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)},
+          m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} {
+            setOn(m_on);
+            setBrightness(m_brightness);
+            setColor(m_color);
+            setEffect(m_effect);
 
             setupNormal();
             setupClick();
@@ -18,26 +26,30 @@ namespace Rovi {
             setupHold();
         };
 
+        void SimpleAbsoluteHue::update() {
+            rotary->update();
+            leds->update();
+        }
 
         void SimpleAbsoluteHue::setupNormal() {
             auto activatedCallback = [this]() {
-                Serial << "NORMAL state activation callback" << endl;
+                std::cout << "NORMAL state activation callback" << endl;
                 if(m_on) {
                     blink();
                 }
             };
 
             auto valueChangeCallback = [this](int brightness) {
-                Serial << "NORMAL value change callback - New value = " << brightness << endl;
-                setOn(true);
+                std::cout << "NORMAL value change callback - New value = " << brightness << endl;
                 setBrightness(brightness);
+                setColor(m_color);
 
-                // TEST: Still required?
-                auto lastColor = leds->getLastColor();
-                auto color = lastColor->toHSV();
-                color->v = (float) brightness / 255.0f;
-                leds->setColor(color);    // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
-                                        // TODO: Check, if this is also required and/or working for the RGB_LEDs
+                // // TEST: Still required?
+                // auto lastColor = leds->getLastColor();
+                // auto color = lastColor->toHSV();
+                // color->v = (float) brightness / 255.0f;
+                // leds->setColor(color);    // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
+                //                         // TODO: Check, if this is also required and/or working for the RGB_LEDs
             };
 
             const auto minRotaryValue = 0;
@@ -50,12 +62,12 @@ namespace Rovi {
 
         void SimpleAbsoluteHue::setupClick() {
             auto activatedCallback = [this]() {
-                Serial << "CLICKED state activation callback" << endl;
+                std::cout << "CLICKED state activation callback" << endl;
                 setOn(!m_on);
             };
 
             auto valueChangeCallback = [&](int value) {
-                Serial << "CLICKED value change callback - Do nothing" << endl;
+                std::cout << "CLICKED value change callback - Do nothing" << endl;
             };
 
             const auto minRotaryValue = 0;
@@ -68,17 +80,16 @@ namespace Rovi {
 
         void SimpleAbsoluteHue::setupDoubleClick() {
             auto activatedCallback = [this]() {
-                Serial << "DOUBLE_CLICKED state activation callback" << endl;
-
-                setOn(true);
-                leds->stopEffect();
-                // TODO: setEffect Color
+                std::cout << "DOUBLE_CLICKED state activation callback" << endl;
+                // leds->stopEffect();
+                auto effect = LEDEffectFactory::getEffect("color_static", leds.get());
+                setEffect(effect);   
                 doubleBlink();
             };
 
             auto valueChangeCallback = [&](int hue) {
-                Serial << "DOUBLE_CLICKED value change callback - New value = " << hue << endl;
-                setHue(hue);   // TODO: getCurrentBrightness()?
+                std::cout << "DOUBLE_CLICKED value change callback - New value = " << hue << endl;
+                setHue(hue);
             };
 
             const auto minRotaryValue = 0;
@@ -91,14 +102,13 @@ namespace Rovi {
 
         void SimpleAbsoluteHue::setupHold() {
             auto activatedCallback = [this]() {
-                Serial << "HOLDED state activation callback" << endl;
-                setOn(true);
+                std::cout << "HOLDED state activation callback" << endl;
                 leds->stopEffect();
                 blink(500);
             };
 
             auto valueChangeCallback = [&](int effectNumber) {
-                Serial << "HOLDED value change callback - New value = " << effectNumber << endl;
+                std::cout << "HOLDED value change callback - New value = " << effectNumber << endl;
                 setEffect(effectNumber);
             };
 
@@ -122,11 +132,9 @@ namespace Rovi {
             blink(delay_ms);
         }
 
-
         bool SimpleAbsoluteHue::on() const {
             return m_on;
         }
-
 
         void SimpleAbsoluteHue::setOn(const bool on) {
             m_on = on;
@@ -137,7 +145,6 @@ namespace Rovi {
             }
             leds->setPower(m_on);
         }
-
 
         uint8_t SimpleAbsoluteHue::brightness() const {
             return m_brightness;
@@ -181,10 +188,15 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setEffect(const std::string& effectName) {
+            auto effect = LEDEffectFactory::getEffect(effectName, leds.get());
+            setEffect(effect);                
+        }
+
+        void SimpleAbsoluteHue::setEffect(const std::shared_ptr<LEDEffect>& effect) {
             setOn(true);
-            m_effect = LEDEffectFactory::getEffect(effectName, leds.get());    
+            m_effect = effect;
             leds->setEffect(m_effect); 
-            leds->startEffect();    // TBD: Required?                 
+            leds->startEffect();    // TBD: Required?     
         }
     }
 }
