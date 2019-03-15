@@ -69,7 +69,7 @@ namespace Rovi {
         };
 
 
-        class RotaryEncoderWithButton : public RoviComponent {
+        class RotaryEncoderWithButton : public Deprecated::RoviComponent {
         public:
           enum class ButtonStates {
             NORMAL,

@@ -24,7 +24,7 @@ Basecamp iot{
 #include <Common/LED/LEDEffectFactory.hpp>
 #include <Components/Input/RotaryEncoderWithButton.hpp>
 
-Rovi::RoviDevice myRovi(iot);
+Rovi::Deprecated::RoviDevice myRovi(iot);
 
 
 // RotaryEncoder
@@ -106,7 +106,7 @@ void setup() {
       if(nextPowerStatus) {
         powerPayload = std::string{"on"};
       }
-      auto packetID = iot.mqtt.publish(powerTopic, to_underlying(Rovi::RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, powerPayload.c_str());
+      auto packetID = iot.mqtt.publish(powerTopic, to_underlying(Rovi::Deprecated::RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, powerPayload.c_str());
 
     };
     auto clickedValueChangeCallback = [&](int value) {
