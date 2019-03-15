@@ -22,7 +22,7 @@ Basecamp iot{
 #include <Devices/SimpleAbsoluteHue.h>
 
 
-RoviDevice myRovi(iot);
+Rovi::RoviDevice myRovi(iot);
 
 
 // RotaryEncoder

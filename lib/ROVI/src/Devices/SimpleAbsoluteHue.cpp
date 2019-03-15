@@ -3,14 +3,14 @@
 #include <ArduinoIostream.hpp>
 #include <UtilFunctions.hpp>
 
-#include "../LED/LEDEffectFactory.hpp"
+#include "Common/LED/LEDEffectFactory.hpp"
 
 namespace Rovi {
     namespace Devices {
         SimpleAbsoluteHue::SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
         const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs)
-        : rotary{std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton)},
-          leds{std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)},
+        : rotary{std::make_shared<Components::RotaryEncoderWithButton>(pinA, pinB, pinButton)},
+          leds{std::make_shared<Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)},
           m_on{true},
           m_brightness{128},
           m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)},
@@ -56,7 +56,7 @@ namespace Rovi {
             const auto maxRotaryValue = 255;
             const auto increment = 10;
             const auto preventOverflow = true;
-            rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
+            rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
         }
 
 
@@ -74,7 +74,7 @@ namespace Rovi {
             const auto maxRotaryValue = 10;
             const auto increment = 1;
             const auto preventOverflow = false;
-            rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
+            rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::CLICKED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
         }
 
 
@@ -96,7 +96,7 @@ namespace Rovi {
             const auto maxRotaryValue = 360;
             const auto increment = 10;
             const auto preventOverflow = false;
-            rotary->setupState(RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
+            rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
         }
 
 
@@ -116,7 +116,7 @@ namespace Rovi {
             const auto maxRotaryValue = LEDEffectFactory::getNumberOfEffects() - 1;;
             const auto increment = 1;
             const auto preventOverflow = false;
-            rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
+            rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::HOLDED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
         }
 
 

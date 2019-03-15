@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "../Input/RotaryEncoderWithButton.hpp"     // TODO: Simplfy, i.e. remove MQTT
-#include "../LED/ColorTypes.h"
-#include "../LED/NeoPixelComponent.hpp"             // TODO: Simplfy, i.e. remove MQTT
+#include "Components/Input/RotaryEncoderWithButton.hpp"     // TODO: Simplfy, i.e. remove MQTT
+#include "Common/LED/ColorTypes.h"
+#include "Components/Output/NeoPixelComponent.hpp"             // TODO: Simplfy, i.e. remove MQTT
 
 namespace Rovi {
     namespace Devices {
@@ -38,8 +38,8 @@ namespace Rovi {
                 void blink(const uint32_t delay_ms = 250);
                 void doubleBlink(const uint32_t delay_ms = 250);
 
-                std::shared_ptr<RotaryEncoderWithButton> rotary;
-                std::shared_ptr<NeoPixelComponent> leds;
+                std::shared_ptr<Components::RotaryEncoderWithButton> rotary;
+                std::shared_ptr<Components::NeoPixelComponent> leds;
 
                 bool m_on;
                 uint8_t m_brightness;

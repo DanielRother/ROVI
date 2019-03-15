@@ -17,14 +17,14 @@ Basecamp iot{
   Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
 };
 
-#include "BaseClasses/RoviDevice.hpp"
-#include "LED/LEDComponent.hpp"
-#include "LED/NeoPixelComponent.hpp"
-//#include "LED/RGBLEDComponent.hpp"
-#include "LED/LEDEffectFactory.hpp"
-#include "Input/RotaryEncoderWithButton.hpp"
+#include <BaseClasses/RoviDevice.hpp>
+#include <Components/Output/LEDComponent.hpp>
+#include <Components/Output/NeoPixelComponent.hpp>
+//#include <Components/Output/RGBLEDComponent.hpp>
+#include <Common/LED/LEDEffectFactory.hpp>
+#include <Components/Input/RotaryEncoderWithButton.hpp>
 
-RoviDevice myRovi(iot);
+Rovi::RoviDevice myRovi(iot);
 
 
 // RotaryEncoder
@@ -36,8 +36,8 @@ uint8_t pinButton = 14;
 uint16_t nbNeoPixelLEDs = 20;
 uint8_t  neoPixelPin    = 15;
 
-std::shared_ptr<RotaryEncoderWithButton> rotary;
-std::shared_ptr<NeoPixelComponent> leds;
+std::shared_ptr<Rovi::Components::RotaryEncoderWithButton> rotary;
+std::shared_ptr<Rovi::Components::NeoPixelComponent> leds;
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
@@ -50,7 +50,7 @@ void setup() {
   myRovi.setupRovi();
 
   // Setup LED
-  leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
+  leds = std::make_shared<Rovi::Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
   auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
   for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
     swapRGValues[pixelIdx] = 1;
@@ -58,7 +58,7 @@ void setup() {
   leds->setSwapRGValues(swapRGValues);
 
   // Setup rotary
-    rotary = std::make_shared<RotaryEncoderWithButton>(pinA, pinB, pinButton);
+    rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(pinA, pinB, pinButton);
   // NORMAL
   {
     auto normalButtonStateActivatedCallback = []() {
@@ -84,7 +84,7 @@ void setup() {
     };
     int normalMaxRotaryValue = 25;
     bool normalPreventOverflow = true;
-    rotary->setupState(RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
+    rotary->setupState(Rovi::Components::RotaryEncoderWithButton::ButtonStates::NORMAL, normalMaxRotaryValue, normalPreventOverflow, normalButtonStateActivatedCallback, normalValueChangeCallback);
   }
   
   // CLICKED
@@ -106,7 +106,7 @@ void setup() {
       if(nextPowerStatus) {
         powerPayload = std::string{"on"};
       }
-      auto packetID = iot.mqtt.publish(powerTopic, to_underlying(RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, powerPayload.c_str());
+      auto packetID = iot.mqtt.publish(powerTopic, to_underlying(Rovi::RoviDevice::MQTTQoSClasses::AT_MOST_ONE), false, powerPayload.c_str());
 
     };
     auto clickedValueChangeCallback = [&](int value) {
@@ -114,7 +114,7 @@ void setup() {
     };
     int clickedMaxRotaryValue = 10;
     bool clickedPreventOverflow = false;
-    rotary->setupState(RotaryEncoderWithButton::ButtonStates::CLICKED, clickedMaxRotaryValue, clickedPreventOverflow, clickedButtonStateActivatedCallback, clickedValueChangeCallback);
+    rotary->setupState(Rovi::Components::RotaryEncoderWithButton::ButtonStates::CLICKED, clickedMaxRotaryValue, clickedPreventOverflow, clickedButtonStateActivatedCallback, clickedValueChangeCallback);
   }
 
   // DOUBLE_CLICKED
@@ -134,11 +134,11 @@ void setup() {
     auto doubleClickedValueChangeCallback = [&](int value) {
       Serial << "DOUBLE_CLICKED value change callback - New value = " << value << endl;
 
-      leds->setColor(std::make_shared<HSVColor>(value*10, 1.0f, 1.0f));   // TODO: getCurrentBrightness()?
+      leds->setColor(std::make_shared<Rovi::HSVColor>(value*10, 1.0f, 1.0f));   // TODO: getCurrentBrightness()?
     };
     int doubleClickedMaxRotaryValue = 36;
     bool doubleClickedPreventOverflow = false;
-    rotary->setupState(RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, doubleClickedMaxRotaryValue, doubleClickedPreventOverflow, doubleClickedButtonStateActivatedCallback, doubleClickedValueChangeCallback);
+    rotary->setupState(Rovi::Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, doubleClickedMaxRotaryValue, doubleClickedPreventOverflow, doubleClickedButtonStateActivatedCallback, doubleClickedValueChangeCallback);
   }
 
   // HOLDED
@@ -152,12 +152,12 @@ void setup() {
     auto holdedValueChangeCallback = [&](int value) {
       Serial << "HOLDED value change callback - New value = " << value << endl;
       
-      auto selectedEffect = LEDEffectFactory::getEffect(value, leds.get());
+      auto selectedEffect = Rovi::LEDEffectFactory::getEffect(value, leds.get());
       leds->setEffect(selectedEffect);
     };
-    int holdedMaxRotaryValue = LEDEffectFactory::getNumberOfEffects() - 1;
+    int holdedMaxRotaryValue = Rovi::LEDEffectFactory::getNumberOfEffects() - 1;
     bool holdedPreventOverflow = false;
-    rotary->setupState(RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
+    rotary->setupState(Rovi::Components::RotaryEncoderWithButton::ButtonStates::HOLDED, holdedMaxRotaryValue, holdedPreventOverflow, holdedButtonStateActivatedCallback, holdedValueChangeCallback);
   }
   leds->setBrightness(0);
 
