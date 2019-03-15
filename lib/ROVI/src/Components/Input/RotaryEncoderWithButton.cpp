@@ -281,7 +281,7 @@ namespace Rovi {
         }
 
         std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
-
+            return "UNDEFINED";
         }
 
         const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 5000;

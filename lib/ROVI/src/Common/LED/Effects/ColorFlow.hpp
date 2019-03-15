@@ -16,7 +16,7 @@ namespace Rovi {
             auto brightness = getCurrentBrightness();
             led->setColor(std::make_shared<HSVColor>(currentColor, 1.0f, brightness));
 
-            currentColor = (++currentColor) % 360;
+            currentColor = (++currentColor) % 360u;
 
             Serial << "step() - brightness: " << brightness << " colorIdx: " << currentColor << endl;
         }
