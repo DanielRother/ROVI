@@ -30,30 +30,25 @@ namespace Rovi {
             void update();
             bool isOn() const;
             void setOn(bool on);
+            void setOn(const std::string& payload);
             std::shared_ptr<Color> color() const ;
             void setColor(const std::shared_ptr<Color>& color);
+            void setColor(const std::string& color);
             std::shared_ptr<LEDEffect> effect() const;
-            void setEffect(std::shared_ptr<LEDEffect> selectedEffect);
+            void setEffect(const std::shared_ptr<LEDEffect>& effect);
+            void setEffect(const std::string& effect);
             void startEffect();
             void stopEffect();
             uint8_t brightness() const;
             void setBrightness(uint8_t brightness);
-
-
-            // TODO: Move to subclass
-            // The convertion between string and concrete data type can be done in this abstract class
-            // But the actual action have to be implemented in an derived class
-            // Names due to overloaded function and bind make problems and would led to long typecasts...
-            virtual void setPowerMQTT(const std::string& payload);
-            virtual void setColorMQTT(const std::string& payload);
-            virtual void setBrightnessMQTT(const std::string& payload);
-            virtual void setEffectMQTT(const std::string& payload);
+            void setBrightness(const std::string& brightness);
 
         protected:
             // Interface for the derived class
             virtual void setBrightnessImpl(uint8_t brightness) = 0;
             virtual void setColorImpl(const std::shared_ptr<Color>& color) = 0;
 
+            // TODO: Use Homie/PalyoadDataTypes
             bool m_on;
             uint8_t m_brightness;
             std::shared_ptr<Color> m_color;
