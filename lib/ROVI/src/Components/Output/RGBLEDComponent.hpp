@@ -17,9 +17,12 @@ namespace Rovi {
         class RGBLEDComponent : public LEDComponent /*, public std::enable_shared_from_this<NeoPixelComponent> */ {
         public:
             RGBLEDComponent(uint8_t pinR, uint8_t pinG, uint8_t pinB, boolean invert = false, const std::string& name = "RGB_LED") 
-                : LEDComponent(name),
-                m_pinR(pinR), m_pinG(pinG), m_pinB(pinB), 
-                m_invert(invert), m_ledArray{1, 2, 3}, // three led channels
+                : LEDComponent{name}
+                , m_pinR{pinR}
+                , m_pinG{pinG}
+                , m_pinB{pinB}
+                , m_invert{invert}
+                , m_ledArray{1, 2, 3}, // three led channels
                 {
                     ledcAttachPin(m_pinR, m_ledArray[0]); // assign RGB led pins to channels
                     ledcAttachPin(m_pinG, m_ledArray[1]);
@@ -61,7 +64,7 @@ namespace Rovi {
             uint8_t m_pinB;
 
             boolean m_invert;
-            uint8_t m_ledArray[3] = {1, 2, 3}; // three led channels
+            std::array<uint8_t, 3> m_ledArray; // three led channels
         };
     }
 }

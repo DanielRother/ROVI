@@ -20,7 +20,9 @@ namespace Rovi {
         class NeoPixelComponent : public LEDComponent /*, public std::enable_shared_from_this<NeoPixelComponent> */ {
         public:
             NeoPixelComponent(uint16_t nbPixel, uint8_t pin, const std::string& name = "NeoPixel") 
-                : LEDComponent(name), pixels(nbPixel, pin, NEO_GRB + NEO_KHZ800), swapRGValues(nbPixel, 0)        // TBD: Maybe make the Pixeltype dynamic as well
+                : LEDComponent{name}
+                , pixels{nbPixel, pin, NEO_GRB + NEO_KHZ800}
+                , swapRGValues(nbPixel, 0)        // TBD: Maybe make the Pixeltype dynamic as well
                 {
                     pixels.begin();                                                     // This initializes the NeoPixel library.
                                                                                         // TBD: Must this be called by the setup method
@@ -67,7 +69,7 @@ namespace Rovi {
                 swapRGValues = newSwapRGValues;
             }
 
-        // protected:
+        protected:
             Adafruit_NeoPixel pixels;
             std::vector<uint32_t> swapRGValues;
         };
