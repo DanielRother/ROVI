@@ -63,10 +63,10 @@ void setup() {
   {
     auto normalButtonStateActivatedCallback = []() {
       Serial << "NORMAL state activation callback" << endl;
-      if(leds->getPowerStatus()) {
-        leds->setPower(false);
+      if(leds->isOn()) {
+        leds->setOn(false);
         delay(250);
-        leds->setPower(true);
+        leds->setOn(true);
       }
     };
     auto normalValueChangeCallback = [&](int value) {
@@ -76,7 +76,7 @@ void setup() {
       Serial << "  setBrightness to " << (brightness) << endl;
       leds->setBrightness(brightness);
 
-      auto lastColor = leds->getLastColor();
+      auto lastColor = leds->color();
       auto color = lastColor->toHSV();
       color->v = (float) brightness / 255.0f;
       leds->setColor(color);     // Required, because otherwise the color is not restored when changen from brightness 0 to 1...
@@ -92,14 +92,14 @@ void setup() {
     auto clickedButtonStateActivatedCallback = []() {
       Serial << "CLICKED state activation callback" << endl;
 
-      auto nextPowerStatus = !leds->getPowerStatus();
+      auto nextPowerStatus = !leds->isOn();
       if(nextPowerStatus) {
         leds->startEffect();
       } else {
         leds->stopEffect();
       }
 
-      leds->setPower(nextPowerStatus);
+      leds->setOn(nextPowerStatus);
 
       auto powerTopic = (myRovi.getBaseTopic() + "/power").c_str();
       auto powerPayload = std::string{"off"};
@@ -123,13 +123,13 @@ void setup() {
       Serial << "DOUBLE_CLICKED state activation callback" << endl;
       leds->stopEffect();
 
-      leds->setPower(false);
+      leds->setOn(false);
       delay(250);
-      leds->setPower(true);
+      leds->setOn(true);
       delay(250);
-      leds->setPower(false);
+      leds->setOn(false);
       delay(250);
-      leds->setPower(true);
+      leds->setOn(true);
     };
     auto doubleClickedValueChangeCallback = [&](int value) {
       Serial << "DOUBLE_CLICKED value change callback - New value = " << value << endl;
@@ -145,9 +145,9 @@ void setup() {
   {
     auto holdedButtonStateActivatedCallback = []() {
       Serial << "HOLDED state activation callback" << endl;
-      leds->setPower(false);
+      leds->setOn(false);
       delay(500);
-      leds->setPower(true);
+      leds->setOn(true);
     };
     auto holdedValueChangeCallback = [&](int value) {
       Serial << "HOLDED value change callback - New value = " << value << endl;

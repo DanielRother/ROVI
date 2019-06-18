@@ -18,16 +18,12 @@ namespace Rovi {
         public:
             RGBLEDComponent(uint8_t pinR, uint8_t pinG, uint8_t pinB, boolean invert = false, const std::string& name = "RGB_LED") 
                 : LEDComponent(name),
-                pinR(pinR), pinG(pinG), pinB(pinB), 
-                invert(invert),ledArray{1, 2, 3}, // three led channels
-                lastColor(std::make_shared<RGBColor>(128,128,128))
+                m_pinR(pinR), m_pinG(pinG), m_pinB(pinB), 
+                m_invert(invert), m_ledArray{1, 2, 3}, // three led channels
                 {
-                    // pinMode(pinR, OUTPUT);
-                    // pinMode(pinG, OUTPUT);
-                    // pinMode(pinB, OUTPUT);
-                    ledcAttachPin(pinR, ledArray[0]); // assign RGB led pins to channels
-                    ledcAttachPin(pinG, ledArray[1]);
-                    ledcAttachPin(pinB, ledArray[2]);
+                    ledcAttachPin(m_pinR, m_ledArray[0]); // assign RGB led pins to channels
+                    ledcAttachPin(m_pinG, m_ledArray[1]);
+                    ledcAttachPin(m_pinB, m_ledArray[2]);
 
                     // Initialize channels 
                     // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
@@ -36,7 +32,7 @@ namespace Rovi {
                     ledcSetup(ledArray[1], 12000, 8);
                     ledcSetup(ledArray[2], 12000, 8);
 
-                    setPower(true);
+                    setOn(true);
                 };
 
             RGBLEDComponent(const RGBLEDComponent& other) = default;
@@ -45,36 +41,36 @@ namespace Rovi {
 
             virtual void setColor(const std::shared_ptr<Color>& color) override {
                 Serial << "--- LEDRGB::setColor" << endl;
-                powerStatus = true;
+                m_on = true;
 
                 // dynamic_pointer_cast requires RTTI...
                 // auto rgb = std::dynamic_pointer_cast<RGBColor>(color);
-                std::shared_ptr<RGBColor> rgb = color->toRGB();
+                auto rgb = color->toRGB();
 
                 // write the RGB values to the pins
-                ledcWrite(ledArray[0], rgb->r); // write red component to channel 1, etc.
-                ledcWrite(ledArray[1], rgb->g);   
-                ledcWrite(ledArray[2], rgb->b); 
+                ledcWrite(m_ledArray[0], rgb->r); // write red component to channel 1, etc.
+                ledcWrite(m_ledArray[1], rgb->g);   
+                ledcWrite(m_ledArray[2], rgb->b); 
 
-                lastColor = rgb;
+                m_color = rgb;
             }
 
-            virtual void setPower(bool power) override {
+            virtual void setOn(bool power) override {
                 Serial << "--- LEDRGB::setPower" << endl;
                 if(power) {
-                    setColor(lastColor);
+                    setColor(m_color);
                 } else {
-                    std::shared_ptr<Color> tmpLastColor = lastColor;
+                    auto tmpLastColor = m_color;
                     setColor(std::make_shared<RGBColor>(0,0,0));
-                    lastColor = tmpLastColor;
+                    m_color = tmpLastColor;
                 }
 
-                powerStatus = power;
+                m_on = power;
             };
 
             virtual void setBrightness(uint8_t brightness) override {
                 Serial << "--- LEDRGB::setBrightness" << endl;
-                powerStatus = true;
+                m_power = true;
 
                 auto hsvColor = lastColor->toHSV();
                 hsvColor->v = brightness;
@@ -83,13 +79,13 @@ namespace Rovi {
             }
 
 
-        // protected:
-            uint8_t pinR;
-            uint8_t pinG;
-            uint8_t pinB;
+        protected:
+            uint8_t m_pinR;
+            uint8_t m_pinG;
+            uint8_t m_pinB;
 
-            boolean invert;
-            uint8_t ledArray[3] = {1, 2, 3}; // three led channels
+            boolean m_invert;
+            uint8_t m_ledArray[3] = {1, 2, 3}; // three led channels
         };
     }
 }

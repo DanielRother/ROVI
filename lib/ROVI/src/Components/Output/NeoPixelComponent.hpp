@@ -26,7 +26,7 @@ namespace Rovi {
                                                                                         // TBD: Must this be called by the setup method
                                                                                         //      as for Basecamp?
 
-                    setPower(true);
+                    setOn(true);
                 };
 
             NeoPixelComponent(const NeoPixelComponent& other) = default;
@@ -35,7 +35,7 @@ namespace Rovi {
 
             virtual void setColor(const std::shared_ptr<Color>& color) override {
                 // Serial << "--- NeoPixel::setColor" << endl;
-                powerStatus = true;
+                m_on = true;
 
                 std::shared_ptr<RGBColor> rgb = color->toRGB();
 
@@ -56,28 +56,28 @@ namespace Rovi {
                 delay(1);
                 pixels.show();
 
-                lastColor = rgb;
+                m_color = rgb;
 
                 // Serial << "   lastColor: " << lastColor->toString() << endl;
             }
 
-            virtual void setPower(bool power) override {
-                Serial << "--- NeoPixel::setPower" << endl;
+            virtual void setOn(bool power) override {
+                Serial << "--- NeoPixel::setOn" << endl;
 
                 if(power) {
-                    setColor(lastColor);
+                    setColor(m_color);
                 } else {
-                    std::shared_ptr<Color> tmpLastColor = lastColor;
+                    auto tmpLastColor = m_color;
                     setColor(std::make_shared<RGBColor>(0,0,0));
-                    lastColor = tmpLastColor;
+                    m_color = tmpLastColor;
                 }
 
-                powerStatus = power;
+                m_on = power;
             };
 
             virtual void setBrightness(uint8_t brightness) override {
                 Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
-                powerStatus = true;
+                m_on = true;
 
                 pixels.setBrightness(brightness);
                 pixels.show();

@@ -121,9 +121,9 @@ namespace Rovi {
 
 
         void SimpleAbsoluteHue::blink(const uint32_t delay_ms) {
-            leds->setPower(false);
+            leds->setOn(false);
             delay(delay_ms);
-            leds->setPower(true);
+            leds->setOn(true);
         }
 
         void SimpleAbsoluteHue::doubleBlink(const uint32_t delay_ms) {
@@ -143,7 +143,7 @@ namespace Rovi {
             } else {
                 leds->stopEffect();
             }
-            leds->setPower(m_on);
+            leds->setOn(m_on);
         }
 
         uint8_t SimpleAbsoluteHue::brightness() const {

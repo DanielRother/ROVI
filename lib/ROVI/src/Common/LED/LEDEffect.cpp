@@ -23,7 +23,7 @@ namespace Rovi {
     }
 
     float LEDEffect::getCurrentBrightness() {
-        return led->lastColor->toHSV()->v;
+        return led->color()->toHSV()->v;
     }
 
     void LEDEffect::stop() {
