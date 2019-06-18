@@ -26,20 +26,18 @@ namespace Rovi {
             // LEDComponent(const LEDComponent& other);
             virtual ~LEDComponent() /*= default*/;
 
-            // Interface for the derived class
-            virtual void setOn(bool on) = 0;
-            virtual void setBrightness(uint8_t brightness) = 0;
-            virtual void setColor(const std::shared_ptr<Color>& color) = 0;
-
-            // Other member methods
+            // Member methods
             void update();
-
             bool isOn() const;
+            void setOn(bool on);
             std::shared_ptr<Color> color() const ;
+            void setColor(const std::shared_ptr<Color>& color);
             std::shared_ptr<LEDEffect> effect() const;
             void setEffect(std::shared_ptr<LEDEffect> selectedEffect);
             void startEffect();
             void stopEffect();
+            uint8_t brightness() const;
+            void setBrightness(uint8_t brightness);
 
 
             // TODO: Move to subclass
@@ -52,6 +50,10 @@ namespace Rovi {
             virtual void setEffectMQTT(const std::string& payload);
 
         protected:
+            // Interface for the derived class
+            virtual void setBrightnessImpl(uint8_t brightness) = 0;
+            virtual void setColorImpl(const std::shared_ptr<Color>& color) = 0;
+
             bool m_on;
             uint8_t m_brightness;
             std::shared_ptr<Color> m_color;

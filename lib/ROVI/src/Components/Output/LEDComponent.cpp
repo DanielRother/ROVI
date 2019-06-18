@@ -105,6 +105,47 @@ namespace Rovi {
             setEffect(selectedEffect);
         }
 
+        void LEDComponent::update() {
+            m_effect->update();
+        }
+
+        bool LEDComponent::isOn() const {
+            return m_on;
+        }
+
+        void LEDComponent::setOn(bool power) {
+            Serial << "--- LEDComponent::setOn" << endl;
+
+            if(power) {
+                setColor(m_color);
+            } else {
+                auto tmpLastColor = m_color;
+                setColor(std::make_shared<RGBColor>(0,0,0));
+                m_color = tmpLastColor;
+            }
+
+            m_on = power;
+        };
+
+        std::shared_ptr<Color> LEDComponent::color() const {
+            return m_color;
+        }
+
+        void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
+                Serial << "--- LEDComponent::setColor" << endl;
+                m_on = true;
+                setColorImpl(color);
+                m_color = color;
+        }
+
+        std::shared_ptr<LEDEffect> LEDComponent::effect() const {
+            return m_effect;
+        }
+
+        void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
+            m_effect = selectedEffect;
+        }
+
         void LEDComponent::startEffect() {
             m_effect->start();
         }
@@ -113,21 +154,14 @@ namespace Rovi {
             m_effect->stop();
         }
 
-        void LEDComponent::update() {
-            m_effect->update();
+        uint8_t LEDComponent::brightness() const {
+            return m_brightness;
         }
 
-        void LEDComponent::setEffect(std::shared_ptr<LEDEffect> selectedEffect) {    
-            m_effect = selectedEffect;
-        }
-
-
-        std::shared_ptr<Color> LEDComponent::color() const {
-            return m_color;
-        }
-
-        bool LEDComponent::isOn() const {
-            return m_on;
+        void LEDComponent::setBrightness(uint8_t brightness) {
+            Serial << "--- LEDComponent::setBrightness to " << (uint32_t) brightness << endl;
+            m_on = true;
+            setBrightnessImpl(brightness);
         }
     }
 }

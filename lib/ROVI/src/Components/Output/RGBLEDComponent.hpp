@@ -39,45 +39,21 @@ namespace Rovi {
             virtual ~RGBLEDComponent() = default;
 
 
-            virtual void setColor(const std::shared_ptr<Color>& color) override {
+            virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
                 Serial << "--- LEDRGB::setColor" << endl;
-                m_on = true;
-
-                // dynamic_pointer_cast requires RTTI...
-                // auto rgb = std::dynamic_pointer_cast<RGBColor>(color);
                 auto rgb = color->toRGB();
-
                 // write the RGB values to the pins
                 ledcWrite(m_ledArray[0], rgb->r); // write red component to channel 1, etc.
                 ledcWrite(m_ledArray[1], rgb->g);   
                 ledcWrite(m_ledArray[2], rgb->b); 
-
-                m_color = rgb;
             }
 
-            virtual void setOn(bool power) override {
-                Serial << "--- LEDRGB::setPower" << endl;
-                if(power) {
-                    setColor(m_color);
-                } else {
-                    auto tmpLastColor = m_color;
-                    setColor(std::make_shared<RGBColor>(0,0,0));
-                    m_color = tmpLastColor;
-                }
-
-                m_on = power;
-            };
-
-            virtual void setBrightness(uint8_t brightness) override {
+            virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- LEDRGB::setBrightness" << endl;
-                m_power = true;
-
                 auto hsvColor = lastColor->toHSV();
                 hsvColor->v = brightness;
-
                 setColor(hsvColor);
             }
-
 
         protected:
             uint8_t m_pinR;

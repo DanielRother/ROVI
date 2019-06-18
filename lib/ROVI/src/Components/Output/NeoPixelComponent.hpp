@@ -33,11 +33,9 @@ namespace Rovi {
             virtual ~NeoPixelComponent() = default;
 
 
-            virtual void setColor(const std::shared_ptr<Color>& color) override {
-                // Serial << "--- NeoPixel::setColor" << endl;
-                m_on = true;
-
-                std::shared_ptr<RGBColor> rgb = color->toRGB();
+            virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
+                Serial << "--- NeoPixel::setColor" << endl;
+                auto rgb = color->toRGB();
 
                 pixels.setPixelColor(0,0,0,0);
                 for(uint16_t pixelIdx = 1; pixelIdx < pixels.numPixels(); ++pixelIdx) {
@@ -55,33 +53,12 @@ namespace Rovi {
                 // See https://github.com/adafruit/Adafruit_NeoPixel/issues/139 for more details
                 delay(1);
                 pixels.show();
-
-                m_color = rgb;
-
-                // Serial << "   lastColor: " << lastColor->toString() << endl;
             }
 
-            virtual void setOn(bool power) override {
-                Serial << "--- NeoPixel::setOn" << endl;
-
-                if(power) {
-                    setColor(m_color);
-                } else {
-                    auto tmpLastColor = m_color;
-                    setColor(std::make_shared<RGBColor>(0,0,0));
-                    m_color = tmpLastColor;
-                }
-
-                m_on = power;
-            };
-
-            virtual void setBrightness(uint8_t brightness) override {
+            virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
-                m_on = true;
-
                 pixels.setBrightness(brightness);
                 pixels.show();
-
                 // TBD: Should the new color be stored?
                 // If so, convert NeoPixels color type...
             }
