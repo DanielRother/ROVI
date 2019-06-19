@@ -45,7 +45,7 @@ namespace Rovi {
           * a timeout which resets the transistion counter after a while (e.g. one transition was lost but the 
           * counter is still updated after m ms as n-1 transitions are enough to savely detect the tick). 
           * 
-          * \return Change of the encoder ticj value (-1,0,1) 
+          * \return Change of the encoder tick value (-1,0,1) 
           */
           int8_t getRotaryTick();
 
@@ -107,7 +107,7 @@ namespace Rovi {
           void invokeButtonStateActivatedCallback(const ButtonStates state);
 
           std::string buttonStateToString(const ButtonStates state) const;
-          std::string prepareMQTTTopicString() const;
+          // std::string prepareMQTTTopicString() const;
 
         protected:
           //*************************************************************************************************//

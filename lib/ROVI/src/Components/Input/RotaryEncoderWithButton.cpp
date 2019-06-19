@@ -234,11 +234,11 @@ namespace Rovi {
         void RotaryEncoderWithButton::invokeRotaryValueChangeCallback(const ButtonStates state, const int value) {
             rotaryValueChangedCallbacks[state](value);
 
-            // MQTT
+            // // MQTT
             std::string buttonStateString   = buttonStateToString(state);
-            std::string topic               = "state/" + buttonStateString;
-            std::string valueString         = to_string(value);
-            publishMQTTMessage(topic, valueString);
+            // std::string topic               = "state/" + buttonStateString;
+            // std::string valueString         = to_string(value);
+            // publishMQTTMessage(topic, valueString);
 
             // Debugging output
             Serial << "Value changed to " << value << " for ButtonState = " << buttonStateString << endl;
@@ -247,13 +247,13 @@ namespace Rovi {
         void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(const ButtonStates state) {
             buttonStateActivatedCallbacks[state]();
 
-            // MQTT here
-            Serial << "RotaryEncoderWithButton - send MQTT message" << endl;
+            // // MQTT here
+            // Serial << "RotaryEncoderWithButton - send MQTT message" << endl;
             std::string buttonStateString   = buttonStateToString(state);
-            std::string topic               = "state/" + buttonStateString;
-            std::string valueString         = "activated";
-            Serial << "   variables got, send Message; topic: " << topic << " - valueString: " << valueString << endl;
-            publishMQTTMessage(topic, valueString);
+            // std::string topic               = "state/" + buttonStateString;
+            // std::string valueString         = "activated";
+            // Serial << "   variables got, send Message; topic: " << topic << " - valueString: " << valueString << endl;
+            // publishMQTTMessage(topic, valueString);
 
             // Debugging output
             Serial << "ButtonState = " << buttonStateString << " activated" << endl;
@@ -280,9 +280,9 @@ namespace Rovi {
             return "";
         }
 
-        std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
-            return "UNDEFINED";
-        }
+        // std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
+        //     return "UNDEFINED";
+        // }
 
         const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS        = 5000;
     }

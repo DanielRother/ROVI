@@ -9,12 +9,12 @@ namespace Rovi {
     namespace Devices {
         SimpleAbsoluteHue::SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
         const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs)
-        : rotary{std::make_shared<Components::RotaryEncoderWithButton>(pinA, pinB, pinButton)},
-          leds{std::make_shared<Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)},
-          m_on{true},
-          m_brightness{128},
-          m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)},
-          m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} {
+        : rotary{std::make_shared<Components::RotaryEncoderWithButton>(pinA, pinB, pinButton)}
+        , leds{std::make_shared<Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)}
+        , m_on{true}
+        , m_brightness{128}
+        , m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)}
+        , m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} {
             setOn(m_on);
             setBrightness(m_brightness);
             setColor(m_color);
@@ -137,13 +137,13 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setOn(const bool on) {
+            // if(m_on) {
+            //     leds->startEffect();
+            // } else {
+            //     leds->stopEffect();
+            // }
+            leds->setOn(on);
             m_on = on;
-            if(m_on) {
-                leds->startEffect();
-            } else {
-                leds->stopEffect();
-            }
-            leds->setOn(m_on);
         }
 
         uint8_t SimpleAbsoluteHue::brightness() const {
@@ -151,10 +151,9 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setBrightness(const int brightness) {
-            setOn(true);
             auto limitedBrightness = Utils::clamp(brightness, 0, 255);      // TBD: Move to Color class?
-            m_brightness = limitedBrightness;
             leds->setBrightness(m_brightness);
+            m_brightness = limitedBrightness;
         }
 
         std::shared_ptr<Color> SimpleAbsoluteHue::color() const {
@@ -162,9 +161,8 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setColor(const std::shared_ptr<Color>& color) {
-            setOn(true);
+            leds->setColor(color);
             m_color = color;
-            leds->setColor(m_color);
         }
 
         float SimpleAbsoluteHue::hue() const {
@@ -172,14 +170,18 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setHue(float hue) {
-            setOn(true);
             auto hsvColor = m_color->toHSV();
             hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);      // TODO: Move to Color class
             setColor(hsvColor);
         }
 
-        std::shared_ptr<LEDEffect> SimpleAbsoluteHue::setEffect() const {
+        std::shared_ptr<LEDEffect> SimpleAbsoluteHue::effect() const {
             return m_effect;
+        }
+
+        void SimpleAbsoluteHue::setEffect(const std::shared_ptr<LEDEffect>& effect) {
+            leds->setEffect(m_effect); 
+            m_effect = effect;
         }
 
         void SimpleAbsoluteHue::setEffect(int effectNumber) {
@@ -190,13 +192,6 @@ namespace Rovi {
         void SimpleAbsoluteHue::setEffect(const std::string& effectName) {
             auto effect = LEDEffectFactory::getEffect(effectName, leds.get());
             setEffect(effect);                
-        }
-
-        void SimpleAbsoluteHue::setEffect(const std::shared_ptr<LEDEffect>& effect) {
-            setOn(true);
-            m_effect = effect;
-            leds->setEffect(m_effect); 
-            leds->startEffect();    // TBD: Required?     
         }
     }
 }

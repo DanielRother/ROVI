@@ -86,28 +86,31 @@ namespace Rovi {
 
         void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
                 Serial << "--- LEDComponent::setColor" << endl;
-                m_on = true;
+                setOn(true);
                 setColorImpl(color);
                 m_color = color;
         }
 
         void LEDComponent::setColor(const std::string& payload) {
             Serial << "  setColor() " << endl;
-            m_color = Color::createColor(payload);
-            Serial << "    Color:      " << m_color->toString().c_str() << endl;
+            auto color = Color::createColor(payload);
+            Serial << "    Color:      " << color->toString().c_str() << endl;
             // TBD: Still required?
             // m_brightness = static_cast<uint8_t>(std::min(std::max(m_color->toHSV()->v * 255.0f, 0.0f), 255.0f));
             // setBrightness(m_brightness);
             // Serial << "    Brightness: " << m_brightness << endl;
-            setColor(m_color);
+            setColor(color);
         }
 
         std::shared_ptr<LEDEffect> LEDComponent::effect() const {
             return m_effect;
         }
 
-        void LEDComponent::setEffect(const std::shared_ptr<LEDEffect>& selectedEffect) {    
+        void LEDComponent::setEffect(const std::shared_ptr<LEDEffect>& selectedEffect) {   
+            setOn(true); 
+            stopEffect();
             m_effect = selectedEffect;
+            startEffect();
         }
 
         void LEDComponent::setEffect(const std::string& payload) {
@@ -134,8 +137,9 @@ namespace Rovi {
 
         void LEDComponent::setBrightness(uint8_t brightness) {
             Serial << "--- LEDComponent::setBrightness to " << (uint32_t) brightness << endl;
-            m_on = true;
+            setOn(true);
             setBrightnessImpl(brightness);
+            m_brightness = brightness;
         }
 
         void LEDComponent::setBrightness(const std::string& payload) {
@@ -150,8 +154,8 @@ namespace Rovi {
             // }
 
             // TODO: Error handling
-            m_brightness = atoi(payload.c_str());
-            setBrightness(m_brightness);
+            auto brightness = atoi(payload.c_str());
+            setBrightness(brightness);
 
             // TBD: Still required?
             // auto color = m_color->toHSV();

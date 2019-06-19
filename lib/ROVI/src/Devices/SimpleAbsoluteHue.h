@@ -24,10 +24,10 @@ namespace Rovi {
                 void setColor(const std::shared_ptr<Color>& color);
                 float hue() const;
                 void setHue(float hue);
-                std::shared_ptr<LEDEffect> setEffect() const;
+                std::shared_ptr<LEDEffect> effect() const;
+                void setEffect(const std::shared_ptr<LEDEffect>& effect);
                 void setEffect(int effectNumber);
                 void setEffect(const std::string& effectName);
-                void setEffect(const std::shared_ptr<LEDEffect>& effect);
 
             protected:
                 void setupNormal();

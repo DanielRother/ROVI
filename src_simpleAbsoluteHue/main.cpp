@@ -26,13 +26,13 @@ Rovi::RoviDevice myRovi(iot);
 
 
 // RotaryEncoder
-uint8_t pinA = 12;
-uint8_t pinB = 13;
-uint8_t pinButton = 14;
+uint8_t rotaryPinA = 12;
+uint8_t rotaryPinB = 13;
+uint8_t rotaryPinButton = 14;
 
 // LED
-uint16_t nbNeoPixelLEDs = 20;
 uint8_t  neoPixelPin    = 15;
+uint16_t nbNeoPixelLEDs = 20;
 
 std::shared_ptr<Rovi::Devices::SimpleAbsoluteHue> absolutHue;
 //***************************************************************************//
@@ -51,8 +51,9 @@ void setup() {
 
     myRovi.setupRovi();
 
-    absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue>(pinA, pinB, pinButton,
-                                                                    neoPixelPin, nbNeoPixelLEDs);
+    absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue>(
+      rotaryPinA, rotaryPinB, rotaryPinButton,
+      neoPixelPin, nbNeoPixelLEDs);
 
   // // Setup LED
   // leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
