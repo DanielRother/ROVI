@@ -20,7 +20,7 @@ namespace Components {
 
 namespace Rovi {
     namespace Components {
-        class LEDComponent : public Deprecated::RoviComponent /*, public std::enable_shared_from_this<LEDComponent>*/ {
+        class LEDComponent {
         public:
             LEDComponent(const std::string& name = "LED");
             // LEDComponent(const LEDComponent& other);

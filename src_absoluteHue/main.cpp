@@ -18,11 +18,12 @@ Basecamp iot{
 };
 
 #include <BaseClasses/RoviDevice.hpp>
-#include <Components/Output/LEDComponent.hpp>
-#include <Components/Output/NeoPixelComponent.hpp>
+// #include <Components/Output/LEDComponent.hpp>
+// #include <Components/Output/NeoPixelComponent.hpp>
 //#include <Components/Output/RGBLEDComponent.hpp>
 #include <Common/LED/LEDEffectFactory.hpp>
-#include <Components/Input/RotaryEncoderWithButton.hpp>
+#include <Components/Deprecated/RotaryEncoderWithButtonMQTT.hpp>
+#include <Components/Deprecated/LEDComponentMQTT.hpp>
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
@@ -36,8 +37,8 @@ uint8_t pinButton = 14;
 uint16_t nbNeoPixelLEDs = 20;
 uint8_t  neoPixelPin    = 15;
 
-std::shared_ptr<Rovi::Components::RotaryEncoderWithButton> rotary;
-std::shared_ptr<Rovi::Components::NeoPixelComponent> leds;
+std::shared_ptr<Rovi::Components::Deprecated::RotaryEncoderWithButtonMQTT> rotary;
+std::shared_ptr<Rovi::Components::Deprecated::NeoPixelComponentMQTT> leds;
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
@@ -50,7 +51,7 @@ void setup() {
   myRovi.setupRovi();
 
   // Setup LED
-  leds = std::make_shared<Rovi::Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
+  leds = std::make_shared<Rovi::Components::Deprecated::NeoPixelComponentMQTT>(nbNeoPixelLEDs, neoPixelPin);
   auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
   for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
     swapRGValues[pixelIdx] = 1;
@@ -58,7 +59,7 @@ void setup() {
   leds->setSwapRGValues(swapRGValues);
 
   // Setup rotary
-    rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(pinA, pinB, pinButton);
+    rotary = std::make_shared<Rovi::Components::Deprecated::RotaryEncoderWithButtonMQTT>(pinA, pinB, pinButton);
   // NORMAL
   {
     auto normalButtonStateActivatedCallback = []() {

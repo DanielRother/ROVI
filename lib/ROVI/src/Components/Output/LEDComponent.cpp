@@ -17,20 +17,9 @@
 namespace Rovi {
     namespace Components {
         LEDComponent::LEDComponent(const std::string& name) 
-        : RoviComponent(name), 
-          m_on(true), m_brightness(128), m_color(std::make_shared<HSVColor>(0,0,0.2)), m_effect(std::make_shared<WhiteStatic>(this)) {
-          
-            // TODO: (Re-)move
-            // Always stop a possibly running effect thread first
-            handler[std::string("setPower")]        = [this](const std::string payload){
-                setOn(payload);};
-            handler[std::string("setColor")]        = [this](const std::string payload){
-                stopEffect();
-                setColor(payload);};
-            handler[std::string("setBrightness")]   = [this](const std::string payload){
-                setBrightness(payload);};
-            handler[std::string("setEffect")]       = [this](const std::string payload){
-                setEffect(payload);};
+        : m_on(true), m_brightness(128)
+        , m_color(std::make_shared<HSVColor>(0,0,0.2))
+        , m_effect(std::make_shared<WhiteStatic>(this)) {
         }
 
         // LEDComponent::LEDComponent(const LEDComponent& other)

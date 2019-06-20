@@ -5,7 +5,6 @@
 
 #include <map>
 
-#include "BaseClasses/RoviComponent.hpp"
 #include "OneButtonFork.h"
 
 // TODO: Cleanup nomenclature
@@ -69,7 +68,7 @@ namespace Rovi {
         };
 
 
-        class RotaryEncoderWithButton : public Deprecated::RoviComponent {
+        class RotaryEncoderWithButton {
         public:
           enum class ButtonStates {
             NORMAL,

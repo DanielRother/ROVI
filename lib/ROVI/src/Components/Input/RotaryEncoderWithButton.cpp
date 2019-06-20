@@ -126,7 +126,7 @@ namespace Rovi {
 
 
         RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name)
-          : RoviComponent(name), rotary(pinA, pinB), button(pinButton, true),
+          : rotary(pinA, pinB), button(pinButton, true),
             buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()), m_increment(1) {
               // Setup button, i.e. callbacks
               button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));
