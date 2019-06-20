@@ -1,7 +1,6 @@
 #include "SimpleAbsoluteHue.h"
 
 #include <ArduinoIostream.hpp>
-#include <UtilFunctions.hpp>
 
 #include "Common/LED/LEDEffectFactory.hpp"
 
@@ -132,28 +131,37 @@ namespace Rovi {
             blink(delay_ms);
         }
 
-        bool SimpleAbsoluteHue::on() const {
+        bool SimpleAbsoluteHue::isOn() const {
             return m_on;
         }
 
-        void SimpleAbsoluteHue::setOn(const bool on) {
+        void SimpleAbsoluteHue::setOn(bool on) {
             // if(m_on) {
             //     leds->startEffect();
             // } else {
             //     leds->stopEffect();
             // }
             leds->setOn(on);
-            m_on = on;
+            m_on = leds->isOn();
+        }
+
+        void SimpleAbsoluteHue::setOn(const std::string& on) {
+            leds->setOn(on);
+            m_on = leds->isOn();
         }
 
         uint8_t SimpleAbsoluteHue::brightness() const {
             return m_brightness;
         }
 
-        void SimpleAbsoluteHue::setBrightness(const int brightness) {
-            auto limitedBrightness = Utils::clamp(brightness, 0, 255);      // TBD: Move to Color class?
-            leds->setBrightness(m_brightness);
-            m_brightness = limitedBrightness;
+        void SimpleAbsoluteHue::setBrightness(int brightness) {
+            leds->setBrightness(brightness);
+            m_brightness = leds->brightness();
+        }
+
+        void SimpleAbsoluteHue::setBrightness(const std::string& brightness) {
+            leds->setBrightness(brightness);
+            m_brightness = leds->brightness();
         }
 
         std::shared_ptr<Color> SimpleAbsoluteHue::color() const {
@@ -162,17 +170,24 @@ namespace Rovi {
 
         void SimpleAbsoluteHue::setColor(const std::shared_ptr<Color>& color) {
             leds->setColor(color);
-            m_color = color;
+            m_color = leds->color();
+        }
+
+        void SimpleAbsoluteHue::setColor(const std::string& color) {
+            leds->setColor(color);
+            m_color = leds->color();
         }
 
         float SimpleAbsoluteHue::hue() const {
-            return m_color->toHSV()->h;
+            return leds->hue();
         }
 
         void SimpleAbsoluteHue::setHue(float hue) {
-            auto hsvColor = m_color->toHSV();
-            hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);      // TODO: Move to Color class
-            setColor(hsvColor);
+            leds->setHue(hue);
+        }
+
+        void SimpleAbsoluteHue::setHue(const std::string& hue) {
+            leds->setHue(hue);
         }
 
         std::shared_ptr<LEDEffect> SimpleAbsoluteHue::effect() const {
@@ -180,18 +195,18 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setEffect(const std::shared_ptr<LEDEffect>& effect) {
-            leds->setEffect(m_effect); 
-            m_effect = effect;
+            leds->setEffect(effect); 
+            m_effect = leds->effect();
         }
 
-        void SimpleAbsoluteHue::setEffect(int effectNumber) {
-            auto effectName = LEDEffectFactory::convertEffectNumberToName(effectNumber);
-            setEffect(effectName);      
+        void SimpleAbsoluteHue::setEffect(int effect) {
+            leds->setEffect(effect); 
+            m_effect = leds->effect();   
         }
 
-        void SimpleAbsoluteHue::setEffect(const std::string& effectName) {
-            auto effect = LEDEffectFactory::getEffect(effectName, leds.get());
-            setEffect(effect);                
+        void SimpleAbsoluteHue::setEffect(const std::string& effect) {
+            leds->setEffect(effect); 
+            m_effect = leds->effect();           
         }
     }
 }

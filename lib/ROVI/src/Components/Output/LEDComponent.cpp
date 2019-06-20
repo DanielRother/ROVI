@@ -14,6 +14,8 @@
 #include "Common/LED/LEDEffectFactory.hpp"
 #include "Common/LED/Effects/AllEffects.hpp"
 
+#include <UtilFunctions.hpp>
+
 namespace Rovi {
     namespace Components {
         LEDComponent::LEDComponent(const std::string& name) 
@@ -69,66 +71,16 @@ namespace Rovi {
             setOn(power);
         }
 
-        std::shared_ptr<Color> LEDComponent::color() const {
-            return m_color;
-        }
-
-        void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
-                Serial << "--- LEDComponent::setColor" << endl;
-                setOn(true);
-                setColorImpl(color);
-                m_color = color;
-        }
-
-        void LEDComponent::setColor(const std::string& payload) {
-            Serial << "  setColor() " << endl;
-            auto color = Color::createColor(payload);
-            Serial << "    Color:      " << color->toString().c_str() << endl;
-            // TBD: Still required?
-            // m_brightness = static_cast<uint8_t>(std::min(std::max(m_color->toHSV()->v * 255.0f, 0.0f), 255.0f));
-            // setBrightness(m_brightness);
-            // Serial << "    Brightness: " << m_brightness << endl;
-            setColor(color);
-        }
-
-        std::shared_ptr<LEDEffect> LEDComponent::effect() const {
-            return m_effect;
-        }
-
-        void LEDComponent::setEffect(const std::shared_ptr<LEDEffect>& selectedEffect) {   
-            setOn(true); 
-            stopEffect();
-            m_effect = selectedEffect;
-            startEffect();
-        }
-
-        void LEDComponent::setEffect(const std::string& payload) {
-            Serial << "  LEDComponent::setEffect() " << endl;
-
-            // TODO: Use effect name
-            auto effectNumber = atoi(payload.c_str());
-
-            auto selectedEffect = LEDEffectFactory::getEffect(effectNumber, this);
-            setEffect(selectedEffect);
-        }
-
-        void LEDComponent::startEffect() {
-            m_effect->start();
-        }
-
-        void LEDComponent::stopEffect() {
-            m_effect->stop();
-        }
-
         uint8_t LEDComponent::brightness() const {
             return m_brightness;
         }
 
-        void LEDComponent::setBrightness(uint8_t brightness) {
+        void LEDComponent::setBrightness(int brightness) {
             Serial << "--- LEDComponent::setBrightness to " << (uint32_t) brightness << endl;
             setOn(true);
-            setBrightnessImpl(brightness);
-            m_brightness = brightness;
+            auto limitedBrightness = Utils::clamp(brightness, 0, 255);      // TBD: Move to Color class?
+            setBrightnessImpl(limitedBrightness);
+            m_brightness = limitedBrightness;
         }
 
         void LEDComponent::setBrightness(const std::string& payload) {
@@ -152,5 +104,77 @@ namespace Rovi {
             // m_color = color->toRGB();
             // setColor(color);     
         }
+
+        std::shared_ptr<Color> LEDComponent::color() const {
+            return m_color;
+        }
+
+        void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
+                Serial << "--- LEDComponent::setColor" << endl;
+                setOn(true);
+                setColorImpl(color);
+                m_color = color;
+        }
+
+        void LEDComponent::setColor(const std::string& payload) {
+            Serial << "  setColor() " << endl;
+            auto color = Color::createColor(payload);
+            Serial << "    Color:      " << color->toString().c_str() << endl;
+            // TBD: Still required?
+            // m_brightness = static_cast<uint8_t>(std::min(std::max(m_color->toHSV()->v * 255.0f, 0.0f), 255.0f));
+            // setBrightness(m_brightness);
+            // Serial << "    Brightness: " << m_brightness << endl;
+            setColor(color);
+        }
+
+        float LEDComponent::hue() const {
+            return m_color->toHSV()->h;
+        }
+
+        void LEDComponent::setHue(float hue) {
+            auto hsvColor = m_color->toHSV();
+            hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);      // TODO: Move to Color class
+            setColor(hsvColor);
+        }
+
+        void LEDComponent::setHue(const std::string& payload) {
+            auto hue = atof(payload.c_str());
+            setHue(hue);
+        }
+
+        std::shared_ptr<LEDEffect> LEDComponent::effect() const {
+            return m_effect;
+        }
+
+        void LEDComponent::setEffect(const std::shared_ptr<LEDEffect>& selectedEffect) {   
+            setOn(true); 
+            stopEffect();
+            m_effect = selectedEffect;
+            startEffect();
+        }
+        void LEDComponent::setEffect(int effect) {
+            Serial << "  LEDComponent::setEffect() " << endl;
+
+            auto selectedEffect = LEDEffectFactory::getEffect(effect, this);
+            setEffect(selectedEffect);
+        }
+
+        void LEDComponent::setEffect(const std::string& payload) {
+            Serial << "  LEDComponent::setEffect() " << endl;
+
+            // TODO/TBD?: Use effect name?
+            auto effectNumber = atoi(payload.c_str());
+            setEffect(effectNumber);
+        }
+
+        void LEDComponent::startEffect() {
+            m_effect->start();
+        }
+
+        void LEDComponent::stopEffect() {
+            m_effect->stop();
+        }
+
+
     }
 }

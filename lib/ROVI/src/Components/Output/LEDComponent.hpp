@@ -20,6 +20,7 @@ namespace Components {
 
 namespace Rovi {
     namespace Components {
+        // TODO: Use Homie payload data types
         class LEDComponent {
         public:
             LEDComponent(const std::string& name = "LED");
@@ -31,17 +32,22 @@ namespace Rovi {
             bool isOn() const;
             void setOn(bool on);
             void setOn(const std::string& payload);
+            uint8_t brightness() const;
+            void setBrightness(int brightness);
+            void setBrightness(const std::string& brightness);
             std::shared_ptr<Color> color() const ;
             void setColor(const std::shared_ptr<Color>& color);
             void setColor(const std::string& color);
             std::shared_ptr<LEDEffect> effect() const;
+            float hue() const;
+            void setHue(float hue);
+            void setHue(const std::string& hue);
             void setEffect(const std::shared_ptr<LEDEffect>& effect);
+            void setEffect(int effect);
             void setEffect(const std::string& effect);
             void startEffect();
             void stopEffect();
-            uint8_t brightness() const;
-            void setBrightness(uint8_t brightness);
-            void setBrightness(const std::string& brightness);
+
 
         protected:
             // Interface for the derived class
