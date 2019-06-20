@@ -22,7 +22,7 @@ Basecamp iot{
 #include <Devices/SimpleAbsoluteHue.h>
 
 
-Rovi::RoviDevice myRovi(iot);
+// Rovi::RoviDevice myRovi(iot);
 
 
 // RotaryEncoder
@@ -49,7 +49,7 @@ void setup() {
     sleep(5);
     iot.begin();
 
-    myRovi.setupRovi();
+    // myRovi.setupRovi();
 
     absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue>(
       rotaryPinA, rotaryPinB, rotaryPinButton,
@@ -65,13 +65,13 @@ void setup() {
 
 
 
-  std::cout << "myRovi.baseTopic" << myRovi.getBaseTopic() << endl;
-  // TODO: Is there an easier way to connect to methods???
-  iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
-  iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {myRovi.mqttSubscribed(packetId, qos);});
-  iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
-    size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
-  iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
+  // std::cout << "myRovi.baseTopic" << myRovi.getBaseTopic() << endl;
+  // // TODO: Is there an easier way to connect to methods???
+  // iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
+  // iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {myRovi.mqttSubscribed(packetId, qos);});
+  // iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
+  //   size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
+  // iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
 
 
   // Activate Over-the-Air updates
