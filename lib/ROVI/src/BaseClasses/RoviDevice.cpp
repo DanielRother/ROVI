@@ -8,7 +8,11 @@
 namespace Rovi {
     namespace Deprecated {
         RoviDevice::RoviDevice(Basecamp& iot)
-            : iot(iot), name(""), room(""), baseTopic(""), statusTopic("")
+            : iot(iot)
+            , name("")
+            , room("")
+            , baseTopic("")
+            , statusTopic("")
         {}
 
         void RoviDevice::setupRovi() {

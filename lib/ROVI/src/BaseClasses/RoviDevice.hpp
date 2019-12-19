@@ -48,7 +48,7 @@ namespace Rovi {
           Basecamp& iot;
           std::string name;
           std::string room;
-
+          
           std::string baseTopic;
           std::string statusTopic;
 
