@@ -21,8 +21,8 @@ Basecamp iot{
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
 
-#define nbPixel 50
-#define pin 15
+const auto nbPixel = 50;
+const auto pin = 15;
 auto name = "weihnachtsbaum";
 // auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
 auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
