@@ -54,7 +54,7 @@ namespace Rovi {
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
-                Serial << "--- FastLedComponent::setColor" << endl;
+                // Serial << "--- FastLedComponent::setColor" << endl;
 
                 AdressableLedComponent::setColorImpl(color, pixelIdx);
 

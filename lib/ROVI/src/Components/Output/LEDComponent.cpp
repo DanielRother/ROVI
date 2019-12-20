@@ -242,7 +242,7 @@ namespace Rovi {
                 return;
             }
 
-            Serial << "--- LEDComponent::setColor" << endl;
+            // Serial << "--- LEDComponent::setColor" << endl;
             m_on = true;
             m_colors[pixelIdx] = color;
         }

@@ -6,5 +6,6 @@
 #include "ColorFlow.hpp"
 #include "RandomColor.hpp"
 #include "Rainbow.hpp"
+#include "ColorCircle.hpp"
 
 #endif /* __ALLLEDEFFECTS__ */

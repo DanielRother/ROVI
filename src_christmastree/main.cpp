@@ -17,6 +17,7 @@ Basecamp iot{
 #include <Components/Output/NeoPixelComponent.hpp>
 #include <Components/Output/FastLedComponent.hpp>
 #include <Common/LED/LEDEffectFactory.hpp>
+#include <Common/LED/Effects/AllEffects.hpp>
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
@@ -28,6 +29,8 @@ auto name = "weihnachtsbaum";
 auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
 auto colorFlow = Rovi::LEDEffectFactory::getEffect("color_flow", xmastree.get());
 auto rainbow = Rovi::LEDEffectFactory::getEffect("rainbow", xmastree.get());
+// auto colorCircle = Rovi::LEDEffectFactory::getEffect("color_circle", xmastree.get());
+auto colorCircle = std::make_shared<Rovi::ColorCircle>(xmastree.get(), 500);
 
 void setup()
 {
@@ -54,7 +57,14 @@ void setup()
   xmastree->setColor(std::make_shared<Rovi::HSVColor>(128,0.0f,0.5f));
   Serial << "Start color flow" << endl;
   // xmastree->setEffect(colorFlow);
-  xmastree->setEffect(rainbow);
+  // xmastree->setEffect(rainbow);
+
+  auto colors = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+  colors.emplace_back(std::make_shared<Rovi::RGBColor>(128, 0, 0));
+  colors.emplace_back(std::make_shared<Rovi::RGBColor>(0, 128, 0));
+  colors.emplace_back(std::make_shared<Rovi::RGBColor>(0, 0, 128));
+  colorCircle->setColors(colors);
+  xmastree->setEffect(colorCircle);
 }
 
 uint8_t colorIdx = 0;

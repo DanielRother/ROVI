@@ -20,6 +20,8 @@ namespace Rovi {
             return std::make_shared<RandomColor>(led, delay_ms);
         } else if(effectLower.find("rainbow") != std::string::npos) {
             return std::make_shared<Rainbow>(led, delay_ms);
+        } else if(effectLower.find("color_circle") != std::string::npos) {
+            return std::make_shared<ColorCircle>(led, delay_ms);
         }
 
         Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;
@@ -80,7 +82,8 @@ namespace Rovi {
         "color_flow_slow",
         "color_random_slow",
 
-        "rainbow"
+        "rainbow",
+        "color_circle"
     };
 
     const uint32_t LEDEffectFactory::DEFAULT_DELAY_MS = 100;

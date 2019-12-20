@@ -17,6 +17,7 @@ namespace Rovi {
 
             if(!led->isAdressable()) {
                 Serial << "Effect not available for this kind of led" << endl;
+                return;
             }
 
             auto brightness = getCurrentBrightness();
