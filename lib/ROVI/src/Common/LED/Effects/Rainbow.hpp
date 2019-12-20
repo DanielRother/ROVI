@@ -13,14 +13,21 @@ namespace Rovi {
             }
 
         void step() {
-            // if(!adressableLed) {
-            //     Serial << "Effect not available for this kind of led" << endl;
-            // }
+            Serial << "Rainbow - step; currentStartColor = " << currentStartColor << endl;
+
+            if(!led->isAdressable()) {
+                Serial << "Effect not available for this kind of led" << endl;
+            }
 
             auto brightness = getCurrentBrightness();
-            // auto nbPixel = adressableLed->asdsd
+            auto nbPixel = led->nbPixel();
+            auto hueIncrement = 360.0f / (float) nbPixel;
 
-            led->setColor(std::make_shared<HSVColor>(currentStartColor, 1.0f, brightness));
+            for(size_t pixelIdx = 0; pixelIdx < nbPixel; ++pixelIdx) {
+                auto curHue = (int32_t) ((float) currentStartColor + pixelIdx * hueIncrement ) % 360;
+                led->setColor(std::make_shared<HSVColor>(curHue, 1.0f, brightness), pixelIdx);
+            }
+            led->show();
 
             currentStartColor = (++currentStartColor) % 360u;
 

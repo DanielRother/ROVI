@@ -27,6 +27,7 @@ auto name = "weihnachtsbaum";
 // auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
 auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
 auto colorFlow = Rovi::LEDEffectFactory::getEffect("color_flow", xmastree.get());
+auto rainbow = Rovi::LEDEffectFactory::getEffect("rainbow", xmastree.get());
 
 void setup()
 {
@@ -52,7 +53,8 @@ void setup()
   xmastree->setBrightness(255);
   xmastree->setColor(std::make_shared<Rovi::HSVColor>(128,0.0f,0.5f));
   Serial << "Start color flow" << endl;
-  xmastree->setEffect(colorFlow);
+  // xmastree->setEffect(colorFlow);
+  xmastree->setEffect(rainbow);
 }
 
 uint8_t colorIdx = 0;
@@ -61,7 +63,8 @@ void loop()
 {
     ArduinoOTA.handle();
 
-    xmastree->update(); 
+    xmastree->update();
+
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(128,0,0), 0);
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,128,0), 1);
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,0,128), 2);
@@ -70,7 +73,7 @@ void loop()
     Serial << "." << endl;
     // Serial << "RED" << endl;
     // nanoleaf.setColor(std::make_shared<RGBColor>(128,0,0));
-    sleep(1);
+    // sleep(5);
     // Serial << "GREEN" << endl;
     // nanoleaf.setColor(std::make_shared<RGBColor>(0,128,0));
     // sleep(1);
