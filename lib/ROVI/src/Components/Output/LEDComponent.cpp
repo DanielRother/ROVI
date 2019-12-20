@@ -175,6 +175,47 @@ namespace Rovi {
             m_effect->stop();
         }
 
+        AdressableLedComponent::AdressableLedComponent(size_t nbPixel, const std::string& name) 
+        : LEDComponent{name}
+        , m_nbPixel{nbPixel}
+        , m_colors{nbPixel}
+        {
 
+        }
+
+        // AdressableLedComponent(const AdressableLedComponent& other) {};
+        AdressableLedComponent::~AdressableLedComponent() /*= default*/ {
+
+        }           
+
+        size_t AdressableLedComponent::nbPixel() const {
+            return m_nbPixel;
+        }
+
+        void AdressableLedComponent::setColor(const std::shared_ptr<Color>& color, size_t pixelIdx) {
+            if(pixelIdx >= m_nbPixel) {
+                return;
+            }
+
+            Serial << "--- AdressableLedComponent::setColor" << endl;
+            m_on = true;
+            setColorImpl(color, pixelIdx);
+            m_colors[pixelIdx] = color;
+        }
+
+        void AdressableLedComponent::setColor(const std::string& payload, size_t pixelIdx) {
+            Serial << "  setColor() " << endl;
+            auto color = Color::createColor(payload);
+            Serial << "    Color:      " << color->toString().c_str() << endl;
+            setColor(color, pixelIdx);
+        }
+
+        std::shared_ptr<Color> AdressableLedComponent::color(size_t pixelIdx) const {
+            if(pixelIdx >= m_nbPixel) {
+                return nullptr;
+            }
+
+            return m_colors[pixelIdx];
+        }
     }
 }

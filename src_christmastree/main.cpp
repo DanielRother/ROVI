@@ -48,11 +48,11 @@ void setup()
   // TODO: Init Neopixel
   // TODO: Move to dedicated component
   std::cout << "Init neopixel" << std::endl;
+  xmastree->init();
   xmastree->setBrightness(255);
   xmastree->setColor(std::make_shared<Rovi::HSVColor>(128,0.0f,0.5f));
   Serial << "Start color flow" << endl;
   xmastree->setEffect(colorFlow);
-  xmastree->init();
 }
 
 uint8_t colorIdx = 0;

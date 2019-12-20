@@ -18,10 +18,10 @@
 namespace Rovi {
     namespace Components {
         template<std::size_t NB_PIXEL, uint8_t PIN>
-        class FastLedComponent : public LEDComponent /*, public std::enable_shared_from_this<FastLedComponent> */ {
+        class FastLedComponent : public AdressableLedComponent /*, public std::enable_shared_from_this<FastLedComponent> */ {
         public:
             FastLedComponent(const std::string& name = "FastLED") 
-                : LEDComponent{name}
+                : AdressableLedComponent{NB_PIXEL, name}
                 , m_isInit{false}
                 , m_leds{}
                 {
@@ -50,6 +50,20 @@ namespace Rovi {
                 for(uint16_t pixelIdx = 0; pixelIdx < NB_PIXEL; ++pixelIdx) {
                     m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
                 }
+                FastLED.show();
+            }
+
+            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
+                Serial << "--- FastLedComponent::setColor" << endl;
+
+                if(!m_isInit) {
+                    std::cout << "Not initialized!" << std::endl;
+                    return;
+                    // init();      // Not possible?!?!?!
+                }
+
+                auto rgb = color->toRGB();
+                m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
                 FastLED.show();
             }
 

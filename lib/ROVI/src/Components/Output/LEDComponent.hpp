@@ -71,6 +71,26 @@ namespace Rovi {
         //     virtual void setBrightnessMQTT(const std::string& payload);
         //     virtual void setEffectMQTT(const std::string& payload);
         // };
+
+        class AdressableLedComponent : public LEDComponent {
+        public:
+            AdressableLedComponent(size_t nbPixel, const std::string& name = "AdressableLedComponent");
+            // AdressableLedComponent(const AdressableLedComponent& other);
+            virtual ~AdressableLedComponent() /*= default*/;            
+
+            size_t nbPixel() const;
+            using LEDComponent::setColor;
+            void setColor(const std::shared_ptr<Color>& color, size_t pixelIdx);
+            void setColor(const std::string& color, size_t pixelIdx);
+            using LEDComponent::color;
+            std::shared_ptr<Color> color(size_t pixelIdx) const;
+
+        protected:
+            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) = 0;
+
+            size_t m_nbPixel;
+            std::vector<std::shared_ptr<Color>> m_colors;
+        };
     }
 }
 
