@@ -79,9 +79,12 @@ namespace Rovi {
             virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
                 pixels.setBrightness(brightness);
-                pixels.show();
                 // TBD: Should the new color be stored?
                 // If so, convert NeoPixels color type...
+            }
+
+            virtual void show() override {
+                pixels.show();
             }
 
             void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues) {

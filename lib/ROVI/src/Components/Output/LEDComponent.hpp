@@ -84,6 +84,7 @@ namespace Rovi {
             void setColor(const std::string& color, size_t pixelIdx);
             using LEDComponent::color;
             std::shared_ptr<Color> color(size_t pixelIdx) const;
+            virtual void show() = 0;
 
         protected:
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) = 0;

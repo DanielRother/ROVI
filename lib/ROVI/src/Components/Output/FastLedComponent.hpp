@@ -64,7 +64,6 @@ namespace Rovi {
 
                 auto rgb = color->toRGB();
                 m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
-                FastLED.show();
             }
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
@@ -80,6 +79,11 @@ namespace Rovi {
                 }
                 FastLED.show();
             }
+
+            virtual void show() override {
+                FastLED.show();
+            }
+
 
         protected:
             bool m_isInit;

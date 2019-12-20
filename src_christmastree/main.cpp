@@ -61,12 +61,16 @@ void loop()
 {
     ArduinoOTA.handle();
 
-    xmastree->update(); 
+    // xmastree->update(); 
+    xmastree->setColor(std::make_shared<Rovi::RGBColor>(128,0,0), 0);
+    xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,128,0), 1);
+    xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,0,128), 2);
+    xmastree->show();
 
-    // Serial << "." << endl;
+    Serial << "." << endl;
     // Serial << "RED" << endl;
     // nanoleaf.setColor(std::make_shared<RGBColor>(128,0,0));
-    // sleep(1);
+    sleep(1);
     // Serial << "GREEN" << endl;
     // nanoleaf.setColor(std::make_shared<RGBColor>(0,128,0));
     // sleep(1);
