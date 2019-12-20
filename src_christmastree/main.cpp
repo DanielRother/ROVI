@@ -18,6 +18,7 @@ Basecamp iot{
 #include <Components/Output/FastLedComponent.hpp>
 #include <Common/LED/LEDEffectFactory.hpp>
 #include <Common/LED/Effects/AllEffects.hpp>
+#include <Common/LED/Color/KnownColors.hpp>
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
@@ -25,12 +26,16 @@ Rovi::Deprecated::RoviDevice myRovi(iot);
 const auto nbPixel = 50;
 const auto pin = 15;
 auto name = "weihnachtsbaum";
+auto colorCircleDelay = 500;
 // auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
 auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
 auto colorFlow = Rovi::LEDEffectFactory::getEffect("color_flow", xmastree.get());
 auto rainbow = Rovi::LEDEffectFactory::getEffect("rainbow", xmastree.get());
-// auto colorCircle = Rovi::LEDEffectFactory::getEffect("color_circle", xmastree.get());
-auto colorCircle = std::make_shared<Rovi::ColorCircle>(xmastree.get(), 500);
+auto colorCircleRGB = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
+auto colorCircleRed = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
+auto colorCircleBlue = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
+auto colorCircleGreen = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
+auto colorCirclePurple = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
 
 void setup()
 {
@@ -59,12 +64,49 @@ void setup()
   // xmastree->setEffect(colorFlow);
   // xmastree->setEffect(rainbow);
 
-  auto colors = std::vector<std::shared_ptr<Rovi::RGBColor>>();
-  colors.emplace_back(std::make_shared<Rovi::RGBColor>(128, 0, 0));
-  colors.emplace_back(std::make_shared<Rovi::RGBColor>(0, 128, 0));
-  colors.emplace_back(std::make_shared<Rovi::RGBColor>(0, 0, 128));
-  colorCircle->setColors(colors);
-  xmastree->setEffect(colorCircle);
+
+  {
+    auto colorsRGB = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+    colorsRGB.emplace_back(std::make_shared<Rovi::RGBColor>(128, 0, 0));
+    colorsRGB.emplace_back(std::make_shared<Rovi::RGBColor>(0, 128, 0));
+    colorsRGB.emplace_back(std::make_shared<Rovi::RGBColor>(0, 0, 128));
+    colorCircleRGB->setColors(colorsRGB);
+  }
+
+  {
+    auto colorsRed = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+    colorsRed.push_back(Rovi::tuYellow);
+    colorsRed.push_back(Rovi::tuOrange);
+    colorsRed.push_back(Rovi::tuRed);
+    colorCircleRed->setColors(colorsRed);
+  }  
+
+  {
+    auto colorsBlue = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+    colorsBlue.push_back(Rovi::tuLightBlue);
+    colorsBlue.push_back(Rovi::tuBlue);
+    colorsBlue.push_back(Rovi::tuDarkBlue);
+    colorCircleBlue->setColors(colorsBlue);
+  }  
+
+  {
+    auto colorsGreen = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+    colorsGreen.push_back(Rovi::tuLightGreen);
+    colorsGreen.push_back(Rovi::tuGreen);
+    colorsGreen.push_back(Rovi::tuDarkGreen);
+    colorCircleGreen->setColors(colorsGreen);
+  }  
+
+  {
+    auto colorsPurple = std::vector<std::shared_ptr<Rovi::RGBColor>>();
+    colorsPurple.push_back(Rovi::tuLightPurple);
+    colorsPurple.push_back(Rovi::tuPurple);
+    colorsPurple.push_back(Rovi::tuDarkPurple);
+    colorCirclePurple->setColors(colorsPurple);
+  }  
+
+  // xmastree->setEffect(colorCircleRGB);
+  xmastree->setEffect(colorCirclePurple);
 }
 
 uint8_t colorIdx = 0;
