@@ -4,6 +4,8 @@
 
 #include <ArduinoOTA.h>
 
+#include <chrono>
+
 //***************************************************************************//
 // Basecamp and Rovi initialize 
 //***************************************************************************//
@@ -22,13 +24,13 @@ Basecamp iot{
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
-
 const auto nbPixel = 50;
 const auto pin = 15;
 auto name = "weihnachtsbaum";
 auto colorCircleDelay = 500;
-// auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
+
 auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
+
 auto colorFlow = Rovi::LEDEffectFactory::getEffect("color_flow", xmastree.get());
 auto rainbow = Rovi::LEDEffectFactory::getEffect("rainbow", xmastree.get());
 auto colorCircleRGB = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
@@ -36,6 +38,22 @@ auto colorCircleRed = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorC
 auto colorCircleBlue = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
 auto colorCircleGreen = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
 auto colorCirclePurple = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
+
+std::vector<std::shared_ptr<Rovi::LEDEffect>> effects;
+auto timePerEffect = std::chrono::seconds(10);
+std::chrono::time_point<std::chrono::system_clock> nextEffectSelection;
+
+void selectRandomEffect() {
+  Serial << "Random effect" << endl;
+
+  auto effectIndex = random(0, effects.size());
+  xmastree->setEffect(effects[effectIndex]);
+
+  Serial << "Effect " << (int) effectIndex << " selected" << endl;
+
+  auto now = std::chrono::system_clock::now();
+  nextEffectSelection = now + timePerEffect;
+}
 
 void setup()
 {
@@ -60,10 +78,10 @@ void setup()
   xmastree->init();
   xmastree->setBrightness(255);
   xmastree->setColor(std::make_shared<Rovi::HSVColor>(128,0.0f,0.5f));
-  Serial << "Start color flow" << endl;
-  // xmastree->setEffect(colorFlow);
-  // xmastree->setEffect(rainbow);
 
+  Serial << "Init efects" << endl;
+  effects.push_back(colorFlow);
+  effects.push_back(rainbow);
 
   {
     auto colorsRGB = std::vector<std::shared_ptr<Rovi::RGBColor>>();
@@ -71,6 +89,7 @@ void setup()
     colorsRGB.emplace_back(std::make_shared<Rovi::RGBColor>(0, 128, 0));
     colorsRGB.emplace_back(std::make_shared<Rovi::RGBColor>(0, 0, 128));
     colorCircleRGB->setColors(colorsRGB);
+    effects.push_back(colorCircleRGB);
   }
 
   {
@@ -79,6 +98,7 @@ void setup()
     colorsRed.push_back(Rovi::tuOrange);
     colorsRed.push_back(Rovi::tuRed);
     colorCircleRed->setColors(colorsRed);
+    effects.push_back(colorCircleRed);
   }  
 
   {
@@ -87,6 +107,7 @@ void setup()
     colorsBlue.push_back(Rovi::tuBlue);
     colorsBlue.push_back(Rovi::tuDarkBlue);
     colorCircleBlue->setColors(colorsBlue);
+    effects.push_back(colorCircleBlue);
   }  
 
   {
@@ -95,6 +116,7 @@ void setup()
     colorsGreen.push_back(Rovi::tuGreen);
     colorsGreen.push_back(Rovi::tuDarkGreen);
     colorCircleGreen->setColors(colorsGreen);
+    effects.push_back(colorCircleGreen);
   }  
 
   {
@@ -103,13 +125,11 @@ void setup()
     colorsPurple.push_back(Rovi::tuPurple);
     colorsPurple.push_back(Rovi::tuDarkPurple);
     colorCirclePurple->setColors(colorsPurple);
+    effects.push_back(colorCirclePurple);
   }  
 
-  // xmastree->setEffect(colorCircleRGB);
-  xmastree->setEffect(colorCirclePurple);
+  selectRandomEffect();
 }
-
-uint8_t colorIdx = 0;
 
 void loop()
 {
@@ -117,12 +137,17 @@ void loop()
 
     xmastree->update();
 
+    auto now = std::chrono::system_clock::now();
+    if(now > nextEffectSelection) {
+      selectRandomEffect();
+    }
+
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(128,0,0), 0);
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,128,0), 1);
     // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,0,128), 2);
     // xmastree->show();
 
-    Serial << "." << endl;
+    // Serial << "." << endl;
     // Serial << "RED" << endl;
     // nanoleaf.setColor(std::make_shared<RGBColor>(128,0,0));
     // sleep(5);
