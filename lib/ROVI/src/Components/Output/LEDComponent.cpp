@@ -175,6 +175,46 @@ namespace Rovi {
             m_effect->stop();
         }
 
+        bool LEDComponent::isAdressable() const {
+            return false;
+        }
+
+        size_t LEDComponent::nbPixel() const {
+            return 1;
+        }
+
+        void LEDComponent::setColor(const std::shared_ptr<Color>& color, size_t pixelIdx) {
+            if(!isAdressable()) {
+                Serial << "Not adressable" << endl;
+                return;
+            }
+
+            Serial << "--- LEDComponent::setColor" << endl;
+            m_on = true;
+            setColorImpl(color, pixelIdx);
+        }
+
+        void LEDComponent::setColor(const std::string& payload, size_t pixelIdx) {
+            Serial << "  setColor() " << endl;
+            auto color = Color::createColor(payload);
+            Serial << "    Color:      " << color->toString().c_str() << endl;
+            setColor(color, pixelIdx);
+        }
+
+        std::shared_ptr<Color> LEDComponent::color(size_t pixelIdx) const {
+            if(!isAdressable()) {
+                return m_color;
+            }
+
+            return colorImpl(pixelIdx);
+        }
+
+        void LEDComponent::show() {
+            showImpl();
+        }
+
+
+
         AdressableLedComponent::AdressableLedComponent(size_t nbPixel, const std::string& name) 
         : LEDComponent{name}
         , m_nbPixel{nbPixel}
@@ -188,30 +228,28 @@ namespace Rovi {
 
         }           
 
+        bool AdressableLedComponent::isAdressable() const {
+            return true;
+        }
+
         size_t AdressableLedComponent::nbPixel() const {
             return m_nbPixel;
         }
 
-        void AdressableLedComponent::setColor(const std::shared_ptr<Color>& color, size_t pixelIdx) {
+        void AdressableLedComponent::setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) {
             if(pixelIdx >= m_nbPixel) {
+                Serial << "Invalid index" << endl;
                 return;
             }
 
-            Serial << "--- AdressableLedComponent::setColor" << endl;
+            Serial << "--- LEDComponent::setColor" << endl;
             m_on = true;
-            setColorImpl(color, pixelIdx);
             m_colors[pixelIdx] = color;
         }
 
-        void AdressableLedComponent::setColor(const std::string& payload, size_t pixelIdx) {
-            Serial << "  setColor() " << endl;
-            auto color = Color::createColor(payload);
-            Serial << "    Color:      " << color->toString().c_str() << endl;
-            setColor(color, pixelIdx);
-        }
-
-        std::shared_ptr<Color> AdressableLedComponent::color(size_t pixelIdx) const {
+        std::shared_ptr<Color> AdressableLedComponent::colorImpl(size_t pixelIdx) const {
             if(pixelIdx >= m_nbPixel) {
+                Serial << "Invalid index" << endl;
                 return nullptr;
             }
 

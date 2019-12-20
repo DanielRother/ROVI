@@ -56,6 +56,8 @@ namespace Rovi {
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
                 Serial << "--- FastLedComponent::setColor" << endl;
 
+                AdressableLedComponent::setColorImpl(color, pixelIdx);
+
                 if(!m_isInit) {
                     std::cout << "Not initialized!" << std::endl;
                     return;
@@ -80,7 +82,7 @@ namespace Rovi {
                 FastLED.show();
             }
 
-            virtual void show() override {
+            virtual void showImpl() override {
                 FastLED.show();
             }
 

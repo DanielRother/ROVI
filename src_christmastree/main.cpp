@@ -61,11 +61,11 @@ void loop()
 {
     ArduinoOTA.handle();
 
-    // xmastree->update(); 
-    xmastree->setColor(std::make_shared<Rovi::RGBColor>(128,0,0), 0);
-    xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,128,0), 1);
-    xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,0,128), 2);
-    xmastree->show();
+    xmastree->update(); 
+    // xmastree->setColor(std::make_shared<Rovi::RGBColor>(128,0,0), 0);
+    // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,128,0), 1);
+    // xmastree->setColor(std::make_shared<Rovi::RGBColor>(0,0,128), 2);
+    // xmastree->show();
 
     Serial << "." << endl;
     // Serial << "RED" << endl;

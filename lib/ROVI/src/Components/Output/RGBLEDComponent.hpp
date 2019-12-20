@@ -59,6 +59,18 @@ namespace Rovi {
             }
 
         protected:
+            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
+                Serial << "Not supported. Never should come here..." << endl;
+            }
+
+            virtual std::shared_ptr<Color> colorImpl(size_t pixelIdx) const override {
+                Serial << "Not supported. Never should come here..." << endl;
+            }
+
+            virtual void showImpl() override {
+                Serial << "Not supported. Never should come here..." << endl;
+            }
+
             uint8_t m_pinR;
             uint8_t m_pinG;
             uint8_t m_pinB;

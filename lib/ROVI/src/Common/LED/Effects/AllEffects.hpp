@@ -5,5 +5,6 @@
 #include "ColorStatic.h"
 #include "ColorFlow.hpp"
 #include "RandomColor.hpp"
+#include "Rainbow.hpp"
 
 #endif /* __ALLLEDEFFECTS__ */

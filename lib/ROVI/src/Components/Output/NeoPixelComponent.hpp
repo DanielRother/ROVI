@@ -59,6 +59,8 @@ namespace Rovi {
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
                 Serial << "--- NeoPixel::setColor" << endl;
+                AdressableLedComponent::setColorImpl(color, pixelIdx);
+
                 auto rgb = color->toRGB();
 
                 // Serial << "pixelIdx: " << pixelIdx;
@@ -69,11 +71,6 @@ namespace Rovi {
                     // Serial << " GRB" << endl;
                     pixels.setPixelColor(pixelIdx, rgb->g, rgb->r, rgb->b);
                 }
-
-                // Possible workaround to prevent flickering
-                // See https://github.com/adafruit/Adafruit_NeoPixel/issues/139 for more details
-                delay(1);
-                pixels.show();
             }
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
@@ -83,7 +80,7 @@ namespace Rovi {
                 // If so, convert NeoPixels color type...
             }
 
-            virtual void show() override {
+            virtual void showImpl() override {
                 pixels.show();
             }
 

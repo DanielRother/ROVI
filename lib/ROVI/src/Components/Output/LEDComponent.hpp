@@ -48,11 +48,21 @@ namespace Rovi {
             void startEffect();
             void stopEffect();
 
+            virtual bool isAdressable() const;
+            virtual size_t nbPixel() const;
+            void setColor(const std::shared_ptr<Color>& color, size_t pixelIdx);
+            void setColor(const std::string& color, size_t pixelIdx);
+            std::shared_ptr<Color> color(size_t pixelIdx) const;
+            virtual void show();
 
         protected:
             // Interface for the derived class
             virtual void setBrightnessImpl(uint8_t brightness) = 0;
             virtual void setColorImpl(const std::shared_ptr<Color>& color) = 0;
+
+            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) = 0;
+            virtual std::shared_ptr<Color> colorImpl(size_t pixelIdx) const = 0;
+            virtual void showImpl() = 0;
 
             // TODO: Use Homie/PalyoadDataTypes
             bool m_on;
@@ -76,18 +86,14 @@ namespace Rovi {
         public:
             AdressableLedComponent(size_t nbPixel, const std::string& name = "AdressableLedComponent");
             // AdressableLedComponent(const AdressableLedComponent& other);
-            virtual ~AdressableLedComponent() /*= default*/;            
+            virtual ~AdressableLedComponent() /*= default*/;      
 
-            size_t nbPixel() const;
-            using LEDComponent::setColor;
-            void setColor(const std::shared_ptr<Color>& color, size_t pixelIdx);
-            void setColor(const std::string& color, size_t pixelIdx);
-            using LEDComponent::color;
-            std::shared_ptr<Color> color(size_t pixelIdx) const;
-            virtual void show() = 0;
+            virtual bool isAdressable() const override;
+            virtual size_t nbPixel() const override;
 
         protected:
-            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) = 0;
+            virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx);
+            virtual std::shared_ptr<Color> colorImpl(size_t pixelIdx) const;
 
             size_t m_nbPixel;
             std::vector<std::shared_ptr<Color>> m_colors;
