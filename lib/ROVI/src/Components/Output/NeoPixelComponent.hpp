@@ -39,8 +39,8 @@ namespace Rovi {
                 Serial << "--- NeoPixel::setColor" << endl;
                 auto rgb = color->toRGB();
 
-                pixels.setPixelColor(0,0,0,0);
-                for(uint16_t pixelIdx = 1; pixelIdx < pixels.numPixels(); ++pixelIdx) {
+                // pixels.setPixelColor(0,0,0,0);
+                for(uint16_t pixelIdx = 0; pixelIdx < pixels.numPixels(); ++pixelIdx) {
                     // Serial << "pixelIdx: " << pixelIdx;
                     if(swapRGValues[pixelIdx] == 0) {
                         // Serial << " RGB" << endl;

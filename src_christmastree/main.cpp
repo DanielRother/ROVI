@@ -15,17 +15,18 @@ Basecamp iot{
 
 #include <BaseClasses/RoviDevice.hpp>
 #include <Components/Output/NeoPixelComponent.hpp>
+#include <Components/Output/FastLedComponent.hpp>
 #include <Common/LED/LEDEffectFactory.hpp>
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
 
-auto nbPixel = 50;
-auto pin = 15;
+#define nbPixel 50
+#define pin 15
 auto name = "weihnachtsbaum";
-auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
+// auto xmastree = std::make_shared<Rovi::Components::NeoPixelComponent>(nbPixel, pin, name);
+auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
 auto colorFlow = Rovi::LEDEffectFactory::getEffect("color_flow", xmastree.get());
-
 
 void setup()
 {
@@ -51,7 +52,10 @@ void setup()
   xmastree->setColor(std::make_shared<Rovi::HSVColor>(128,0.0f,0.5f));
   Serial << "Start color flow" << endl;
   xmastree->setEffect(colorFlow);
+  xmastree->init();
 }
+
+uint8_t colorIdx = 0;
 
 void loop()
 {
