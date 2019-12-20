@@ -40,7 +40,7 @@ auto colorCircleGreen = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colo
 auto colorCirclePurple = std::make_shared<Rovi::ColorCircle>(xmastree.get(), colorCircleDelay);
 
 std::vector<std::shared_ptr<Rovi::LEDEffect>> effects;
-auto timePerEffect = std::chrono::seconds(10);
+auto timePerEffect = std::chrono::minutes(15);
 std::chrono::time_point<std::chrono::system_clock> nextEffectSelection;
 
 void selectRandomEffect() {

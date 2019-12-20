@@ -33,7 +33,8 @@ namespace Rovi {
 
             // TBD: Why must this be called later and frm external and cannot be done in the ctor or inside of this class?!
             void init() {
-                FastLED.addLeds<NEOPIXEL, PIN>(m_leds.data(), NB_PIXEL);
+                // FastLED.addLeds<NEOPIXEL, PIN>(m_leds.data(), NB_PIXEL);
+                FastLED.addLeds<WS2811, PIN, RGB>(m_leds.data(), NB_PIXEL);      // TODO: Pass the ordering as ctor variable
                 m_isInit = true;
             }
 
