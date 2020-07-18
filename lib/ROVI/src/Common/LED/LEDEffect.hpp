@@ -2,6 +2,9 @@
 #define __LED_EFFECT_H__
 
 #include <stdint.h>
+#include <memory>
+
+#include "ColorTypes.h"
 
 namespace Rovi {
     // class LEDEffect;
@@ -26,6 +29,7 @@ namespace Rovi {
         // Function to be implemented by actual effect
         virtual void step() = 0;
 
+        std::shared_ptr<Color> getCurrentColor();
         float getCurrentBrightness();
 
         // std::shared_ptr<LEDComponent> led;      // TODO: Synchronize access

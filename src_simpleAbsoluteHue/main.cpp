@@ -57,11 +57,12 @@ void setup() {
 
   // // Setup LED
   // leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
-  // auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
-  // for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
-  //   swapRGValues[pixelIdx] = 1;
-  // }
+  auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
+  for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
+    swapRGValues[pixelIdx] = 1;
+  }
   // leds->setSwapRGValues(swapRGValues);
+  absolutHue->setSwapRGValues(swapRGValues);
 
 
 

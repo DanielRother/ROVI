@@ -13,7 +13,8 @@ namespace Rovi {
         , m_on{true}
         , m_brightness{50}
         , m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)}
-        , m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} {
+        , m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} 
+        {
             setOn(m_on);
             setBrightness(m_brightness);
             setColor(m_color);
@@ -23,6 +24,8 @@ namespace Rovi {
             setupClick();
             setupDoubleClick();
             setupHold();
+
+            // TODO: Add possible effects list
         };
 
         void SimpleAbsoluteHue::update() {
@@ -44,7 +47,7 @@ namespace Rovi {
             auto valueChangeCallback = [this](int brightness) {
                 std::cout << "NORMAL value change callback - Set brightness to new value = " << brightness << std::endl;
                 setBrightness(brightness);
-                setColor(m_color);
+                // setColor(m_color);
             };
 
             const auto minRotaryValue = 0;
@@ -86,7 +89,8 @@ namespace Rovi {
 
             auto valueChangeCallback = [&](int hue) {
                 std::cout << "DOUBLE_CLICKED value change callback - Set hue to new value = " << hue << std::endl;
-                setHue(hue);
+                auto color = std::make_shared<HSVColor>(hue, 1.0f, 1.0f);
+                setColor(color);
             };
 
             const auto minRotaryValue = 0;
@@ -165,6 +169,7 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setHue(uint32_t hue) {
+            std::cout << "--- SimpleAbsoluteHue::setHue() to " << hue << std::endl;
             leds->setHue(hue);
             m_color = leds->color();
             rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, m_color->toHSV()->h);
@@ -182,6 +187,10 @@ namespace Rovi {
         void SimpleAbsoluteHue::setEffect(int effect) {
             leds->setEffect(effect); 
             m_effect = leds->effect();   
+        }
+
+        void SimpleAbsoluteHue::setSwapRGValues(const std::vector<uint32_t> newSwapRGValues) {
+            leds->setSwapRGValues(newSwapRGValues);
         }
     }
 }

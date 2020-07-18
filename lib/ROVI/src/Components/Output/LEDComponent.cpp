@@ -110,10 +110,11 @@ namespace Rovi {
         }
 
         void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
-                // Serial << "--- LEDComponent::setColor" << endl;
-                m_on = true;
-                setColorImpl(color);
-                m_color = color;
+            std::cout << "--- LEDComponent::setColor() to " << color->toRGB()->toString() << std::endl;
+
+            m_on = true;
+            setColorImpl(color);
+            m_color = color;
         }
 
         // void LEDComponent::setColor(const std::string& payload) {
@@ -132,9 +133,13 @@ namespace Rovi {
         }
 
         void LEDComponent::setHue(uint32_t hue) {
+            std::cout << "--- LEDComponent::setHue() to " << hue << std::endl;
+
             auto hsvColor = m_color->toHSV();
             hsvColor->h = Utils::clamp((float) hue, 0.0f, 360.0f);      // TODO: Move to Color class
+            std::cout << "--- Color should be set to " << hsvColor->toHSV()->toString() << ", i.e. " << hsvColor->toRGB()->toString() << std::endl;
             setColor(hsvColor);
+            std::cout << "--- Color is now " << color()->toHSV()->toString() << std::endl;
         }
 
         // void LEDComponent::setHue(const std::string& payload) {
@@ -189,7 +194,7 @@ namespace Rovi {
                 return;
             }
 
-            // Serial << "--- LEDComponent::setColor" << endl;
+            Serial << "--- LEDComponent::setColor" << endl;
             m_on = true;
             setColorImpl(color, pixelIdx);
         }
@@ -242,7 +247,7 @@ namespace Rovi {
                 return;
             }
 
-            // Serial << "--- LEDComponent::setColor" << endl;
+            Serial << "--- AdressableLedComponent::setColor" << endl;
             m_on = true;
             m_colors[pixelIdx] = color;
         }

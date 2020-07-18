@@ -22,6 +22,10 @@ namespace Rovi {
         }
     }
 
+    std::shared_ptr<Color> LEDEffect::getCurrentColor() {
+        return led->color();
+    }
+
     float LEDEffect::getCurrentBrightness() {
         return led->color()->toHSV()->v;
     }

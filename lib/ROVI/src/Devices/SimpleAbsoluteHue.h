@@ -28,6 +28,8 @@ namespace Rovi {
                 void setEffect(const std::shared_ptr<LEDEffect>& effect);
                 void setEffect(int effect);
 
+                void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues);
+
             protected:
                 void setupNormal();
                 void setupClick();
