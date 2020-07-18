@@ -7,10 +7,10 @@
 
 #include <ArduinoIostream.hpp>
 
-#include "BaseClasses/RoviComponent.hpp"
 #include "LED/LEDComponent.hpp"
 #include "LED/ColorTypes.h"
 #include "LEDEffect.hpp"
+#include "UtilFunctions.hpp"
 
 namespace Rovi {
     namespace Components {
@@ -54,7 +54,7 @@ namespace Rovi {
             virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- LEDRGB::setBrightness" << endl;
                 auto hsvColor = lastColor->toHSV();
-                hsvColor->v = brightness;
+                hsvColor->v = Utils::scale(brightness, 1.0f);
                 setColor(hsvColor);
             }
 

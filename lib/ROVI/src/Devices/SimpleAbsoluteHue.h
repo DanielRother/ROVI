@@ -3,9 +3,11 @@
 
 #include <memory>
 
-#include "Components/Input/RotaryEncoderWithButton.hpp"     // TODO: Simplfy, i.e. remove MQTT
+#include "Components/Input/RotaryEncoderWithButton.hpp"
 #include "Common/LED/ColorTypes.h"
-#include "Components/Output/NeoPixelComponent.hpp"             // TODO: Simplfy, i.e. remove MQTT
+#include "Components/Output/NeoPixelComponent.hpp"
+#include "Components/Output/FastLedComponent.hpp"
+
 
 namespace Rovi {
     namespace Devices {

@@ -56,6 +56,8 @@ namespace Rovi {
                 // See https://github.com/adafruit/Adafruit_NeoPixel/issues/139 for more details
                 delay(1);
                 pixels.show();
+                delay(1);
+                pixels.show();
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
@@ -72,6 +74,13 @@ namespace Rovi {
                     // std::cout << " GRB" << std::endl;
                     pixels.setPixelColor(pixelIdx, rgb->g, rgb->r, rgb->b);
                 }
+
+                // Possible workaround to prevent flickering
+                // See https://github.com/adafruit/Adafruit_NeoPixel/issues/139 for more details
+                delay(1);
+                pixels.show();
+                delay(1);
+                pixels.show();
             }
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
@@ -85,9 +94,14 @@ namespace Rovi {
 
                 delay(1);
                 pixels.show();
+                delay(1);
+                pixels.show();
             }
 
             virtual void showImpl() override {
+                delay(1);
+                pixels.show();
+                delay(1);
                 pixels.show();
             }
 
