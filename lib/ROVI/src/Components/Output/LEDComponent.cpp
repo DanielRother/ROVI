@@ -79,6 +79,7 @@ namespace Rovi {
             Serial << "--- LEDComponent::setBrightness to " << (uint32_t) brightness << endl;
             setOn(true);
             auto limitedBrightness = Utils::clamp(brightness, (uint8_t) 0, (uint8_t) 100);      // TBD: Move to Color class?
+            Serial << "--- limitedBrightness " << (uint32_t) limitedBrightness << endl;
             setBrightnessImpl(limitedBrightness);
             m_brightness = limitedBrightness;
         }

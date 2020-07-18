@@ -47,7 +47,12 @@ namespace Rovi {
             auto valueChangeCallback = [this](int brightness) {
                 std::cout << "NORMAL value change callback - Set brightness to new value = " << brightness << std::endl;
                 setBrightness(brightness);
-                // setColor(m_color);
+                // Not sure why this is required but otherwise the brightness is not set at all when changing
+                // from 0 to a small percentage
+                if(brightness < 20) {
+                    setBrightness(brightness);
+                }
+                std::cout << "--- brightness set to " << (uint32_t) m_brightness << std::endl;
             };
 
             const auto minRotaryValue = 0;

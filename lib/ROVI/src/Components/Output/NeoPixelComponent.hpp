@@ -37,17 +37,17 @@ namespace Rovi {
 
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
-                // Serial << "--- NeoPixel::setColor" << endl;
+                // std::cout << "--- NeoPixel::setColor" << std::endl;
                 auto rgb = color->toRGB();
 
                 // pixels.setPixelColor(0,0,0,0);
                 for(uint16_t pixelIdx = 0; pixelIdx < pixels.numPixels(); ++pixelIdx) {
-                    // Serial << "pixelIdx: " << pixelIdx;
+                    // std::cout << "pixelIdx: " << pixelIdx;
                     if(swapRGValues[pixelIdx] == 0) {
-                        // Serial << " RGB" << endl;
+                        // std::cout << " RGB" << std::endl;
                         pixels.setPixelColor(pixelIdx, rgb->r, rgb->g, rgb->b);
                     } else {
-                        // Serial << " GRB" << endl;
+                        // std::cout << " GRB" << std::endl;
                         pixels.setPixelColor(pixelIdx, rgb->g, rgb->r, rgb->b);
                     }
                 }
@@ -59,28 +59,32 @@ namespace Rovi {
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
-                Serial << "--- NeoPixel::setColorImpl() to " << color->toRGB()->toString() << endl;
+                std::cout << "--- NeoPixel::setColorImpl() to " << color->toRGB()->toString() << std::endl;
                 AdressableLedComponent::setColorImpl(color, pixelIdx);
 
                 auto rgb = color->toRGB();
 
-                // Serial << "pixelIdx: " << pixelIdx;
+                // std::cout << "pixelIdx: " << pixelIdx;
                 if(swapRGValues[pixelIdx] == 0) {
-                    // Serial << " RGB" << endl;
+                    // std::cout << " RGB" << std::endl;
                     pixels.setPixelColor(pixelIdx, rgb->r, rgb->g, rgb->b);
                 } else {
-                    // Serial << " GRB" << endl;
+                    // std::cout << " GRB" << std::endl;
                     pixels.setPixelColor(pixelIdx, rgb->g, rgb->r, rgb->b);
                 }
             }
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
-                Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
+                std::cout << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << std::endl;
 
                 auto convertedBrightness = Utils::scale(brightness, 255);
+                std::cout << "--- limitedBrightness " << (uint32_t) convertedBrightness << std::endl;
                 pixels.setBrightness(convertedBrightness);
                 // TBD: Should the new color be stored?
                 // If so, convert NeoPixels color type...
+
+                delay(1);
+                pixels.show();
             }
 
             virtual void showImpl() override {
