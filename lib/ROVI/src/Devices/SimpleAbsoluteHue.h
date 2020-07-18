@@ -18,20 +18,15 @@ namespace Rovi {
 
                 bool isOn() const;
                 void setOn(bool on);
-                // void setOn(const std::string& on);
                 uint8_t brightness() const;
-                void setBrightness(int brightness);
-                // void setBrightness(const std::string& brightness);
+                void setBrightness(uint8_t brightness);
                 std::shared_ptr<Color> color() const;
                 void setColor(const std::shared_ptr<Color>& color);
-                // void setColor(const std::string& color);
-                float hue() const;
-                void setHue(float hue);
-                // void setHue(const std::string& hue);
+                uint32_t hue() const;
+                void setHue(uint32_t hue);
                 std::shared_ptr<LEDEffect> effect() const;
                 void setEffect(const std::shared_ptr<LEDEffect>& effect);
                 void setEffect(int effect);
-                // void setEffect(const std::string& effect);
 
             protected:
                 void setupNormal();
@@ -45,6 +40,7 @@ namespace Rovi {
                 std::shared_ptr<Components::RotaryEncoderWithButton> rotary;
                 std::shared_ptr<Components::NeoPixelComponent> leds;
 
+                // TBD: Are storing within this class required?
                 bool m_on;
                 uint8_t m_brightness;
                 std::shared_ptr<Color> m_color;

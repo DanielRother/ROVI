@@ -21,7 +21,7 @@ namespace Rovi {
       Color() = default;
 
     public:
-      static std::shared_ptr<Color> createColor(std::string payload);
+      // static std::shared_ptr<Color> createColor(std::string payload);
 
       virtual std::string toString() = 0;
       virtual std::shared_ptr<RGBColor> toRGB() = 0;

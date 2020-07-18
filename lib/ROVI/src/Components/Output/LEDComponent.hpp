@@ -31,27 +31,21 @@ namespace Rovi {
             void update();
             bool isOn() const;
             void setOn(bool on);
-            void setOn(const std::string& payload);
             uint8_t brightness() const;
-            void setBrightness(int brightness);
-            void setBrightness(const std::string& brightness);
+            void setBrightness(uint8_t brightness);
             std::shared_ptr<Color> color() const ;
             void setColor(const std::shared_ptr<Color>& color);
-            void setColor(const std::string& color);
             std::shared_ptr<LEDEffect> effect() const;
-            float hue() const;
-            void setHue(float hue);
-            void setHue(const std::string& hue);
+            uint32_t hue() const;
+            void setHue(uint32_t hue);
             void setEffect(const std::shared_ptr<LEDEffect>& effect);
             void setEffect(int effect);
-            void setEffect(const std::string& effect);
             void startEffect();
             void stopEffect();
 
             virtual bool isAdressable() const;
             virtual size_t nbPixel() const;
             void setColor(const std::shared_ptr<Color>& color, size_t pixelIdx);
-            void setColor(const std::string& color, size_t pixelIdx);
             std::shared_ptr<Color> color(size_t pixelIdx) const;
             virtual void show();
 

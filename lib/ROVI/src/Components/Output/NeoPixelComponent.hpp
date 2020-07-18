@@ -14,6 +14,7 @@
 #include "LEDComponent.hpp"
 #include "Common/LED/ColorTypes.h"
 #include "Common/LED/LEDEffect.hpp"
+#include "UtilFunctions.hpp"
 
 namespace Rovi {
     namespace Components {
@@ -75,7 +76,9 @@ namespace Rovi {
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- NeoPixel::setBrightness to " << (uint32_t) brightness << endl;
-                pixels.setBrightness(brightness);
+
+                auto convertedBrightness = Utils::scale(brightness, 255);
+                pixels.setBrightness(convertedBrightness);
                 // TBD: Should the new color be stored?
                 // If so, convert NeoPixels color type...
             }

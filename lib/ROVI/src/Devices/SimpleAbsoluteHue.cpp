@@ -11,7 +11,7 @@ namespace Rovi {
         : rotary{std::make_shared<Components::RotaryEncoderWithButton>(pinA, pinB, pinButton)}
         , leds{std::make_shared<Components::NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin)}
         , m_on{true}
-        , m_brightness{128}
+        , m_brightness{50}
         , m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)}
         , m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} {
             setOn(m_on);
@@ -48,7 +48,7 @@ namespace Rovi {
             };
 
             const auto minRotaryValue = 0;
-            const auto maxRotaryValue = 255;
+            const auto maxRotaryValue = 100;
             const auto increment = 10;
             const auto preventOverflow = true;
             rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);
@@ -143,10 +143,11 @@ namespace Rovi {
             return m_brightness;
         }
 
-        void SimpleAbsoluteHue::setBrightness(int brightness) {
+        void SimpleAbsoluteHue::setBrightness(uint8_t brightness) {
             setOn(true);
             leds->setBrightness(brightness);
             m_brightness = leds->brightness();
+            rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, m_brightness);
         }
 
         std::shared_ptr<Color> SimpleAbsoluteHue::color() const {
@@ -156,14 +157,17 @@ namespace Rovi {
         void SimpleAbsoluteHue::setColor(const std::shared_ptr<Color>& color) {
             leds->setColor(color);
             m_color = leds->color();
+            rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, m_color->toHSV()->h);
         }
 
-        float SimpleAbsoluteHue::hue() const {
+        uint32_t SimpleAbsoluteHue::hue() const {
             return leds->hue();
         }
 
-        void SimpleAbsoluteHue::setHue(float hue) {
+        void SimpleAbsoluteHue::setHue(uint32_t hue) {
             leds->setHue(hue);
+            m_color = leds->color();
+            rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, m_color->toHSV()->h);
         }
 
         std::shared_ptr<LEDEffect> SimpleAbsoluteHue::effect() const {

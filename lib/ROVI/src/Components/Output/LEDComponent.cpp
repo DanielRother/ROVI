@@ -56,54 +56,54 @@ namespace Rovi {
             m_on = power;
         };
 
-        void LEDComponent::setOn(const std::string& payload) {
-            std::cout << "  setPower() " << endl;
+        // void LEDComponent::setOn(const std::string& payload) {
+        //     std::cout << "  setPower() " << endl;
 
-            // Convert to lower cases
-            auto localPayload = payload;
-            std::transform(begin(localPayload), end(localPayload), begin(localPayload),::tolower);
+        //     // Convert to lower cases
+        //     auto localPayload = payload;
+        //     std::transform(begin(localPayload), end(localPayload), begin(localPayload),::tolower);
 
-            bool power = false;
-            if(payload == "on" || payload == "true" || payload == "1") {
-                power = true;
-            }
+        //     bool power = false;
+        //     if(payload == "on" || payload == "true" || payload == "1") {
+        //         power = true;
+        //     }
 
-            setOn(power);
-        }
+        //     setOn(power);
+        // }
 
         uint8_t LEDComponent::brightness() const {
             return m_brightness;
         }
 
-        void LEDComponent::setBrightness(int brightness) {
+        void LEDComponent::setBrightness(uint8_t brightness) {
             Serial << "--- LEDComponent::setBrightness to " << (uint32_t) brightness << endl;
             setOn(true);
-            auto limitedBrightness = Utils::clamp(brightness, 0, 255);      // TBD: Move to Color class?
+            auto limitedBrightness = Utils::clamp(brightness, (uint8_t) 0, (uint8_t) 100);      // TBD: Move to Color class?
             setBrightnessImpl(limitedBrightness);
             m_brightness = limitedBrightness;
         }
 
-        void LEDComponent::setBrightness(const std::string& payload) {
-            Serial << "  setBrightness() " << endl;
+        // void LEDComponent::setBrightness(const std::string& payload) {
+        //     Serial << "  setBrightness() " << endl;
 
-            // uint8_t brightness = 255;
-            // stoi is not supported by PlatformIO... :(
-            // try {
-            //     brightness = std::stoi(payload);
-            // } catch(const std::invalid_argument e& e) {
-            //     Serial << "  Payload (" << payload << ") could not be converted to uint8_t" << endl << e.what() << endl;
-            // }
+        //     // uint8_t brightness = 255;
+        //     // stoi is not supported by PlatformIO... :(
+        //     // try {
+        //     //     brightness = std::stoi(payload);
+        //     // } catch(const std::invalid_argument e& e) {
+        //     //     Serial << "  Payload (" << payload << ") could not be converted to uint8_t" << endl << e.what() << endl;
+        //     // }
 
-            // TODO: Error handling
-            auto brightness = atoi(payload.c_str());
-            setBrightness(brightness);
+        //     // TODO: Error handling
+        //     auto brightness = atoi(payload.c_str());
+        //     setBrightness(brightness);
 
-            // TBD: Still required?
-            // auto color = m_color->toHSV();
-            // color->v = (float) m_brightness / 255.0f;
-            // m_color = color->toRGB();
-            // setColor(color);     
-        }
+        //     // TBD: Still required?
+        //     // auto color = m_color->toHSV();
+        //     // color->v = (float) m_brightness / 255.0f;
+        //     // m_color = color->toRGB();
+        //     // setColor(color);     
+        // }
 
         std::shared_ptr<Color> LEDComponent::color() const {
             return m_color;
@@ -116,31 +116,31 @@ namespace Rovi {
                 m_color = color;
         }
 
-        void LEDComponent::setColor(const std::string& payload) {
-            Serial << "  setColor() " << endl;
-            auto color = Color::createColor(payload);
-            Serial << "    Color:      " << color->toString().c_str() << endl;
-            // TBD: Still required?
-            // m_brightness = static_cast<uint8_t>(std::min(std::max(m_color->toHSV()->v * 255.0f, 0.0f), 255.0f));
-            // setBrightness(m_brightness);
-            // Serial << "    Brightness: " << m_brightness << endl;
-            setColor(color);
-        }
+        // void LEDComponent::setColor(const std::string& payload) {
+        //     Serial << "  setColor() " << endl;
+        //     auto color = Color::createColor(payload);
+        //     Serial << "    Color:      " << color->toString().c_str() << endl;
+        //     // TBD: Still required?
+        //     // m_brightness = static_cast<uint8_t>(std::min(std::max(m_color->toHSV()->v * 255.0f, 0.0f), 255.0f));
+        //     // setBrightness(m_brightness);
+        //     // Serial << "    Brightness: " << m_brightness << endl;
+        //     setColor(color);
+        // }
 
-        float LEDComponent::hue() const {
+        uint32_t LEDComponent::hue() const {
             return m_color->toHSV()->h;
         }
 
-        void LEDComponent::setHue(float hue) {
+        void LEDComponent::setHue(uint32_t hue) {
             auto hsvColor = m_color->toHSV();
-            hsvColor->h = Utils::clamp(hue, 0.0f, 360.0f);      // TODO: Move to Color class
+            hsvColor->h = Utils::clamp((float) hue, 0.0f, 360.0f);      // TODO: Move to Color class
             setColor(hsvColor);
         }
 
-        void LEDComponent::setHue(const std::string& payload) {
-            auto hue = atof(payload.c_str());
-            setHue(hue);
-        }
+        // void LEDComponent::setHue(const std::string& payload) {
+        //     auto hue = atof(payload.c_str());
+        //     setHue(hue);
+        // }
 
         std::shared_ptr<LEDEffect> LEDComponent::effect() const {
             return m_effect;
@@ -159,13 +159,13 @@ namespace Rovi {
             setEffect(selectedEffect);
         }
 
-        void LEDComponent::setEffect(const std::string& payload) {
-            Serial << "  LEDComponent::setEffect() " << endl;
+        // void LEDComponent::setEffect(const std::string& payload) {
+        //     Serial << "  LEDComponent::setEffect() " << endl;
 
-            // TODO/TBD?: Use effect name?
-            auto effectNumber = atoi(payload.c_str());
-            setEffect(effectNumber);
-        }
+        //     // TODO/TBD?: Use effect name?
+        //     auto effectNumber = atoi(payload.c_str());
+        //     setEffect(effectNumber);
+        // }
 
         void LEDComponent::startEffect() {
             m_effect->start();
@@ -194,12 +194,12 @@ namespace Rovi {
             setColorImpl(color, pixelIdx);
         }
 
-        void LEDComponent::setColor(const std::string& payload, size_t pixelIdx) {
-            Serial << "  setColor() " << endl;
-            auto color = Color::createColor(payload);
-            Serial << "    Color:      " << color->toString().c_str() << endl;
-            setColor(color, pixelIdx);
-        }
+        // void LEDComponent::setColor(const std::string& payload, size_t pixelIdx) {
+        //     Serial << "  setColor() " << endl;
+        //     auto color = Color::createColor(payload);
+        //     Serial << "    Color:      " << color->toString().c_str() << endl;
+        //     setColor(color, pixelIdx);
+        // }
 
         std::shared_ptr<Color> LEDComponent::color(size_t pixelIdx) const {
             if(!isAdressable()) {
