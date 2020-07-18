@@ -77,6 +77,14 @@ namespace Rovi {
             HOLDED
           };
 
+          static std::string buttonStateToString(const ButtonStates state);
+
+          struct ButtonStateSetting {
+            int increment;
+            std::function<void(void)> activationCallback;
+            std::function<void(int)> valueChangedCallback;
+          };
+
           RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name = "RotaryEncoder");
           // RotaryEncoderWithButton(const RotaryEncoder& other);
           virtual ~RotaryEncoderWithButton() = default;
@@ -105,7 +113,6 @@ namespace Rovi {
           void invokeRotaryValueChangeCallback(const ButtonStates state, const int value);
           void invokeButtonStateActivatedCallback(const ButtonStates state);
 
-          std::string buttonStateToString(const ButtonStates state) const;
           // std::string prepareMQTTTopicString() const;
 
         protected:
@@ -118,11 +125,13 @@ namespace Rovi {
           ButtonStates buttonState;
           unsigned long lastButtonStateUpdate_ms;
 
-          std::map<ButtonStates, RotaryValue> rotaryValuePerState;
-          std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
-          std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
+          std::map<ButtonStates, ButtonStateSetting> stateSettings;
+          std::map<ButtonStates, RotaryValue> stateValues;
 
-          int m_increment;
+          // std::map<ButtonStates, RotaryValue> rotaryValuePerState;
+          // std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
+          // std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
+          // int m_increment;
 
           static const uint16_t BUTTON_STATE_TIMEOUT_MS;
         };

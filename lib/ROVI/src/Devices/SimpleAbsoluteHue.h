@@ -18,20 +18,20 @@ namespace Rovi {
 
                 bool isOn() const;
                 void setOn(bool on);
-                void setOn(const std::string& on);
+                // void setOn(const std::string& on);
                 uint8_t brightness() const;
                 void setBrightness(int brightness);
-                void setBrightness(const std::string& brightness);
+                // void setBrightness(const std::string& brightness);
                 std::shared_ptr<Color> color() const;
                 void setColor(const std::shared_ptr<Color>& color);
-                void setColor(const std::string& color);
+                // void setColor(const std::string& color);
                 float hue() const;
                 void setHue(float hue);
-                void setHue(const std::string& hue);
+                // void setHue(const std::string& hue);
                 std::shared_ptr<LEDEffect> effect() const;
                 void setEffect(const std::shared_ptr<LEDEffect>& effect);
                 void setEffect(int effect);
-                void setEffect(const std::string& effect);
+                // void setEffect(const std::string& effect);
 
             protected:
                 void setupNormal();

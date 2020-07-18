@@ -145,10 +145,10 @@ namespace Rovi {
             m_on = leds->isOn();
         }
 
-        void SimpleAbsoluteHue::setOn(const std::string& on) {
-            leds->setOn(on);
-            m_on = leds->isOn();
-        }
+        // void SimpleAbsoluteHue::setOn(const std::string& on) {
+        //     leds->setOn(on);
+        //     m_on = leds->isOn();
+        // }
 
         uint8_t SimpleAbsoluteHue::brightness() const {
             return m_brightness;
@@ -159,10 +159,10 @@ namespace Rovi {
             m_brightness = leds->brightness();
         }
 
-        void SimpleAbsoluteHue::setBrightness(const std::string& brightness) {
-            leds->setBrightness(brightness);
-            m_brightness = leds->brightness();
-        }
+        // void SimpleAbsoluteHue::setBrightness(const std::string& brightness) {
+        //     leds->setBrightness(brightness);
+        //     m_brightness = leds->brightness();
+        // }
 
         std::shared_ptr<Color> SimpleAbsoluteHue::color() const {
             return m_color;
@@ -173,10 +173,10 @@ namespace Rovi {
             m_color = leds->color();
         }
 
-        void SimpleAbsoluteHue::setColor(const std::string& color) {
-            leds->setColor(color);
-            m_color = leds->color();
-        }
+        // void SimpleAbsoluteHue::setColor(const std::string& color) {
+        //     leds->setColor(color);
+        //     m_color = leds->color();
+        // }
 
         float SimpleAbsoluteHue::hue() const {
             return leds->hue();
@@ -186,9 +186,9 @@ namespace Rovi {
             leds->setHue(hue);
         }
 
-        void SimpleAbsoluteHue::setHue(const std::string& hue) {
-            leds->setHue(hue);
-        }
+        // void SimpleAbsoluteHue::setHue(const std::string& hue) {
+        //     leds->setHue(hue);
+        // }
 
         std::shared_ptr<LEDEffect> SimpleAbsoluteHue::effect() const {
             return m_effect;
@@ -204,9 +204,9 @@ namespace Rovi {
             m_effect = leds->effect();   
         }
 
-        void SimpleAbsoluteHue::setEffect(const std::string& effect) {
-            leds->setEffect(effect); 
-            m_effect = leds->effect();           
-        }
+        // void SimpleAbsoluteHue::setEffect(const std::string& effect) {
+        //     leds->setEffect(effect); 
+        //     m_effect = leds->effect();           
+        // }
     }
 }

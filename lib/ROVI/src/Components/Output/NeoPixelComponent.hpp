@@ -36,7 +36,7 @@ namespace Rovi {
 
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
-                Serial << "--- NeoPixel::setColor" << endl;
+                // Serial << "--- NeoPixel::setColor" << endl;
                 auto rgb = color->toRGB();
 
                 // pixels.setPixelColor(0,0,0,0);

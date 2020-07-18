@@ -127,7 +127,7 @@ namespace Rovi {
 
         RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name)
           : rotary(pinA, pinB), button(pinButton, true),
-            buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()), m_increment(1) {
+            buttonState(ButtonStates::NORMAL), lastButtonStateUpdate_ms(millis()) {
               // Setup button, i.e. callbacks
               button.attachClick(std::bind(&RotaryEncoderWithButton::onClick, this));
               button.attachDoubleClick(std::bind(&RotaryEncoderWithButton::onDoubleClick, this));
@@ -143,8 +143,9 @@ namespace Rovi {
 
               std::list<ButtonStates> states = {ButtonStates::NORMAL, ButtonStates::CLICKED, ButtonStates::DOUBLE_CLICKED, ButtonStates::HOLDED};
               for(auto& state : states) {
-                buttonStateActivatedCallbacks[state] = defaultButtonStateActivatedCallback;
-                rotaryValueChangedCallbacks[state]   = defaultValueChangeCallback;
+                stateSettings[state].activationCallback = defaultButtonStateActivatedCallback;
+                stateSettings[state].valueChangedCallback = defaultValueChangeCallback;
+                stateSettings[state].increment = 1;
               }
         }
 
@@ -159,7 +160,7 @@ namespace Rovi {
             button.tick();
             auto curButtonState = getCurrentButtonState();
             auto tick = rotary.getRotaryTick();
-            auto newValue = tick * m_increment;
+            auto newValue = tick * stateSettings[curButtonState].increment;
 
             if(tick != 0) {
                 lastButtonStateUpdate_ms = millis();
@@ -171,9 +172,11 @@ namespace Rovi {
 
         void RotaryEncoderWithButton::setupState(const ButtonStates state, const int minValue, const int maxValue, const int increment, const bool preventOverflow, 
           const std::function<void(void)> stateActivatedCallback, const std::function<void(int)> stateValueChangedCallback) {
-            rotaryValuePerState[state] = RotaryValue(maxValue, minValue, preventOverflow);
-            buttonStateActivatedCallbacks[state] = stateActivatedCallback;
-            rotaryValueChangedCallbacks[state] = stateValueChangedCallback;
+            std::cout << "Setup rotary state " << buttonStateToString(state) << ": minValue = " << minValue << ", maxValue = " << maxValue << ", increment = " << increment << ", preventOverflow = " << preventOverflow << endl;
+            stateSettings[state].activationCallback = stateActivatedCallback;
+            stateSettings[state].valueChangedCallback = stateValueChangedCallback;
+            stateSettings[state].increment = increment;
+            stateValues[state] = RotaryValue(maxValue, minValue, preventOverflow);
         }
 
 
@@ -186,12 +189,12 @@ namespace Rovi {
 
 
         int RotaryEncoderWithButton::value(const ButtonStates state) /* const */ {
-            return rotaryValuePerState[state].value();
+            return stateValues[state].value();
         }
 
 
         int RotaryEncoderWithButton::setValue(const ButtonStates state, const int value) {
-            return rotaryValuePerState[state].setValue(value);
+            return stateValues[state].setValue(value);
         }
 
 
@@ -228,11 +231,11 @@ namespace Rovi {
         }
 
         int RotaryEncoderWithButton::incrementStateValueByValue(const ButtonStates state, const int increment) {
-            return rotaryValuePerState[state].incrementByValue(increment);
+            return stateValues[state].incrementByValue(increment);
         }
 
         void RotaryEncoderWithButton::invokeRotaryValueChangeCallback(const ButtonStates state, const int value) {
-            rotaryValueChangedCallbacks[state](value);
+            stateSettings[state].valueChangedCallback(value);
 
             // // MQTT
             std::string buttonStateString   = buttonStateToString(state);
@@ -245,7 +248,7 @@ namespace Rovi {
         }
 
         void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(const ButtonStates state) {
-            buttonStateActivatedCallbacks[state]();
+            stateSettings[state].activationCallback();
 
             // // MQTT here
             // Serial << "RotaryEncoderWithButton - send MQTT message" << endl;
@@ -259,7 +262,7 @@ namespace Rovi {
             Serial << "ButtonState = " << buttonStateString << " activated" << endl;
         }
 
-        std::string RotaryEncoderWithButton::buttonStateToString(const ButtonStates state) const {
+        std::string RotaryEncoderWithButton::buttonStateToString(const ButtonStates state) {
             switch (state) {
                 case ButtonStates::NORMAL:
                     return "NORMAL";

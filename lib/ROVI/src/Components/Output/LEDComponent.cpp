@@ -110,7 +110,7 @@ namespace Rovi {
         }
 
         void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
-                Serial << "--- LEDComponent::setColor" << endl;
+                // Serial << "--- LEDComponent::setColor" << endl;
                 m_on = true;
                 setColorImpl(color);
                 m_color = color;
