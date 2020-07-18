@@ -14,6 +14,11 @@ namespace Rovi {
         , m_brightness{50}
         , m_color{std::make_shared<HSVColor>(0.0f, 0.0f, 0.5f)}
         , m_effect{LEDEffectFactory::getEffect("white_static", leds.get())} 
+        , m_possibleEffects{
+            "white_static",
+            "color_static",
+            "color_flow",            
+            "color_flow_slow"}
         {
             setOn(m_on);
             setBrightness(m_brightness);
@@ -24,8 +29,6 @@ namespace Rovi {
             setupClick();
             setupDoubleClick();
             setupHold();
-
-            // TODO: Add possible effects list
         };
 
         void SimpleAbsoluteHue::update() {
@@ -115,12 +118,12 @@ namespace Rovi {
             };
 
             auto valueChangeCallback = [&](int effectNumber) {
-                std::cout << "HOLDED value change callback - Select effect number " << effectNumber << ", i.e. effect '" << LEDEffectFactory::convertEffectNumberToName(effectNumber) << "'" << std::endl;
-                setEffect(effectNumber);
+                std::cout << "HOLDED value change callback - Select effect number " << effectNumber << ", i.e. effect '" << m_possibleEffects[effectNumber] << "'" << std::endl;
+                setEffect(LEDEffectFactory::getEffect(m_possibleEffects[effectNumber], leds.get()));
             };
 
             const auto minRotaryValue = 0;
-            const auto maxRotaryValue = LEDEffectFactory::getNumberOfEffects() - 1;;
+            const auto maxRotaryValue = m_possibleEffects.size() - 1;
             const auto increment = 1;
             const auto preventOverflow = false;
             rotary->setupState(Components::RotaryEncoderWithButton::ButtonStates::HOLDED, minRotaryValue, maxRotaryValue, increment, preventOverflow, activatedCallback, valueChangeCallback);

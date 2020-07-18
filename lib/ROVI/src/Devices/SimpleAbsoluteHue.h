@@ -47,6 +47,8 @@ namespace Rovi {
                 uint8_t m_brightness;
                 std::shared_ptr<Color> m_color;
                 std::shared_ptr<LEDEffect> m_effect;
+
+                std::vector<std::string> m_possibleEffects;
         };
     }
 }
