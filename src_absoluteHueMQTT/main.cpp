@@ -17,13 +17,7 @@ Basecamp iot{
   Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
 };
 
-// #include "BaseClasses/RoviDevice.hpp"
-
 #include <Devices/AbsoluteHueMQTT.h>
-
-
-// Rovi::RoviDevice myRovi(iot);
-
 
 // RotaryEncoder
 uint8_t rotaryPinA = 12;
@@ -44,21 +38,18 @@ void setup() {
     sleep(5);
     iot.begin();
 
-    // myRovi.setupRovi();
-
     absolutHue = std::make_shared<Rovi::Devices::AbsoluteHueMQTT>(
       iot,
       rotaryPinA, rotaryPinB, rotaryPinButton,
       neoPixelPin, nbNeoPixelLEDs);
 
-  // // Setup LED
-  // leds = std::make_shared<NeoPixelComponent>(nbNeoPixelLEDs, neoPixelPin);
-  auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
-  for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
-    swapRGValues[pixelIdx] = 1;
-  }
-  // leds->setSwapRGValues(swapRGValues);
-  absolutHue->setSwapRGValues(swapRGValues);
+	// Setup LED
+	auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
+	for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
+		swapRGValues[pixelIdx] = 1;
+	}
+	// leds->setSwapRGValues(swapRGValues);
+	absolutHue->setSwapRGValues(swapRGValues);
 
 
 
