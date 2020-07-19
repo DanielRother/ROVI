@@ -24,6 +24,29 @@ namespace Rovi {
                             setupDoubleClick();
                             setupHold();
 
+                            // Restoring currently not possible as it is unclear wheter the local information
+                            // or the last set messages should be used
+                            // --> As some kind of timestamp
+                            
+                            // // Restore configuration
+                            // m_isRestoring = true;
+                            // auto power = iot.configuration.get("rovi-power");
+                            // setOn(power.toInt());
+                            // auto brightness = iot.configuration.get("rovi-power");
+                            // setBrightness(brightness.toInt());
+                            // auto r = iot.configuration.get("rovi-r");
+                            // auto g = iot.configuration.get("rovi-g");
+                            // auto b = iot.configuration.get("rovi-b");
+                            // auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
+                            // setColor(color);
+                            // auto effect = iot.configuration.get("rovi-effect");
+                            // auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
+                            // if (it != m_possibleEffects.end()) {
+                            //     int index = std::distance(m_possibleEffects.begin(), it);
+                            //     setEffect(index);
+                            // }
+                            // m_isRestoring = false;
+
                             sendStateStatusUpdate();
                         }
 
@@ -31,6 +54,7 @@ namespace Rovi {
                     SimpleAbsoluteHue::update();
                     if(isStatusUpdateRequired()) {
                         sendStateStatusUpdate();
+                        m_iot.configuration.save();
                     }
                 }
 
@@ -103,10 +127,18 @@ namespace Rovi {
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
 
-                    if(m_isConnected) {
+                    if(m_isConnected && !m_isRestoring) {
                         m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
                         m_iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output);
                     }
+
+                    // // Save to config
+                    // m_iot.configuration.set("rovi-power", String{m_on});
+                    // m_iot.configuration.set("rovi-brightness", String{m_brightness});
+                    // m_iot.configuration.set("rovi-r", String{curRgbColor->r});
+                    // m_iot.configuration.set("rovi-g", String{curRgbColor->g});
+                    // m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+                    // m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
 
                     lastStateStatusSend_ms = millis();
                 }

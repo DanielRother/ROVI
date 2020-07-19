@@ -16,6 +16,7 @@ namespace Rovi {
                 MqttDevice(Basecamp& iot)
                 : m_iot(iot)
                 , m_isConnected{false}
+                , m_isRestoring{false}
                 , m_hostname{iot.hostname.c_str()}
                 , m_statusTopic{"rovi/" + m_hostname + "/status"}
                 , m_setTopic{"rovi/" + m_hostname + "/set"}
@@ -60,6 +61,7 @@ namespace Rovi {
 
                 Basecamp& m_iot;
                 bool m_isConnected;
+                bool m_isRestoring;
                 std::string m_hostname;
                 std::string m_statusTopic;
                 std::string m_setTopic;
