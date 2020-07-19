@@ -9,6 +9,7 @@ namespace Rovi {
         ColorFlow(Components::LEDComponent* led, uint32_t delay_ms = 100)
             : LEDEffect(led, delay_ms), currentColor(0)
             {
+                m_name = std::string{"color_flow"};
                 Serial << "Colorflow - delay: " << delay_ms << endl;
             }
 

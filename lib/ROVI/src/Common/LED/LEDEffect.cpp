@@ -11,7 +11,12 @@
 namespace Rovi {
     // LEDEffect::LEDEffect(std::shared_ptr<Components::LEDComponent> led)
     LEDEffect::LEDEffect(Components::LEDComponent* led, uint32_t delay_ms)
-    : led(led), delay_ms(delay_ms), lastUpdate_ms(millis()), isStopped(false) {}
+        : led(led)
+        , delay_ms(delay_ms)
+        , lastUpdate_ms(millis())
+        , isStopped(false) 
+        , m_name{"unspecified"}
+        {}
 
     void LEDEffect::update() {
         // Serial << "Dummy LEDEffect. Doesn't do anything" << endl;

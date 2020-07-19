@@ -24,6 +24,8 @@ namespace Rovi {
         void update();
         void start();
         void stop();
+        std::string name() const {return m_name; }
+        void setName(const std::string& name) { m_name = name; }
 
     protected:
         // Function to be implemented by actual effect
@@ -38,6 +40,7 @@ namespace Rovi {
         unsigned long lastUpdate_ms;   
 
         bool isStopped;
+        std::string m_name; 
     };
 }
 

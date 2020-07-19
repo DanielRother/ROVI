@@ -21,7 +21,9 @@ namespace Rovi {
             : LEDEffect(led, delay_ms), 
             generator(std::chrono::system_clock::now().time_since_epoch().count()), distribution(0,360),
             currentColor(0), state(EffectState::INIT), currentSaturation(0.0f)
-            {}
+            {
+                m_name = std::string{"random_color"};
+            }
 
         void step() {
             // Get current brightness

@@ -10,6 +10,7 @@ namespace Rovi {
             : LEDEffect(led, delay_ms)
             , done(false)
             {
+                m_name = std::string{"color_static"};
             }
 
         void step() {

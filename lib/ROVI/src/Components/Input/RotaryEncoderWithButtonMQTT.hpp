@@ -42,10 +42,6 @@ namespace Rovi {
 				}
 				obj["settings"] = settings;
 
-				// char output[MAX_SIZE];
-				// obj.printTo(output);
-				// std::cout << "rotary: " << output << std::endl;
-
     			obj.printTo(json, maxSize);
 			}
 

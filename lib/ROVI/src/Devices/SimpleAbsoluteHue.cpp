@@ -162,7 +162,8 @@ namespace Rovi {
             rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, m_brightness);
         }
 
-        std::shared_ptr<Color> SimpleAbsoluteHue::color() const {
+        std::shared_ptr<Color> SimpleAbsoluteHue::color() {
+            m_color = leds->color();
             return m_color;
         }
 

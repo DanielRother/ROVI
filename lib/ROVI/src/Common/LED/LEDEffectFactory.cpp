@@ -11,17 +11,29 @@ namespace Rovi {
         auto delay_ms    = getDelay(effectLower);
 
         if(effectLower.find("white_static") != std::string::npos) {
-            return std::make_shared<WhiteStatic>(led, delay_ms);
+            auto effect = std::make_shared<WhiteStatic>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         } else if(effectLower.find("color_static") != std::string::npos) {
-            return std::make_shared<ColorStatic>(led, delay_ms);
+            auto effect = std::make_shared<ColorStatic>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         } else if(effectLower.find("color_flow") != std::string::npos) {
-            return std::make_shared<ColorFlow>(led, delay_ms);
+            auto effect = std::make_shared<ColorFlow>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         } else if(effectLower.find("color_random") != std::string::npos) {
-            return std::make_shared<RandomColor>(led, delay_ms);
+            auto effect = std::make_shared<RandomColor>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         } else if(effectLower.find("rainbow") != std::string::npos) {
-            return std::make_shared<Rainbow>(led, delay_ms);
+            auto effect = std::make_shared<Rainbow>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         } else if(effectLower.find("color_circle") != std::string::npos) {
-            return std::make_shared<ColorCircle>(led, delay_ms);
+            auto effect = std::make_shared<ColorCircle>(led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
         }
 
         Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;

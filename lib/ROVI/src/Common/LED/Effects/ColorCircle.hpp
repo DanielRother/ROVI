@@ -11,6 +11,7 @@ namespace Rovi {
             , m_startIdx(0)
             , m_colors(0)
             {
+                m_name = std::string{"color_circle"};
                 Serial << "ColorCircle - delay: " << delay_ms << endl;
             }
 

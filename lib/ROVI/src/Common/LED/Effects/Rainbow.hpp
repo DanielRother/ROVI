@@ -9,6 +9,7 @@ namespace Rovi {
         Rainbow(Components::LEDComponent* led, uint32_t delay_ms = 100)
             : LEDEffect(led, delay_ms), currentStartColor(0)
             {
+                m_name = std::string{"rainbow"};
                 Serial << "Rainbow - delay: " << delay_ms << endl;
             }
 

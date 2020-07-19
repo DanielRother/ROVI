@@ -76,32 +76,34 @@ namespace Rovi {
                     // Create a JsonObject
                     JsonObject& obj = jb.createObject();
 
+                    obj["status"] = "online";
+                    obj["power"] = m_on;
+                    obj["brightness"] = m_brightness;
+                    obj["colorType"] = "rgb";
+                    auto curRgbColor = color()->toRGB();
+                    JsonObject& color = jb.createObject();
+                    color["r"] = curRgbColor->r;       
+                    color["g"] = curRgbColor->g;       
+                    color["b"] = curRgbColor->b;  
+                    obj["color"] = color;     
+                    obj["effect"] = String{m_effect->name().c_str()};
+
+                    JsonObject& settings = jb.createObject();
+                    JsonArray& possibleEffects =jb.createArray();
+                    for(const auto& effects : m_possibleEffects) {
+                        possibleEffects.add(String{effects.c_str()});
+                    }
+                    settings["possibleEffects"] = possibleEffects;
+                    obj["settings"] = settings;
+
                     auto rotaryMqtt = std::static_pointer_cast<Components::RotaryEncoderWithButtonMQTT>(rotary);
                     auto rotaryJsonSize = rotaryMqtt->jsonSize();
                     auto rotaryJson = new char[rotaryJsonSize];
                     rotaryMqtt->status(rotaryJson, rotaryJsonSize);
                     obj["rotary_button"] = RawJson(rotaryJson);
-                    // std::cout << "rotary - size = " <<  rotaryJsonSize << " msg = " << rotaryJson << std::endl;
 
-                    // std::static_pointer_cast<Components::RotaryEncoderWithButtonMQTT>(rotary)->status();
-                    // obj["rotary_button"] = std::static_pointer_cast<Components::RotaryEncoderWithButtonMQTT>(rotary)->status();
-
-                    JsonObject& obj2 = jb.createObject();
-                    obj2["foo"] = 42;
-                    obj2["bar"] = 48.748010;
-                    obj["someNestedObj"] = obj2;
-
-                    // Declare a buffer to hold the result
                     char output[1280];
-
-                    // Produce a minified JSON document
                     obj.printTo(output);
-
-                    // StaticJsonDocument<100> testDocument;       // TODO: Use Dynamic
-                    // testDocument["sensorType"] = "Temperature";
-                    // testDocument["value"] = 10;
-                    // auto msg = std::string{};
-                    // serializeJson(testDocument, msg);
                     std::cout << "msg: " << output << std::endl;
 
                     lastStateStatusSend_ms = millis();
