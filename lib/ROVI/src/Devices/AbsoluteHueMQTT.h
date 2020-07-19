@@ -74,7 +74,6 @@ namespace Rovi {
                     // Create a JsonObject
                     JsonObject& obj = jb.createObject();
 
-                    obj["status"] = "online";
                     obj["power"] = m_on;
                     obj["brightness"] = m_brightness;
                     obj["colorType"] = "rgb";
@@ -105,6 +104,7 @@ namespace Rovi {
                     std::cout << "msg: " << output << std::endl;
 
                     if(m_isConnected) {
+                        m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
                         m_iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output);
                     }
 
