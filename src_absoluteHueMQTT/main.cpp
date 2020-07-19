@@ -11,11 +11,11 @@
 // //***************************************************************************//
 // // Basecamp and Rovi initialize 
 // //***************************************************************************//
-// #include <Basecamp.hpp>
-// // Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
-// Basecamp iot{
-//   Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
-// };
+#include <Basecamp.hpp>
+// Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
+Basecamp iot{
+  Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
+};
 
 // #include "BaseClasses/RoviDevice.hpp"
 
@@ -39,19 +39,15 @@ std::shared_ptr<Rovi::Devices::AbsoluteHueMQTT> absolutHue;
 // Arduino setup()
 //***************************************************************************//
 void setup() {
-  // TODO:
-  //    Test:
-  //        RotaryEncoder
-  //        LEDFactory
-
     std::cout << "--- setup() ---" << endl;
 
-    // sleep(5);
-    // iot.begin();
+    sleep(5);
+    iot.begin();
 
     // myRovi.setupRovi();
 
     absolutHue = std::make_shared<Rovi::Devices::AbsoluteHueMQTT>(
+      iot,
       rotaryPinA, rotaryPinB, rotaryPinButton,
       neoPixelPin, nbNeoPixelLEDs);
 

@@ -10,11 +10,36 @@ namespace Rovi {
     namespace Devices {
         class AbsoluteHueMQTT : public SimpleAbsoluteHue {
             public:
-                AbsoluteHueMQTT(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
+                AbsoluteHueMQTT(Basecamp& iot,
+                        const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
                         const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs)
                         : SimpleAbsoluteHue(pinA, pinB, pinButton, neoPixelPin, nbNeoPixelLEDs)
                         , lastStateStatusSend_ms{0}
+                        , m_isConnected{false}
+                        , m_hostname{""}
+                        , m_statusTopic{""}
+                        , m_setTopic{""}
                         {
+                            // TODO move to baseclass
+                            m_hostname = std::string{iot.hostname.c_str()};
+                            m_setTopic = std::string{"rovi/" + m_hostname + "/set"};
+                            m_statusTopic = std::string{"rovi/" + m_hostname + "/status"};
+
+                            // const int capacity = 100; //JSON_OBJECT_SIZE(1);
+                            // StaticJsonBuffer<capacity>jb;
+                            // JsonObject& obj = jb.createObject();
+                            // obj["status"] = "offline";
+                            // char output[capacity];
+                            // auto len = obj.printTo(output);
+                            // std::cout << "last will: " << output << std::endl;
+                            iot.mqtt.setWill(m_statusTopic.c_str(), 1, true, "{\"status\":\"offline\"}");
+
+                            iot.mqtt.onConnect([&](bool sessionPresent) {mqttConnected(sessionPresent);});
+                            iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {mqttSubscribed(packetId, qos);});
+                            iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
+                                size_t len, size_t index, size_t total) {mqttMessage(topic, payload, properties, len, index, total);});
+                            iot.mqtt.onPublish([&](uint16_t packetId) {mqttPublished(packetId);});
+
                             rotary = std::make_shared<Components::RotaryEncoderWithButtonMQTT>(pinA, pinB, pinButton);
 
                             setupNormal();
@@ -67,6 +92,28 @@ namespace Rovi {
                     return millis() - lastStateStatusSend_ms > STATE_STATUS_SEND_TIMEOUT_MS;
                 }
 
+                //****************************************//
+                // MQTT interface methods
+                //****************************************//
+                // TODO move to baseclass
+                void mqttConnected(bool sessionPresent) {
+                    std::cout << "mqttConnected()" << std::endl;
+
+                    iot.mqtt.subscribe(m_setTopic.c_str(),2);
+                    m_isConnected = true;//sessionPresent;
+                    sendStateStatusUpdate();
+                }
+                void mqttSubscribed(uint16_t packetId, uint8_t qos) {
+                    std::cout << "mqttSubscribed()" << std::endl;
+                }
+                void mqttPublished(uint16_t packetId) {
+                    std::cout << "mqttPublished()" << std::endl;
+                }
+                void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+                    std::cout << "mqttMessage()" << std::endl;
+                }
+
+
                 void sendStateStatusUpdate() {
                     std::cout << "sendStateStatusUpdate()" << std::endl;
 
@@ -106,12 +153,21 @@ namespace Rovi {
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
 
+                    if(m_isConnected) {
+                        iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output);
+                    }
+
                     lastStateStatusSend_ms = millis();
                 }
 
                 unsigned long lastStateStatusSend_ms;
 
                 static const uint16_t STATE_STATUS_SEND_TIMEOUT_MS;
+
+                bool m_isConnected;
+                std::string m_hostname;
+                std::string m_statusTopic;
+                std::string m_setTopic;
         };
 
         const uint16_t AbsoluteHueMQTT::STATE_STATUS_SEND_TIMEOUT_MS = 5000;
