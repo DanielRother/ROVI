@@ -26,7 +26,7 @@ namespace Rovi {
                     m_iot.mqtt.onConnect([&](bool sessionPresent) {mqttConnected(sessionPresent);});
                     m_iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {mqttSubscribed(packetId, qos);});
                     m_iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
-                        size_t len, size_t index, size_t total) {mqttMessage(topic, payload, properties, len, index, total);});
+                        size_t len, size_t index, size_t total) {receiveSetMessage(topic, payload, properties, len, index, total);});
                     m_iot.mqtt.onPublish([&](uint16_t packetId) {mqttPublished(packetId);});
                 }
 
@@ -54,9 +54,7 @@ namespace Rovi {
                 void mqttPublished(uint16_t packetId) {
                     std::cout << "mqttPublished()" << std::endl;
                 }
-                void mqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-                    std::cout << "mqttMessage()" << std::endl;
-                }
+                virtual void receiveSetMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) = 0;
 
                 Basecamp& m_iot;
                 bool m_isConnected;

@@ -50,11 +50,6 @@ namespace Rovi {
             auto valueChangeCallback = [this](int brightness) {
                 std::cout << "NORMAL value change callback - Set brightness to new value = " << brightness << std::endl;
                 setBrightness(brightness);
-                // Not sure why this is required but otherwise the brightness is not set at all when changing
-                // from 0 to a small percentage
-                if(brightness < 20) {
-                    setBrightness(brightness);
-                }
                 std::cout << "--- brightness set to " << (uint32_t) m_brightness << std::endl;
             };
 
@@ -158,6 +153,11 @@ namespace Rovi {
         void SimpleAbsoluteHue::setBrightness(uint8_t brightness) {
             setOn(true);
             leds->setBrightness(brightness);
+            // Not sure why this is required but otherwise the brightness is not set at all when changing
+            // from 0 to a small percentage
+            if(m_brightness == 0) {
+                leds->setBrightness(brightness);
+            }
             m_brightness = leds->brightness();
             rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, m_brightness);
         }
@@ -168,6 +168,9 @@ namespace Rovi {
         }
 
         void SimpleAbsoluteHue::setColor(const std::shared_ptr<Color>& color) {
+            auto effect = LEDEffectFactory::getEffect("color_static", leds.get());
+            setEffect(effect);   
+
             leds->setColor(color);
             m_color = leds->color();
             rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, m_color->toHSV()->h);

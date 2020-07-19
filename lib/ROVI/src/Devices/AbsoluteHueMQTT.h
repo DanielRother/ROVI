@@ -110,6 +110,69 @@ namespace Rovi {
 
                     lastStateStatusSend_ms = millis();
                 }
+
+                void receiveSetMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) override {
+                    std::cout << "mqttMessage() -  topic = " << topic << ", payload = " << payload << std::endl;
+
+                    const int capacity = 2000; //JSON_OBJECT_SIZE(10);
+                    StaticJsonBuffer<capacity>jb;
+
+                    JsonObject& obj = jb.parseObject(payload);
+                    if(obj.success()) {
+                        std::cout << "parseObject() succeeded" << std::endl;
+                    } else {
+                        std::cout << "parseObject() failed" << std::endl;
+                        return;
+                    }
+
+                    // Check possible inputs
+                    if(obj.containsKey("brightness")) {
+                        auto brightness = Utils::clamp(obj["brightness"].as<int>(), 0, 100);
+                        std::cout << "Set brightness to " << brightness << endl;
+                        setBrightness(brightness);
+                    }
+                    if(obj.containsKey("colorType") && obj.containsKey("color")) {
+                        auto colorType = std::string{obj["colorType"].as<char*>()};
+                        std::cout << "Set color for type " << colorType << std::endl;
+                        if(colorType == "rgb") {
+                            auto color = obj["color"];
+                            auto r = Utils::clamp(color["r"].as<int>(), 0, 255);
+                            auto g = Utils::clamp(color["g"].as<int>(), 0, 255);
+                            auto b = Utils::clamp(color["b"].as<int>(), 0, 255);
+                            auto newColor = std::make_shared<RGBColor>(r, g, b);
+                            setColor(newColor);
+                        } else if(colorType == "hsv") {
+                            auto color = obj["color"];
+                            auto h = Utils::clamp(color["h"].as<int>(), 0, 359);
+                            auto s = Utils::clamp(color["s"].as<float>(), 0.0f, 1.0f);
+                            auto v = Utils::clamp(color["v"].as<float>(), 0.0f, 1.0f);
+                            auto newColor = std::make_shared<HSVColor>(h, s, v);
+                            setColor(newColor);
+                        } else {
+                            std::cout << "Error: Unknown colortype" << std::endl;
+                        }
+                        // brightness = Utils::clamp(brightness, 0, 100);
+                        // std::cout << "Set brightness to " << brightness << endl;
+                        // setBrightness(brightness);
+                    }
+                    if(obj.containsKey("effect")) {
+                        auto effect = std::string{obj["effect"].as<char*>()};
+                        std::cout << "Set effect to " << effect << endl;
+                        auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect);
+                        if (it == m_possibleEffects.end()) {
+                            std::cout << "Not a valid effect" << std::endl;
+                        } else {
+                            int index = std::distance(m_possibleEffects.begin(), it);
+                            setEffect(index);
+                        }
+                    }
+                    // Check power last as power == false should always turn the bulb off
+                    if(obj.containsKey("power")) {
+                        auto power = obj["power"].as<bool>();
+                        std::cout << "Set power to " << power << endl;
+                        setOn(power);
+                    }
+                }
         };
 
     };
