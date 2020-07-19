@@ -6,8 +6,6 @@
 #include "Components/Input/RotaryEncoderWithButton.hpp"
 #include "Common/LED/ColorTypes.h"
 #include "Components/Output/NeoPixelComponent.hpp"
-#include "Components/Output/FastLedComponent.hpp"
-
 
 namespace Rovi {
     namespace Devices {
@@ -16,19 +14,19 @@ namespace Rovi {
                 SimpleAbsoluteHue(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
                                 const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs);
                                 
-                void update();
+                virtual void update();
 
                 bool isOn() const;
-                void setOn(bool on);
+                virtual void setOn(bool on);
                 uint8_t brightness() const;
-                void setBrightness(uint8_t brightness);
+                virtual void setBrightness(uint8_t brightness);
                 std::shared_ptr<Color> color() const;
-                void setColor(const std::shared_ptr<Color>& color);
+                virtual void setColor(const std::shared_ptr<Color>& color);
                 uint32_t hue() const;
-                void setHue(uint32_t hue);
+                virtual void setHue(uint32_t hue);
                 std::shared_ptr<LEDEffect> effect() const;
-                void setEffect(const std::shared_ptr<LEDEffect>& effect);
-                void setEffect(int effect);
+                virtual void setEffect(const std::shared_ptr<LEDEffect>& effect);
+                virtual void setEffect(int effect);
 
                 void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues);
 

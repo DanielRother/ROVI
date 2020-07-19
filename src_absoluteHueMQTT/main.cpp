@@ -8,18 +8,18 @@
 #include <ArduinoIostream.hpp>
 
 
-//***************************************************************************//
-// Basecamp and Rovi initialize 
-//***************************************************************************//
-#include <Basecamp.hpp>
-// Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
-Basecamp iot{
-  Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
-};
+// //***************************************************************************//
+// // Basecamp and Rovi initialize 
+// //***************************************************************************//
+// #include <Basecamp.hpp>
+// // Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
+// Basecamp iot{
+//   Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
+// };
 
-#include "BaseClasses/RoviDevice.hpp"
+// #include "BaseClasses/RoviDevice.hpp"
 
-#include <Devices/SimpleAbsoluteHue.h>
+#include <Devices/AbsoluteHueMQTT.h>
 
 
 // Rovi::RoviDevice myRovi(iot);
@@ -34,7 +34,7 @@ uint8_t rotaryPinButton = 14;
 uint8_t  neoPixelPin    = 15;
 uint16_t nbNeoPixelLEDs = 20;
 
-std::shared_ptr<Rovi::Devices::SimpleAbsoluteHue> absolutHue;
+std::shared_ptr<Rovi::Devices::AbsoluteHueMQTT> absolutHue;
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
@@ -46,12 +46,12 @@ void setup() {
 
     std::cout << "--- setup() ---" << endl;
 
-    sleep(5);
-    iot.begin();
+    // sleep(5);
+    // iot.begin();
 
     // myRovi.setupRovi();
 
-    absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue>(
+    absolutHue = std::make_shared<Rovi::Devices::AbsoluteHueMQTT>(
       rotaryPinA, rotaryPinB, rotaryPinButton,
       neoPixelPin, nbNeoPixelLEDs);
 
@@ -75,13 +75,13 @@ void setup() {
   // iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
 
 
-  // Activate Over-the-Air updates
-  String otaPassword = iot.configuration.get("OTAPassword");
-  std::cout << "*******************************************" << endl
-         << "* OTA PASSWORD:" <<  otaPassword << endl
-         << "*******************************************" << endl;
-  ArduinoOTA.setPassword(otaPassword.c_str());
-  ArduinoOTA.begin();
+  // // Activate Over-the-Air updates
+  // String otaPassword = iot.configuration.get("OTAPassword");
+  // std::cout << "*******************************************" << endl
+  //        << "* OTA PASSWORD:" <<  otaPassword << endl
+  //        << "*******************************************" << endl;
+  // ArduinoOTA.setPassword(otaPassword.c_str());
+  // ArduinoOTA.begin();
 }
 
 
@@ -91,7 +91,7 @@ void setup() {
 bool showEnableMessage = false;
 
 void loop() {
-  ArduinoOTA.handle();
+  // ArduinoOTA.handle();
 
   absolutHue->update();
 }

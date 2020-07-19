@@ -146,6 +146,9 @@ namespace Rovi {
                 stateSettings[state].activationCallback = defaultButtonStateActivatedCallback;
                 stateSettings[state].valueChangedCallback = defaultValueChangeCallback;
                 stateSettings[state].increment = 1;
+                stateSettings[state].minValue = 0;
+                stateSettings[state].maxValue = 255;
+                stateSettings[state].preventOverflow = false;
               }
         }
 
@@ -176,6 +179,9 @@ namespace Rovi {
             stateSettings[state].activationCallback = stateActivatedCallback;
             stateSettings[state].valueChangedCallback = stateValueChangedCallback;
             stateSettings[state].increment = increment;
+            stateSettings[state].minValue = minValue;
+            stateSettings[state].maxValue = maxValue;
+            stateSettings[state].preventOverflow = preventOverflow;
             stateValues[state] = RotaryValue(maxValue, minValue, preventOverflow);
         }
 

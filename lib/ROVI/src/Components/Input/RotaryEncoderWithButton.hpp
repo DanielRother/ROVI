@@ -81,6 +81,9 @@ namespace Rovi {
 
           struct ButtonStateSetting {
             int increment;
+            int minValue;
+            int maxValue;
+            bool preventOverflow;
             std::function<void(void)> activationCallback;
             std::function<void(int)> valueChangedCallback;
           };
@@ -127,11 +130,6 @@ namespace Rovi {
 
           std::map<ButtonStates, ButtonStateSetting> stateSettings;
           std::map<ButtonStates, RotaryValue> stateValues;
-
-          // std::map<ButtonStates, RotaryValue> rotaryValuePerState;
-          // std::map<ButtonStates, std::function<void(void)>> buttonStateActivatedCallbacks;
-          // std::map<ButtonStates, std::function<void(int)>> rotaryValueChangedCallbacks;
-          // int m_increment;
 
           static const uint16_t BUTTON_STATE_TIMEOUT_MS;
         };
