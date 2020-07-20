@@ -48,27 +48,15 @@ void setup() {
 	for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
 		swapRGValues[pixelIdx] = 1;
 	}
-	// leds->setSwapRGValues(swapRGValues);
 	absolutHue->setSwapRGValues(swapRGValues);
 
-
-
-  // std::cout << "myRovi.baseTopic" << myRovi.getBaseTopic() << endl;
-  // // TODO: Is there an easier way to connect to methods???
-  // iot.mqtt.onConnect([&](bool sessionPresent) {myRovi.mqttConnected(sessionPresent);});
-  // iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {myRovi.mqttSubscribed(packetId, qos);});
-  // iot.mqtt.onMessage([&](char* topic, char* payload, AsyncMqttClientMessageProperties properties, 
-  //   size_t len, size_t index, size_t total) {myRovi.mqttMessage(topic, payload, properties, len, index, total);});
-  // iot.mqtt.onPublish([&](uint16_t packetId) {myRovi.mqttPublished(packetId);});
-
-
-  // // Activate Over-the-Air updates
-  // String otaPassword = iot.configuration.get("OTAPassword");
-  // std::cout << "*******************************************" << endl
-  //        << "* OTA PASSWORD:" <<  otaPassword << endl
-  //        << "*******************************************" << endl;
-  // ArduinoOTA.setPassword(otaPassword.c_str());
-  // ArduinoOTA.begin();
+	// Activate Over-the-Air updates
+	String otaPassword = iot.configuration.get("OTAPassword");
+	std::cout << "*******************************************" << endl
+			<< "* OTA PASSWORD:" <<  otaPassword.c_str() << endl
+			<< "*******************************************" << endl;
+	ArduinoOTA.setPassword(otaPassword.c_str());
+	ArduinoOTA.begin();
 }
 
 
@@ -78,8 +66,8 @@ void setup() {
 bool showEnableMessage = false;
 
 void loop() {
-  // ArduinoOTA.handle();
+	ArduinoOTA.handle();
 
-  absolutHue->update();
+	absolutHue->update();
 }
 

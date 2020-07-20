@@ -30,6 +30,10 @@ namespace Rovi {
                 , m_willTopic{"rovi/" + m_hostname + "/connection"}
                 , lastStateStatusSend_ms{0}
                 {
+                    m_iot.web.addInterfaceElement("OTAPassword", "input", "OTA Password:", "#configform", "OTAPassword");
+                    m_iot.web.setInterfaceElementAttribute("OTAPassword", "type", "password");
+                    m_iot.configuration.save();
+
                     std::cout << "Set last will on topic: " << m_willTopic << std::endl;
                     m_iot.mqtt.setWill(m_willTopic.c_str(), 1, true, "{\"status\":\"offline\"}");
 
