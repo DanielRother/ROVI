@@ -24,78 +24,85 @@ namespace Rovi {
                             setupDoubleClick();
                             setupHold();
 
-                            // Restoring currently not possible as it is unclear wheter the local information
-                            // or the last set messages should be used
-                            // --> As some kind of timestamp
-
-                            // Restore configuration
-                            auto power = iot.configuration.get("rovi-power");
-                            setOn(power.toInt());
-                            auto brightness = iot.configuration.get("rovi-brightness");
-                            setBrightness(brightness.toInt());
-                            auto r = iot.configuration.get("rovi-r");
-                            auto g = iot.configuration.get("rovi-g");
-                            auto b = iot.configuration.get("rovi-b");
-                            auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
-                            setColor(color);
-                            auto effect = iot.configuration.get("rovi-effect");
-                            auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
-                            if (it != m_possibleEffects.end()) {
-                                int index = std::distance(m_possibleEffects.begin(), it);
-                                setEffect(index);
-                            }
-                            std::cout << "****** Restored setting ******" << std::endl;
-                            std::cout << "p = " << m_on << ", b = " << (uint32_t) m_brightness << "; c = " << color->toString() << "; e = " << m_effect->name() << std::endl;
-                            std::cout << "******************************" << std::endl;
+                            restoreSettings();
                             m_restoreStatus = RestoreStatus::RESTORED;
-
-                            sendStateStatusUpdate();
+                            distributeSettings();
                         }
 
-                virtual void update() override {
-                    SimpleAbsoluteHue::update();
-                    if(isStatusUpdateRequired()) {
-                        sendStateStatusUpdate();
-                        m_restoreStatus = RestoreStatus::READY;     // Ready for reception and normal processing
-                        m_iot.configuration.save();
-                        std::cout << "Settings saved to disc" << endl;
-                    }
-                }
-
                 virtual void setOn(bool on) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setOn(on);
-                    sendStateStatusUpdate();
+                    distributeSettings();
                 }
 
                 virtual void setBrightness(uint8_t brightness) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setBrightness(brightness);
-                    sendStateStatusUpdate();
+                    distributeSettings();
                 }
                 
                 virtual void setColor(const std::shared_ptr<Color>& color) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setColor(color);
-                    sendStateStatusUpdate();
+                    distributeSettings();
                 }
 
                 virtual void setHue(uint32_t hue) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setHue(hue);
-                    sendStateStatusUpdate();
+                    distributeSettings();
                 }
 
                 virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setEffect(effect);
-                    sendStateStatusUpdate();
+                    distributeSettings();
                 }
 
                 virtual void setEffect(int effect) override {
+                    m_settingsChanged = true;
                     SimpleAbsoluteHue::setEffect(effect);
-                    sendStateStatusUpdate();
+                    distributeSettings();
+                }
+
+                virtual void update() override {
+                    SimpleAbsoluteHue::update();
+                    MqttDevice::update();
                 }
 
             protected:
-                void sendStateStatusUpdate() override {
-                    std::cout << "sendStateStatusUpdate()" << std::endl;
+                virtual void saveSettings() override {
+                        m_iot.configuration.set("rovi-power", String{m_on});
+                        m_iot.configuration.set("rovi-brightness", String{m_brightness});
+                        auto curRgbColor = color()->toRGB();
+                        m_iot.configuration.set("rovi-r", String{curRgbColor->r});
+                        m_iot.configuration.set("rovi-g", String{curRgbColor->g});
+                        m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+                        m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
+                }
 
+                virtual void restoreSettings() override {
+                    auto power = m_iot.configuration.get("rovi-power");
+                    setOn(power.toInt());
+                    auto brightness = m_iot.configuration.get("rovi-brightness");
+                    setBrightness(brightness.toInt());
+                    auto r = m_iot.configuration.get("rovi-r");
+                    auto g = m_iot.configuration.get("rovi-g");
+                    auto b = m_iot.configuration.get("rovi-b");
+                    auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
+                    setColor(color);
+                    auto effect = m_iot.configuration.get("rovi-effect");
+                    auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
+                    if (it != m_possibleEffects.end()) {
+                        int index = std::distance(m_possibleEffects.begin(), it);
+                        setEffect(index);
+                    }
+                    std::cout << "****** Restored setting ******" << std::endl;
+                    std::cout << "p = " << m_on << ", b = " << (uint32_t) m_brightness << "; c = " << color->toString() << "; e = " << m_effect->name() << std::endl;
+                    std::cout << "******************************" << std::endl;
+                }
+
+                virtual void createMqttMessage(String& output) override {
                     const int capacity = 2000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
 
@@ -127,40 +134,13 @@ namespace Rovi {
                     rotaryMqtt->status(rotaryJson, rotaryJsonSize);
                     obj["rotary_button"] = RawJson(rotaryJson);
 
-                    char output[1280];
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
-
-                    if(m_isConnected && m_restoreStatus == RestoreStatus::READY) {
-                        m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
-                        m_iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output);
-                    }
-
-                    // Save to config
-                    if(m_restoreStatus == RestoreStatus::READY) {
-                        m_iot.configuration.set("rovi-power", String{m_on});
-                        m_iot.configuration.set("rovi-brightness", String{m_brightness});
-                        m_iot.configuration.set("rovi-r", String{curRgbColor->r});
-                        m_iot.configuration.set("rovi-g", String{curRgbColor->g});
-                        m_iot.configuration.set("rovi-b", String{curRgbColor->b});
-                        m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
-                        std::cout << "Settings saved to RAM" << endl;
-                    }
-
-                    lastStateStatusSend_ms = millis();
                 }
 
-                void receiveSetMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) override {
-                    std::cout << "mqttMessage() -  topic = " << topic << ", payload = " << payload << std::endl;
-
-                    if(m_restoreStatus != RestoreStatus::READY && millis() > IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS) {
-                        std::cout << "Restoring not ready yet. Ignoring message" << std::endl;
-                        return;
-                    }
-
+                void receiveMqttMessage(const char* payload) override {
                     const int capacity = 2000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
-
                     JsonObject& obj = jb.parseObject(payload);
                     if(obj.success()) {
                         std::cout << "parseObject() succeeded" << std::endl;
@@ -195,9 +175,6 @@ namespace Rovi {
                         } else {
                             std::cout << "Error: Unknown colortype" << std::endl;
                         }
-                        // brightness = Utils::clamp(brightness, 0, 100);
-                        // std::cout << "Set brightness to " << brightness << endl;
-                        // setBrightness(brightness);
                     }
                     if(obj.containsKey("effect")) {
                         auto effect = std::string{obj["effect"].as<char*>()};
