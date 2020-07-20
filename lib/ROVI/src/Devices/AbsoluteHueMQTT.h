@@ -27,25 +27,27 @@ namespace Rovi {
                             // Restoring currently not possible as it is unclear wheter the local information
                             // or the last set messages should be used
                             // --> As some kind of timestamp
-                            
-                            // // Restore configuration
-                            // m_isRestoring = true;
-                            // auto power = iot.configuration.get("rovi-power");
-                            // setOn(power.toInt());
-                            // auto brightness = iot.configuration.get("rovi-power");
-                            // setBrightness(brightness.toInt());
-                            // auto r = iot.configuration.get("rovi-r");
-                            // auto g = iot.configuration.get("rovi-g");
-                            // auto b = iot.configuration.get("rovi-b");
-                            // auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
-                            // setColor(color);
-                            // auto effect = iot.configuration.get("rovi-effect");
-                            // auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
-                            // if (it != m_possibleEffects.end()) {
-                            //     int index = std::distance(m_possibleEffects.begin(), it);
-                            //     setEffect(index);
-                            // }
-                            // m_isRestoring = false;
+
+                            // Restore configuration
+                            auto power = iot.configuration.get("rovi-power");
+                            setOn(power.toInt());
+                            auto brightness = iot.configuration.get("rovi-brightness");
+                            setBrightness(brightness.toInt());
+                            auto r = iot.configuration.get("rovi-r");
+                            auto g = iot.configuration.get("rovi-g");
+                            auto b = iot.configuration.get("rovi-b");
+                            auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
+                            setColor(color);
+                            auto effect = iot.configuration.get("rovi-effect");
+                            auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
+                            if (it != m_possibleEffects.end()) {
+                                int index = std::distance(m_possibleEffects.begin(), it);
+                                setEffect(index);
+                            }
+                            std::cout << "****** Restored setting ******" << std::endl;
+                            std::cout << "p = " << m_on << ", b = " << (uint32_t) m_brightness << "; c = " << color->toString() << "; e = " << m_effect->name() << std::endl;
+                            std::cout << "******************************" << std::endl;
+                            m_restoreStatus = RestoreStatus::RESTORED;
 
                             sendStateStatusUpdate();
                         }
@@ -54,7 +56,9 @@ namespace Rovi {
                     SimpleAbsoluteHue::update();
                     if(isStatusUpdateRequired()) {
                         sendStateStatusUpdate();
+                        m_restoreStatus = RestoreStatus::READY;     // Ready for reception and normal processing
                         m_iot.configuration.save();
+                        std::cout << "Settings saved to disc" << endl;
                     }
                 }
 
@@ -127,24 +131,32 @@ namespace Rovi {
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
 
-                    if(m_isConnected && !m_isRestoring) {
+                    if(m_isConnected && m_restoreStatus == RestoreStatus::READY) {
                         m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
                         m_iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output);
                     }
 
-                    // // Save to config
-                    // m_iot.configuration.set("rovi-power", String{m_on});
-                    // m_iot.configuration.set("rovi-brightness", String{m_brightness});
-                    // m_iot.configuration.set("rovi-r", String{curRgbColor->r});
-                    // m_iot.configuration.set("rovi-g", String{curRgbColor->g});
-                    // m_iot.configuration.set("rovi-b", String{curRgbColor->b});
-                    // m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
+                    // Save to config
+                    if(m_restoreStatus == RestoreStatus::READY) {
+                        m_iot.configuration.set("rovi-power", String{m_on});
+                        m_iot.configuration.set("rovi-brightness", String{m_brightness});
+                        m_iot.configuration.set("rovi-r", String{curRgbColor->r});
+                        m_iot.configuration.set("rovi-g", String{curRgbColor->g});
+                        m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+                        m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
+                        std::cout << "Settings saved to RAM" << endl;
+                    }
 
                     lastStateStatusSend_ms = millis();
                 }
 
                 void receiveSetMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) override {
                     std::cout << "mqttMessage() -  topic = " << topic << ", payload = " << payload << std::endl;
+
+                    if(m_restoreStatus != RestoreStatus::READY && millis() > IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS) {
+                        std::cout << "Restoring not ready yet. Ignoring message" << std::endl;
+                        return;
+                    }
 
                     const int capacity = 2000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;

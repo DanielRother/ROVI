@@ -13,10 +13,17 @@ namespace Rovi {
     namespace Devices {
         class MqttDevice {
             public:
+                // State are required such that the first mqtt message can be ignoried
+                enum class RestoreStatus {
+                    INIT,
+                    RESTORED,
+                    READY
+                };
+
                 MqttDevice(Basecamp& iot)
                 : m_iot(iot)
                 , m_isConnected{false}
-                , m_isRestoring{false}
+                , m_restoreStatus{RestoreStatus::INIT}
                 , m_hostname{iot.hostname.c_str()}
                 , m_statusTopic{"rovi/" + m_hostname + "/status"}
                 , m_setTopic{"rovi/" + m_hostname + "/set"}
@@ -61,7 +68,7 @@ namespace Rovi {
 
                 Basecamp& m_iot;
                 bool m_isConnected;
-                bool m_isRestoring;
+                RestoreStatus m_restoreStatus;
                 std::string m_hostname;
                 std::string m_statusTopic;
                 std::string m_setTopic;
@@ -70,9 +77,11 @@ namespace Rovi {
                 unsigned long lastStateStatusSend_ms;
 
                 static const uint16_t STATE_STATUS_SEND_TIMEOUT_MS;
+                static const uint16_t IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS;
         };
 
         const uint16_t MqttDevice::STATE_STATUS_SEND_TIMEOUT_MS = 5000;
+        const uint16_t MqttDevice::IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS = 0;
 
     };
 };
