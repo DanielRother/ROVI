@@ -17,7 +17,7 @@
 
 namespace Rovi {
     namespace Components {
-        template<std::size_t NB_PIXEL, uint8_t PIN>
+        template<uint8_t PIN, std::size_t NB_PIXEL>
         class FastLedComponent : public AdressableLedComponent /*, public std::enable_shared_from_this<FastLedComponent> */ {
         public:
             FastLedComponent(const std::string& name = "FastLED") 
