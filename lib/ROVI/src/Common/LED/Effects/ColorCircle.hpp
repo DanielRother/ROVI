@@ -15,7 +15,7 @@ namespace Rovi {
                 Serial << "ColorCircle - delay: " << delay_ms << endl;
             }
 
-        void setColors(const std::vector<std::shared_ptr<RGBColor>>& colors) {
+        void setColors(const std::vector<std::shared_ptr<RGBColor>> colors) {
             m_colors = colors;
         }
 

@@ -7,12 +7,15 @@
 
 #include "Components/Output/LEDComponent.hpp"       // TBD: Required?
 #include "LEDEffect.hpp"
+#include "Effects/AllEffects.hpp"
 
 namespace Rovi {
     class LEDEffectFactory {
     public:
         static std::shared_ptr<LEDEffect> getEffect(const std::string& selectedEffect, Components::LEDComponent* led);
         static std::shared_ptr<LEDEffect> getEffect(const int effectNumber, Components::LEDComponent* led);
+
+        static std::shared_ptr<Rovi::ColorCircle> createColorCircle(const std::string& name, const std::vector<std::shared_ptr<Rovi::RGBColor>> colors, Components::LEDComponent* led, const int delay);
 
         static std::string convertEffectNumberToName(const int effectNumber);
         static int convertEffectNameToNumber(const std::string& effectName);

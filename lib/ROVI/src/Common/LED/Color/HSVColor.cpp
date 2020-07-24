@@ -65,6 +65,14 @@ namespace Rovi {
         }
     }
 
+    HSVColor::HSVColor(const std::shared_ptr<HSVColor>& hsv)
+        : h(hsv->h), s(hsv->s), v(hsv->v)
+    {}
+
+    HSVColor::HSVColor(const std::shared_ptr<RGBColor>& rgb)
+        : HSVColor(RGBColor(rgb))
+    {}
+
 
     std::string HSVColor::toString() {
         std::stringstream ret;

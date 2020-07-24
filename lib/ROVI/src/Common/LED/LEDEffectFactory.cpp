@@ -1,5 +1,6 @@
 #include "LEDEffectFactory.hpp"
 #include "Effects/AllEffects.hpp"
+#include "Common/LED/Color/KnownColors.hpp"
 #include <FileIOUtils.hpp>
 
 namespace Rovi {
@@ -10,6 +11,7 @@ namespace Rovi {
         auto effectLower = toLower(selectedEffect);
         auto delay_ms    = getDelay(effectLower);
 
+        // TODO: Use enum instead of strings
         if(effectLower.find("white_static") != std::string::npos) {
             auto effect = std::make_shared<WhiteStatic>(led, delay_ms);
             effect->setName(effectLower);
@@ -34,10 +36,52 @@ namespace Rovi {
             auto effect = std::make_shared<ColorCircle>(led, delay_ms);
             effect->setName(effectLower);
             return effect;
+        } else if(effectLower.find("color_cyle_rgb") != std::string::npos) {
+            auto effect = createColorCircle(effectLower, {
+                        std::make_shared<Rovi::RGBColor>(128, 0, 0),
+                        std::make_shared<Rovi::RGBColor>(0, 128, 0),
+                        std::make_shared<Rovi::RGBColor>(0, 0, 128)
+                        }, led, delay_ms * 5);
+            return effect;
+        } else if(effectLower.find("color_cyle_red") != std::string::npos) {
+            auto effect = createColorCircle(effectLower, {
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuYellow),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuOrange),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuRed)
+                        }, led, delay_ms * 5);
+            return effect;
+        } else if(effectLower.find("color_cyle_blue") != std::string::npos) {
+            auto effect = createColorCircle(effectLower, {
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuLightBlue),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuBlue),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuDarkBlue)
+                        }, led, delay_ms * 5);
+            return effect;
+        } else if(effectLower.find("color_cyle_green") != std::string::npos) {
+            auto effect = createColorCircle(effectLower, {
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuLightGreen),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuGreen),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuDarkGreen)
+                        }, led, delay_ms * 5);
+            return effect;
+        } else if(effectLower.find("color_cyle_purple") != std::string::npos) {
+            auto effect = createColorCircle(effectLower, {
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuLightPurple),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuPurple),
+                        std::make_shared<Rovi::RGBColor>(Rovi::tuDarkPurple)
+                        }, led, delay_ms * 5);
+            return effect;
         }
 
         Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;
         return std::make_shared<WhiteStatic>(led, delay_ms);
+    }
+
+    std::shared_ptr<Rovi::ColorCircle> LEDEffectFactory::createColorCircle(const std::string& name, const std::vector<std::shared_ptr<Rovi::RGBColor>> colors, Components::LEDComponent* led, const int delay) {
+        auto colorCircle = std::make_shared<Rovi::ColorCircle>(led, delay);
+        colorCircle->setColors(colors);
+        colorCircle->setName(name);
+        return colorCircle;
     }
 
     std::shared_ptr<LEDEffect> LEDEffectFactory::getEffect(const int effectNumber, Components::LEDComponent* led) {    // TODO: Use an shared_ptr also for LEDComponent

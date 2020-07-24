@@ -12,7 +12,7 @@
 #include <ArduinoIostream.hpp>
 
 namespace Rovi {
-    RGBColor::RGBColor(uint8_t r, uint8_t g, uint8_t b)
+    RGBColor::RGBColor(const uint8_t r, const uint8_t g, const uint8_t b)
         : r(r), g(g), b(b)
     {}
 
@@ -20,7 +20,7 @@ namespace Rovi {
         : r(255), g(255), b(255)
     {}
 
-    RGBColor::RGBColor(HSVColor hsv) 
+    RGBColor::RGBColor(const HSVColor& hsv) 
         : r(255), g(255), b(255) {
 
         float       hh, p, q, t, ff;
@@ -80,6 +80,14 @@ namespace Rovi {
         g = (tmpG * 255.0f);
         b = (tmpB * 255.0f);
     }
+
+    RGBColor::RGBColor(const std::shared_ptr<RGBColor>& rgb)
+        : r(rgb->r), g(rgb->g), b(rgb->g)
+    {}
+
+        RGBColor::RGBColor(const std::shared_ptr<HSVColor>& hsv)
+        : RGBColor(HSVColor(hsv))
+    {}
 
 
 

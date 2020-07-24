@@ -11,6 +11,8 @@ Basecamp iot{
 };
 
 #include <Devices/SimpleXmasTree.hpp>
+#include <Devices/SimpleLedDevice.hpp>
+#include <Components/Output/FastLedComponent.hpp>
 
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
@@ -19,9 +21,8 @@ const auto pin = 15;
 auto name = "weihnachtsbaum";
 auto colorCircleDelay = 500;
 
-std::shared_ptr<Rovi::Devices::SimpleXmasTree<pin, nbPixel>> xmastree; 
-// auto xmastree = std::make_shared<Rovi::Components::FastLedComponent<nbPixel, pin>>(name);
-
+// std::shared_ptr<Rovi::Devices::SimpleXmasTree<pin, nbPixel>> xmastree; 
+std::shared_ptr<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>> xmastree; 
 
 void setup()
 {
@@ -30,7 +31,10 @@ void setup()
   iot.begin();
   myRovi.setupRovi();
 
-  xmastree = std::make_shared<Rovi::Devices::SimpleXmasTree<pin, nbPixel>>(colorCircleDelay, name);
+  // xmastree = std::make_shared<Rovi::Devices::SimpleXmasTree<pin, nbPixel>>(colorCircleDelay, name);
+  auto led = std::make_shared<Rovi::Components::FastLedComponent<pin, nbPixel>>();
+  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(led, name);
+  xmastree->setupEffects();
 
   // Activate Over-the-Air updates
   String otaPassword = iot.configuration.get("OTAPassword"); // The prefedined variable OTAPassword is always reset to '1'; TODO: Check why/fix?

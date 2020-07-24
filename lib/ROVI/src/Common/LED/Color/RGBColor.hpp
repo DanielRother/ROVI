@@ -14,8 +14,10 @@ namespace Rovi {
     };
 
     RGBColor();
-    RGBColor(uint8_t r, uint8_t g, uint8_t b);
-    RGBColor(HSVColor hsv);
+    RGBColor(const uint8_t r, const uint8_t g, const uint8_t b);
+    RGBColor(const HSVColor& hsv);
+    RGBColor(const std::shared_ptr<RGBColor>& rgb);
+    RGBColor(const std::shared_ptr<HSVColor>& hsv);
 
     virtual std::string toString() override;
     virtual std::shared_ptr<RGBColor> toRGB() override;
