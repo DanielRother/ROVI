@@ -14,6 +14,7 @@ Basecamp iot{
 #include <Devices/SimpleLedDevice.hpp>
 #include <Components/Output/FastLedComponent.hpp>
 
+#include <BaseClasses/RoviDevice.hpp>
 Rovi::Deprecated::RoviDevice myRovi(iot);
 
 const auto nbPixel = 50;
@@ -22,7 +23,8 @@ auto name = "weihnachtsbaum";
 auto colorCircleDelay = 500;
 
 // std::shared_ptr<Rovi::Devices::SimpleXmasTree<pin, nbPixel>> xmastree; 
-std::shared_ptr<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>> xmastree; 
+// std::shared_ptr<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>> xmastree; 
+std::shared_ptr<Rovi::Devices::SimpleXmasTree<Rovi::Components::FastLedComponent<pin, nbPixel>>> xmastree; 
 
 void setup()
 {
@@ -33,7 +35,8 @@ void setup()
 
   // xmastree = std::make_shared<Rovi::Devices::SimpleXmasTree<pin, nbPixel>>(colorCircleDelay, name);
   auto led = std::make_shared<Rovi::Components::FastLedComponent<pin, nbPixel>>();
-  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(led, name);
+  // xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(led, name);
+  xmastree = std::make_shared<Rovi::Devices::SimpleXmasTree<Rovi::Components::FastLedComponent<pin, nbPixel>>>(led, name);
   xmastree->setupEffects();
 
   // Activate Over-the-Air updates

@@ -3,12 +3,8 @@
 
 #include <memory>
 #include <chrono>
+#include <iostream>
 
-#include <ArduinoIostream.hpp>
-
-#include <BaseClasses/RoviDevice.hpp>
-#include <Components/Output/NeoPixelComponent.hpp>
-#include <Components/Output/FastLedComponent.hpp>
 #include <Common/LED/LEDEffectFactory.hpp>
 #include <Common/LED/Effects/AllEffects.hpp>
 #include <Common/LED/Color/KnownColors.hpp>
@@ -39,8 +35,8 @@ namespace Rovi {
                 virtual void setupEffects() {
                     Serial << "Init efects" << endl;
                     m_effects.clear();
-                    // m_effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", m_leds.get()));
-                    // m_effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", m_leds.get()));
+                    m_effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", m_leds.get()));
+                    m_effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", m_leds.get()));
                     m_effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", m_leds.get()));
 
                     selectRandomEffect();
