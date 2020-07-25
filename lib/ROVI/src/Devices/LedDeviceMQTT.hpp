@@ -139,7 +139,7 @@ namespace Rovi {
                     obj["effect"] = String{this->m_effect->name().c_str()};
                     std::stringstream ss;
                     ss << this->m_timePerEffect.count();
-                    obj["timePerEffect_m"] = String{ss.str().c_str()};
+                    obj["timePerEffect_m"] = String{ss.str().c_str()}.toInt();
 
                     JsonObject& settings = jb.createObject();
                     JsonArray& possibleEffects =jb.createArray();

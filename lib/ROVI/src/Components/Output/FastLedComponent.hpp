@@ -80,9 +80,10 @@ namespace Rovi {
                 }
 
                 Serial << "--- FastLedComponent::setBrightness to " << (uint32_t) brightness << endl;
-                for(uint16_t pixelIdx = 0; pixelIdx < NB_PIXEL; ++pixelIdx) {
-                    m_leds[pixelIdx].fadeToBlackBy( brightness );
-                }
+                FastLED.setBrightness(brightness);
+                // for(uint16_t pixelIdx = 0; pixelIdx < NB_PIXEL; ++pixelIdx) {
+                //     // m_leds[pixelIdx].fadeToBlackBy( brightness );
+                // }
                 FastLED.show();
             }
 
