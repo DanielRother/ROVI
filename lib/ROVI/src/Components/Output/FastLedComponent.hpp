@@ -31,7 +31,7 @@ namespace Rovi {
             FastLedComponent(const FastLedComponent& other) = default;
             virtual ~FastLedComponent() = default;
 
-            // TBD: Why must this be called later and frm external and cannot be done in the ctor or inside of this class?!
+            // TBD: Why must this be called later and from external and cannot be done in the ctor or inside of this class?!
             void init() {
                 // FastLED.addLeds<NEOPIXEL, PIN>(m_leds.data(), NB_PIXEL);
                 FastLED.addLeds<WS2811, PIN, RGB>(m_leds.data(), NB_PIXEL);      // TODO: Pass the ordering as ctor variable
@@ -39,7 +39,7 @@ namespace Rovi {
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
-                Serial << "--- FastLedComponent::setColor" << endl;
+                Serial << "--- FastLedComponent::setColor(): " << color->toString() << endl;
 
                 if(!m_isInit) {
                     std::cout << "Not initialized!" << std::endl;
@@ -52,6 +52,7 @@ namespace Rovi {
                     m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
                 }
                 FastLED.show();
+                m_color = color;
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
@@ -66,7 +67,9 @@ namespace Rovi {
                 }
 
                 auto rgb = color->toRGB();
-                m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
+                m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b);
+                FastLED.show();
+                m_color = color; 
             }
 
             virtual void setBrightnessImpl(uint8_t brightness) override {

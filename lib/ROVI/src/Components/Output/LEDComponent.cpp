@@ -22,6 +22,7 @@ namespace Rovi {
         : m_on(true), m_brightness(128)
         , m_color(std::make_shared<HSVColor>(0,0,0.2))
         , m_effect(std::make_shared<WhiteStatic>(this)) {
+            std::cout << "LEDComponent ctor" << std::endl;
         }
 
         // LEDComponent::LEDComponent(const LEDComponent& other)
@@ -107,6 +108,7 @@ namespace Rovi {
         // }
 
         std::shared_ptr<Color> LEDComponent::color() const {
+            std::cout << "--- LEDComponent::color(): " << m_color->toString() << std::endl;
             return m_color;
         }
 
@@ -153,6 +155,7 @@ namespace Rovi {
         }
 
         void LEDComponent::setEffect(const std::shared_ptr<LEDEffect>& selectedEffect) {   
+            Serial << "  LEDComponent::setEffect() " << endl;
             setOn(true); 
             stopEffect();
             m_effect = selectedEffect;
@@ -174,10 +177,12 @@ namespace Rovi {
         // }
 
         void LEDComponent::startEffect() {
+            Serial << "  LEDComponent::startEffect() " << endl;
             m_effect->start();
         }
 
         void LEDComponent::stopEffect() {
+            Serial << "  LEDComponent::stopEffect() " << endl;
             m_effect->stop();
         }
 
@@ -195,7 +200,7 @@ namespace Rovi {
                 return;
             }
 
-            Serial << "--- LEDComponent::setColor" << endl;
+            // Serial << "--- LEDComponent::setColor" << endl;
             m_on = true;
             setColorImpl(color, pixelIdx);
         }
@@ -248,7 +253,7 @@ namespace Rovi {
                 return;
             }
 
-            Serial << "--- AdressableLedComponent::setColor" << endl;
+            // Serial << "--- AdressableLedComponent::setColor" << endl;
             m_on = true;
             m_colors[pixelIdx] = color;
         }

@@ -1,145 +1,143 @@
-#ifndef __ABSOLUTE_HUE_MQTT_H__
-#define __ABSOLUTE_HUE_MQTT_H__
+#ifndef __LED_DEVICE_MQTT_H__
+#define __LED_DEVICE_MQTT_H__
 
+#include <Arduino.h>
 #include <ArduinoJson.h>
 
+#include "UtilFunctions.hpp"
 #include "MqttDevice.hpp"
-#include "SimpleAbsoluteHue.h"
-#include "Components/Input/RotaryEncoderWithButtonMQTT.hpp"
+#include "SimpleLedDevice.hpp"
 
 namespace Rovi {
     namespace Devices {
-        class AbsoluteHueMQTT : public MqttDevice, public SimpleAbsoluteHue{
+        template<class LED>
+        class LedDeviceMQTT : public MqttDevice, public SimpleLedDevice<LED> {
             public:
-                AbsoluteHueMQTT(Basecamp& iot,
-                        const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton,
-                        const uint8_t neoPixelPin, const uint16_t nbNeoPixelLEDs)
+                LedDeviceMQTT(Basecamp& iot, const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, const std::string& name = "led")
                         : MqttDevice(iot)
-                        , SimpleAbsoluteHue(pinA, pinB, pinButton, neoPixelPin, nbNeoPixelLEDs)
+                        , SimpleLedDevice<LED>(led, effects, name)
                         {
-                            rotary = std::make_shared<Components::RotaryEncoderWithButtonMQTT>(pinA, pinB, pinButton);
-
-                            setupNormal();
-                            setupClick();
-                            setupDoubleClick();
-                            setupHold();
-
                             restoreSettings();
                             m_restoreStatus = RestoreStatus::RESTORED;
                             distributeSettings();
                         }
 
                 virtual void setOn(bool on) override {
-                    m_settingsChanged = true;
-                    SimpleAbsoluteHue::setOn(on);
-                    distributeSettings();
+                    this->m_settingsChanged = true;
+                    SimpleLedDevice<LED>::setOn(on);
+                    this->distributeSettings();
                 }
 
                 virtual void setBrightness(uint8_t brightness) override {
-                    m_settingsChanged = true;
-                    SimpleAbsoluteHue::setBrightness(brightness);
-                    distributeSettings();
+                    this->m_settingsChanged = true;
+                    SimpleLedDevice<LED>::setBrightness(brightness);
+                    this->distributeSettings();
                 }
                 
                 virtual void setColor(const std::shared_ptr<Color>& color) override {
                     m_settingsChanged = true;
-                    SimpleAbsoluteHue::setColor(color);
+                    SimpleLedDevice<LED>::setColor(color);
                     distributeSettings();
                 }
 
                 virtual void setHue(uint32_t hue) override {
                     m_settingsChanged = true;
-                    SimpleAbsoluteHue::setHue(hue);
+                    SimpleLedDevice<LED>::setHue(hue);
                     distributeSettings();
                 }
 
                 virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) override {
                     m_settingsChanged = true;
-                    SimpleAbsoluteHue::setEffect(effect);
+                    SimpleLedDevice<LED>::setEffect(effect);
                     distributeSettings();
                 }
 
                 virtual void setEffect(int effect) override {
                     m_settingsChanged = true;
-                    SimpleAbsoluteHue::setEffect(effect);
+                    SimpleLedDevice<LED>::setEffect(effect);
                     distributeSettings();
                 }
 
                 virtual void update() override {
-                    SimpleAbsoluteHue::update();
+                    SimpleLedDevice<LED>::update();
                     MqttDevice::update();
                 }
 
             protected:
                 virtual void saveSettings() override {
-                        m_iot.configuration.set("rovi-power", String{m_on});
-                        m_iot.configuration.set("rovi-brightness", String{m_brightness});
-                        auto curRgbColor = color()->toRGB();
-                        m_iot.configuration.set("rovi-r", String{curRgbColor->r});
-                        m_iot.configuration.set("rovi-g", String{curRgbColor->g});
-                        m_iot.configuration.set("rovi-b", String{curRgbColor->b});
-                        m_iot.configuration.set("rovi-effect", String{m_effect->name().c_str()});
-                }
+                    Serial << "LedDeviceMQTT::saveSettings() " << endl;
+
+                    m_iot.configuration.set("rovi-power", String{this->m_on});
+                    m_iot.configuration.set("rovi-brightness", String{this->m_brightness});
+                    auto curRgbColor = this->color()->toRGB();
+                    std::cout << "    save settings color: " << curRgbColor->toString() << std::endl;
+                    m_iot.configuration.set("rovi-r", String{curRgbColor->r});
+                    m_iot.configuration.set("rovi-g", String{curRgbColor->g});
+                    m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+                    m_iot.configuration.set("rovi-effect", String{this->m_effect->name().c_str()});
+            }
 
                 virtual void restoreSettings() override {
-                    auto brightness = m_iot.configuration.get("rovi-brightness");
+                    Serial << "LedDeviceMQTT::restoreSettings() " << endl;
+
+                    auto brightness = this->m_iot.configuration.get("rovi-brightness");
                     setBrightness(brightness.toInt());
-                    auto r = m_iot.configuration.get("rovi-r");
-                    auto g = m_iot.configuration.get("rovi-g");
-                    auto b = m_iot.configuration.get("rovi-b");
+                    auto r = this->m_iot.configuration.get("rovi-r");
+                    auto g = this->m_iot.configuration.get("rovi-g");
+                    auto b = this->m_iot.configuration.get("rovi-b");
                     auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
                     setColor(color);
-                    auto effect = m_iot.configuration.get("rovi-effect");
-                    auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect.c_str());
-                    if (it != m_possibleEffects.end()) {
-                        int index = std::distance(m_possibleEffects.begin(), it);
-                        setEffect(index);
+                    auto selectedEffect = std::string{this->m_iot.configuration.get("rovi-effect").c_str()};
+                    for(auto effect : this->m_effects) {
+                        if(effect->name() == selectedEffect) {
+                            setEffect(effect);
+                            break;
+                        }
                     }
                     // Check power last as power == false should always turn the bulb off
-                    auto power = m_iot.configuration.get("rovi-power");
+                    auto power = this->m_iot.configuration.get("rovi-power");
                     setOn(power.toInt());
                     std::cout << "****** Restored setting ******" << std::endl;
-                    std::cout << "p = " << m_on << ", b = " << (uint32_t) m_brightness << "; c = " << color->toString() << "; e = " << m_effect->name() << std::endl;
+                    std::cout << "p = " << this->m_on << ", b = " << (uint32_t) this->m_brightness << "; c = " << color->toString() << "; e = " << this->m_effect->name() << std::endl;
                     std::cout << "******************************" << std::endl;
                 }
 
                 virtual void createMqttMessage(String& output) override {
+                    Serial << "LedDeviceMQTT::createMqttMessage() " << endl;
+
                     const int capacity = 2000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
 
                     // Create a JsonObject
                     JsonObject& obj = jb.createObject();
 
-                    obj["power"] = m_on;
-                    obj["brightness"] = m_brightness;
+                    obj["power"] = this->m_on;
+                    obj["brightness"] = this->m_brightness;
                     obj["colorType"] = "rgb";
-                    auto curRgbColor = color()->toRGB();
+                    auto curRgbColor = this->color()->toRGB();
+                    std::cout << "    send color via mqttt: " << curRgbColor->toString() << std::endl;
                     JsonObject& color = jb.createObject();
                     color["r"] = curRgbColor->r;       
                     color["g"] = curRgbColor->g;       
                     color["b"] = curRgbColor->b;  
                     obj["color"] = color;     
-                    obj["effect"] = String{m_effect->name().c_str()};
+                    obj["effect"] = String{this->m_effect->name().c_str()};
 
                     JsonObject& settings = jb.createObject();
                     JsonArray& possibleEffects =jb.createArray();
-                    for(const auto& effects : m_possibleEffects) {
-                        possibleEffects.add(String{effects.c_str()});
+                    for(const auto effect : this->m_effects) {
+                        possibleEffects.add(String{effect->name().c_str()});
                     }
                     settings["possibleEffects"] = possibleEffects;
                     obj["settings"] = settings;
-
-                    auto rotaryMqtt = std::static_pointer_cast<Components::RotaryEncoderWithButtonMQTT>(rotary);
-                    auto rotaryJsonSize = rotaryMqtt->jsonSize();
-                    auto rotaryJson = new char[rotaryJsonSize];
-                    rotaryMqtt->status(rotaryJson, rotaryJsonSize);
-                    obj["rotary_button"] = RawJson(rotaryJson);
 
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
                 }
 
                 void receiveMqttMessage(const char* payload) override {
+                    Serial << "LedDeviceMQTT::receiveMqttMessage() " << endl;
+
                     const int capacity = 2000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
                     JsonObject& obj = jb.parseObject(payload);
@@ -165,6 +163,8 @@ namespace Rovi {
                             auto g = Utils::clamp(color["g"].as<int>(), 0, 255);
                             auto b = Utils::clamp(color["b"].as<int>(), 0, 255);
                             auto newColor = std::make_shared<RGBColor>(r, g, b);
+                            std::cout << "    r: " << r << ", g: " << g << ", b: " << b << std::endl;
+                            std::cout << "    new color received via MQTT is " << newColor->toString();
                             setColor(newColor);
                         } else if(colorType == "hsv") {
                             auto color = obj["color"];
@@ -178,14 +178,13 @@ namespace Rovi {
                         }
                     }
                     if(obj.containsKey("effect")) {
-                        auto effect = std::string{obj["effect"].as<char*>()};
-                        std::cout << "Set effect to " << effect << endl;
-                        auto it = std::find(m_possibleEffects.begin(), m_possibleEffects.end(), effect);
-                        if (it == m_possibleEffects.end()) {
-                            std::cout << "Not a valid effect" << std::endl;
-                        } else {
-                            int index = std::distance(m_possibleEffects.begin(), it);
-                            setEffect(index);
+                        auto selectedEffect = std::string{obj["effect"].as<char*>()};
+                        std::cout << "Set effect to " << selectedEffect << endl;
+                        for(auto effect : this->m_effects) {
+                            if(effect->name() == selectedEffect) {
+                                setEffect(effect);
+                                break;
+                            }
                         }
                     }
                     // Check power last as power == false should always turn the bulb off
@@ -200,4 +199,4 @@ namespace Rovi {
     };
 };
 
-#endif /* __ABSOLUTE_HUE_MQTT_H__ */
+#endif /* __LED_DEVICE_MQTT_H__ */

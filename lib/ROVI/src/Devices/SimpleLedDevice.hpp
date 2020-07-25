@@ -14,14 +14,14 @@ namespace Rovi {
         template<class LED>
         class SimpleLedDevice {
             public:
-                SimpleLedDevice(const std::shared_ptr<LED> led, const std::string& name = "led")
+                SimpleLedDevice(const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, const std::string& name = "led")
                 : m_name{name}
                 , m_leds{led}
                 , m_on{true}
                 , m_brightness{128}
                 , m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)}
                 , m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())} 
-                , m_effects{LEDEffectFactory::getEffect("color_static", m_leds.get())}
+                , m_effects{effects}
                 , m_timePerEffect{15}
                 , m_nextEffectSelection{std::chrono::system_clock::now()}
                 {
@@ -32,17 +32,7 @@ namespace Rovi {
                     setColor(m_color);
                 }
 
-                virtual void setupEffects() {
-                    Serial << "Init efects" << endl;
-                    m_effects.clear();
-                    m_effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", m_leds.get()));
-                    m_effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", m_leds.get()));
-                    m_effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", m_leds.get()));
-
-                    selectRandomEffect();
-                }
-
-                void update() {
+                virtual void update() {
                     m_leds->update();
 
                     auto now = std::chrono::system_clock::now();
@@ -51,72 +41,107 @@ namespace Rovi {
                     }
                 }
 
-                bool isOn() const {
+                virtual bool isOn() const {
                     return m_on;
                 }
 
-                void setOn(bool on) {
+                virtual void setOn(bool on) {
+                    std::cout << "SimpleLedDevice::setOn(" << on << ")" << std::endl;
                     m_leds->setOn(on);
                     m_on = m_leds->isOn();
                 }
 
-                uint8_t brightness() const {
+                virtual uint8_t brightness() const {
                     return m_brightness;
                 }
 
-                void setBrightness(uint8_t brightness) {
+                virtual void setBrightness(uint8_t brightness) {
+                    std::cout << "SimpleLedDevice::setBrightness(" << brightness << ")" << std::endl;
                     setOn(true);
                     m_leds->setBrightness(brightness);
                     // Not sure why this is required but otherwise the brightness is not set at all when changing
                     // from 0 to a small percentage
-                    if(m_brightness == 0) {
+                    if(m_brightness >= 0) {
                         m_leds->setBrightness(brightness);
                     }
                     m_brightness = m_leds->brightness();
                 }
 
-                std::shared_ptr<Color> color() {
+                virtual std::shared_ptr<Color> color() {
                     m_color = m_leds->color();
                     return m_color;
                 }
 
-                void setColor(const std::shared_ptr<Color>& color) {
-                    auto effect = LEDEffectFactory::getEffect("color_static", m_leds.get());
-                    setEffect(effect);   
+                virtual void setColor(const std::shared_ptr<Color>& color) {
+                    std::cout << "SimpleLedDevice::setColor(" << color << ")" << std::endl;
+                    setOn(true);
 
+                    auto selectedEffect = std::string{"color_static"};
+                    bool effectFound = false;
+                    for(auto effect : this->m_effects) {
+                        if(effect->name() == selectedEffect) {
+                            effectFound = true;
+                            setEffect(effect);
+                            break;
+                        }
+                    }  
+                    if(!effectFound) {
+                        auto effect = LEDEffectFactory::getEffect(selectedEffect, m_leds.get());
+                        setEffect(effect); 
+                        // Delay processing, otherwise the effect will update to really set color to the effect's default one...
+                        sleep(1);
+                        effect->update();
+                    }
+
+                    std::cout << "    finally realy set color" << std::endl;
                     m_leds->setColor(color);
                     m_color = m_leds->color();
                 }
 
-                uint32_t hue() const {
+                virtual uint32_t hue() const {
                     return m_leds->hue();
                 }
 
-                void setHue(uint32_t hue) {
-                    std::cout << "--- SimpleAbsoluteHue::setHue() to " << hue << std::endl;
+                virtual void setHue(uint32_t hue) {
+                    std::cout << "SimpleLedDevice::setHue(" << hue << ")" << std::endl;
+                    setOn(true);
                     m_leds->setHue(hue);
                     m_color = m_leds->color();
                 }
 
-                std::shared_ptr<LEDEffect> effect() const {
+                virtual std::shared_ptr<LEDEffect> effect() const {
                     return m_effect;
                 }
 
                 // TBD: Adapt?
-                void setEffect(const std::shared_ptr<LEDEffect>& effect) {
+                virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) {
+                    setOn(true);
                     m_leds->setEffect(effect); 
                     m_effect = m_leds->effect();
                 }
 
-                void setEffect(int effect) {
+                virtual void setEffect(int effect) {
+                    setOn(true);
                     m_leds->setEffect(effect); 
                     m_effect = m_leds->effect();   
                 }
 
-            protected:
-                void selectRandomEffect() {
-                    std::cout << "Random effect" << std::endl;
+               virtual void setEffects(const std::vector<std::shared_ptr<LEDEffect>>& effects) {
+                    setOn(true);
+                    m_effects = effects;
+                    selectRandomEffect();
+                }
 
+                virtual std::vector<std::shared_ptr<LEDEffect>> getEffects() const {
+                    return m_effects;
+                }
+
+
+            protected:
+                virtual void selectRandomEffect() {
+                    std::cout << "SimpleLedDevice::selectRandomEffect()" << std::endl;
+
+                    setOn(true);
                     auto effectIndex = random(0, m_effects.size());
                     setEffect(m_effects[effectIndex]);
 

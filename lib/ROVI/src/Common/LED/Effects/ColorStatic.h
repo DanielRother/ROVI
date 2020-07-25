@@ -19,6 +19,7 @@ namespace Rovi {
             // Probably, there is an initialization order and/or null pointer issue
             // TODO: Fix me
             if(!done) {
+                std::cout << "ColorStatic::step() - should only be called once" << std::endl;
                 auto hue = 0.0f;
                 auto brightness = 0.5f;
                 const auto saturation = 1.0f; 
