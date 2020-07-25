@@ -14,7 +14,7 @@ namespace Rovi {
         template<class LED>
         class SimpleLedDevice {
             public:
-                SimpleLedDevice(const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, const std::string& name = "led")
+                SimpleLedDevice(const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, const std::string& name = "led", std::chrono::minutes timePerEffect = std::chrono::minutes{15})
                 : m_name{name}
                 , m_leds{led}
                 , m_on{true}
@@ -22,7 +22,7 @@ namespace Rovi {
                 , m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)}
                 , m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())} 
                 , m_effects{effects}
-                , m_timePerEffect{15}
+                , m_timePerEffect{timePerEffect}
                 , m_nextEffectSelection{std::chrono::system_clock::now()}
                 {
                     std::cout << "Init led" << std::endl;
@@ -36,7 +36,7 @@ namespace Rovi {
                     m_leds->update();
 
                     auto now = std::chrono::system_clock::now();
-                    if(now > m_nextEffectSelection) {
+                    if(now > m_nextEffectSelection && m_timePerEffect != std::chrono::minutes(0)) {
                         selectRandomEffect();
                     }
                 }
@@ -134,6 +134,15 @@ namespace Rovi {
 
                 virtual std::vector<std::shared_ptr<LEDEffect>> getEffects() const {
                     return m_effects;
+                }
+
+                virtual std::chrono::minutes timePerEffect() const {
+                    return m_timePerEffect;
+                }
+
+                virtual void setTimePerEffect(const std::chrono::minutes& timePerEffect)  {
+                    m_timePerEffect = timePerEffect;
+                    m_nextEffectSelection = std::chrono::system_clock::now() + m_timePerEffect;
                 }
 
 

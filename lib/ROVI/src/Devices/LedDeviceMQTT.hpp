@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
+#include <iostream>
+#include <sstream>
+
 #include "UtilFunctions.hpp"
 #include "MqttDevice.hpp"
 #include "SimpleLedDevice.hpp"
@@ -58,6 +61,12 @@ namespace Rovi {
                     distributeSettings();
                 }
 
+                virtual void setTimePerEffect(const std::chrono::minutes& timePerEffect) override {
+                    m_settingsChanged = true;
+                    SimpleLedDevice<LED>::setTimePerEffect(timePerEffect);
+                    distributeSettings();
+                }
+                
                 virtual void update() override {
                     SimpleLedDevice<LED>::update();
                     MqttDevice::update();
@@ -75,6 +84,9 @@ namespace Rovi {
                     m_iot.configuration.set("rovi-g", String{curRgbColor->g});
                     m_iot.configuration.set("rovi-b", String{curRgbColor->b});
                     m_iot.configuration.set("rovi-effect", String{this->m_effect->name().c_str()});
+                    std::stringstream ss;
+                    ss << this->m_timePerEffect.count();
+                    m_iot.configuration.set("rovi-timePerEffect_m", String{ss.str().c_str()});
             }
 
                 virtual void restoreSettings() override {
@@ -94,6 +106,9 @@ namespace Rovi {
                             break;
                         }
                     }
+                    auto timePerEffect = this->m_iot.configuration.get("rovi-timePerEffect_m").toInt();
+                    setTimePerEffect(std::chrono::minutes{timePerEffect});
+
                     // Check power last as power == false should always turn the bulb off
                     auto power = this->m_iot.configuration.get("rovi-power");
                     setOn(power.toInt());
@@ -122,12 +137,15 @@ namespace Rovi {
                     color["b"] = curRgbColor->b;  
                     obj["color"] = color;     
                     obj["effect"] = String{this->m_effect->name().c_str()};
+                    std::stringstream ss;
+                    ss << this->m_timePerEffect.count();
+                    obj["timePerEffect_m"] = String{ss.str().c_str()};
 
                     JsonObject& settings = jb.createObject();
                     JsonArray& possibleEffects =jb.createArray();
                     for(const auto effect : this->m_effects) {
                         possibleEffects.add(String{effect->name().c_str()});
-                    }
+                    } 
                     settings["possibleEffects"] = possibleEffects;
                     obj["settings"] = settings;
 
@@ -186,6 +204,11 @@ namespace Rovi {
                                 break;
                             }
                         }
+                    }
+                    if(obj.containsKey("timePerEffect_m")) {
+                        auto timePerEffect = obj["timePerEffect_m"].as<int>();
+                        std::cout << "Set timePerEffect to " << timePerEffect << endl;
+                        setTimePerEffect(std::chrono::minutes{timePerEffect});
                     }
                     // Check power last as power == false should always turn the bulb off
                     if(obj.containsKey("power")) {

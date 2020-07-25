@@ -13,8 +13,8 @@ Basecamp iot{
 #include <Devices/LedDeviceMQTT.hpp>
 #include <Components/Output/FastLedComponent.hpp>
 
-#include <BaseClasses/RoviDevice.hpp>
-Rovi::Deprecated::RoviDevice myRovi(iot);
+// #include <BaseClasses/RoviDevice.hpp>
+// Rovi::Deprecated::RoviDevice myRovi(iot);
 
 const auto nbPixel = 50;
 const auto pin = 15;
@@ -29,7 +29,7 @@ void setup()
   std::cout << "--- setup() ---" << endl;
   sleep(5);
   iot.begin();
-  myRovi.setupRovi();
+  // myRovi.setupRovi();
 
   auto leds = std::make_shared<Rovi::Components::FastLedComponent<pin, nbPixel>>();
   // xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(leds, name);
