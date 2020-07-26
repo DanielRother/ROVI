@@ -10,11 +10,11 @@
 namespace Rovi {
     namespace Devices {
         template<class ROTARY, class LED>
-        class SimpleAbsoluteHue :public SimpleLedDevice<LED> {
+        class SimpleAbsoluteHue : public SimpleLedDevice<LED> {
             public:
                 SimpleAbsoluteHue(Basecamp& iot, const std::shared_ptr<ROTARY> rotary, 
                     const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, 
-                    const std::string& name = "led", std::chrono::minutes timePerEffect = std::chrono::minutes{15}) 
+                    const std::string& name = "SimpleAbsoluteHue", std::chrono::minutes timePerEffect = std::chrono::minutes{0}) 
                 : BasicDevice(iot)
                 , SimpleLedDevice<LED>(iot, led, effects, name, timePerEffect)
                 , m_rotary{rotary}
@@ -52,6 +52,12 @@ namespace Rovi {
                     std::cout << "SimpleAbsoluteHue()::setHue(" << hue << ")" << std::endl;
                     SimpleLedDevice<LED>::setHue(hue);
                     m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, this->m_color->toHSV()->h);
+                }
+
+                virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) {
+                    std::cout << "SimpleAbsoluteHue()::setEffect(" << effect->name() << ")" << std::endl;
+                    SimpleLedDevice<LED>::setEffect(effect);
+                    // TODO: Search effect index and set rotary encoder accordingly
                 }
 
                 virtual void setEffect(int effect) {
