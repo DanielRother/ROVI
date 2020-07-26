@@ -32,7 +32,7 @@ namespace Rovi {
             virtual ~FastLedComponent() = default;
 
             // TBD: Why must this be called later and from external and cannot be done in the ctor or inside of this class?!
-            void init() {
+            virtual void init() override {
                 // FastLED.addLeds<NEOPIXEL, PIN>(m_leds.data(), NB_PIXEL);
                 FastLED.addLeds<WS2811, PIN, RGB>(m_leds.data(), NB_PIXEL);      // TODO: Pass the ordering as ctor variable
                 m_isInit = true;

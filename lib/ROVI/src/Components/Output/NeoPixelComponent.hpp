@@ -20,7 +20,7 @@ namespace Rovi {
     namespace Components {
         class NeoPixelComponent : public AdressableLedComponent /*, public std::enable_shared_from_this<NeoPixelComponent> */ {
         public:
-            NeoPixelComponent(uint16_t nbPixel, uint8_t pin, const std::string& name = "NeoPixel") 
+            NeoPixelComponent(uint8_t pin, uint16_t nbPixel, const std::string& name = "NeoPixel") 
                 : AdressableLedComponent{nbPixel, name}
                 , pixels{nbPixel, pin, NEO_GRB + NEO_KHZ800}
                 , swapRGValues(nbPixel, 0)        // TBD: Maybe make the Pixeltype dynamic as well

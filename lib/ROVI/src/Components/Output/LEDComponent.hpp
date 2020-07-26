@@ -28,6 +28,7 @@ namespace Rovi {
             virtual ~LEDComponent() /*= default*/;
 
             // Member methods
+            virtual void init() {};
             void update();
             bool isOn() const;
             void setOn(bool on);
