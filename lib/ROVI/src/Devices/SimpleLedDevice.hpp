@@ -29,9 +29,11 @@ namespace Rovi {
                 {
                     std::cout << "Init led" << std::endl;
                     m_leds->init();
-                    setOn(m_on);
-                    setBrightness(m_brightness);
-                    setColor(m_color);
+                    restoreSettings();
+
+                    // setOn(m_on);
+                    // setBrightness(m_brightness);
+                    // setColor(m_color);
                 }
 
                 virtual void update() {
@@ -51,6 +53,7 @@ namespace Rovi {
 
                 virtual void setOn(bool on) {
                     std::cout << "SimpleLedDevice::setOn(" << on << ")" << std::endl;
+                    m_settingsChanged = true;
                     m_leds->setOn(on);
                     m_on = m_leds->isOn();
                 }
@@ -61,6 +64,7 @@ namespace Rovi {
 
                 virtual void setBrightness(uint8_t brightness) {
                     std::cout << "SimpleLedDevice::setBrightness(" << (int) brightness << ")" << std::endl;
+                    m_settingsChanged = true;
                     setOn(true);
                     m_leds->setBrightness(brightness);
                     // Not sure why this is required but otherwise the brightness is not set at all when changing
@@ -78,6 +82,7 @@ namespace Rovi {
 
                 virtual void setColor(const std::shared_ptr<Color>& color) {
                     std::cout << "SimpleLedDevice::setColor(" << color << ")" << std::endl;
+                    m_settingsChanged = true;
                     setOn(true);
 
                     auto selectedEffect = std::string{"color_static"};
@@ -108,6 +113,7 @@ namespace Rovi {
 
                 virtual void setHue(uint32_t hue) {
                     std::cout << "SimpleLedDevice::setHue(" << hue << ")" << std::endl;
+                    m_settingsChanged = true;
                     setOn(true);
                     m_leds->setHue(hue);
                     m_color = m_leds->color();
@@ -119,18 +125,21 @@ namespace Rovi {
 
                 // TBD: Adapt?
                 virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) {
+                    m_settingsChanged = true;
                     setOn(true);
                     m_leds->setEffect(effect); 
                     m_effect = m_leds->effect();
                 }
 
                 virtual void setEffect(int effect) {
+                    m_settingsChanged = true;
                     setOn(true);
                     m_leds->setEffect(effect); 
                     m_effect = m_leds->effect();   
                 }
 
                virtual void setEffects(const std::vector<std::shared_ptr<LEDEffect>>& effects) {
+                    m_settingsChanged = true;
                     setOn(true);
                     m_effects = effects;
                     selectRandomEffect();
@@ -145,6 +154,7 @@ namespace Rovi {
                 }
 
                 virtual void setTimePerEffect(const std::chrono::minutes& timePerEffect)  {
+                    m_settingsChanged = true;
                     m_timePerEffect = timePerEffect;
                     m_nextEffectSelection = std::chrono::system_clock::now() + m_timePerEffect;
                 }
@@ -168,6 +178,7 @@ namespace Rovi {
                     Serial << "LedDeviceMQTT::saveSettings() " << endl;
 
                     m_iot.configuration.set("rovi-power", String{this->m_on});
+                    std::cout << "    save settings power: " << this->m_on << std::endl;
                     m_iot.configuration.set("rovi-brightness", String{this->m_brightness});
                     auto curRgbColor = this->color()->toRGB();
                     std::cout << "    save settings color: " << curRgbColor->toString() << std::endl;
@@ -175,6 +186,7 @@ namespace Rovi {
                     m_iot.configuration.set("rovi-g", String{curRgbColor->g});
                     m_iot.configuration.set("rovi-b", String{curRgbColor->b});
                     m_iot.configuration.set("rovi-effect", String{this->m_effect->name().c_str()});
+                    std::cout << "    save settings effect: " << this->m_effect->name() << std::endl;
                     std::stringstream ss;
                     ss << this->m_timePerEffect.count();
                     m_iot.configuration.set("rovi-timePerEffect_m", String{ss.str().c_str()});

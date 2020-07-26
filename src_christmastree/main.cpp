@@ -40,7 +40,7 @@ void setup()
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_blue", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_green", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_purple", leds.get()));
-  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(leds, effects, name);
+  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<Rovi::Components::FastLedComponent<pin, nbPixel>>>(iot, leds, effects, name);
 
   // Activate Over-the-Air updates
   String otaPassword = iot.configuration.get("OTAPassword"); // The prefedined variable OTAPassword is always reset to '1'; TODO: Check why/fix?

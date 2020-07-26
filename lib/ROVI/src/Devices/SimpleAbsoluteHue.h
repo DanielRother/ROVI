@@ -12,10 +12,11 @@ namespace Rovi {
         template<class ROTARY, class LED>
         class SimpleAbsoluteHue :public SimpleLedDevice<LED> {
             public:
-                SimpleAbsoluteHue(const std::shared_ptr<ROTARY> rotary, 
+                SimpleAbsoluteHue(Basecamp& iot, const std::shared_ptr<ROTARY> rotary, 
                     const std::shared_ptr<LED> led, const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects, 
                     const std::string& name = "led", std::chrono::minutes timePerEffect = std::chrono::minutes{15}) 
-                : SimpleLedDevice<LED>(led, effects, name, timePerEffect)
+                : BasicDevice(iot)
+                , SimpleLedDevice<LED>(iot, led, effects, name, timePerEffect)
                 , m_rotary{rotary}
                 {
                     // Attention: Initialize the rotary encoder first. Otherwise the led-set-methods
@@ -28,9 +29,10 @@ namespace Rovi {
 
                     std::cout << "SimpleAbsoluteHue(): Init led" << std::endl;
                     // Attention: Do NOT init the leds here again. Otherwise the application hangs.:!
-                    this->setOn(this->m_on);
-                    this->setBrightness(this->m_brightness);
-                    this->setColor(this->m_color);
+                    // this->restoreSettings();
+                    // this->setOn(this->m_on);
+                    // this->setBrightness(this->m_brightness);
+                    // this->setColor(this->m_color);
 
                 }
                                 

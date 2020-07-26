@@ -27,43 +27,36 @@ namespace Rovi {
                         }
 
                 virtual void setOn(bool on) override {
-                    this->m_settingsChanged = true;
                     SimpleLedDevice<LED>::setOn(on);
                     this->distributeSettings();
                 }
 
                 virtual void setBrightness(uint8_t brightness) override {
-                    this->m_settingsChanged = true;
                     SimpleLedDevice<LED>::setBrightness(brightness);
                     this->distributeSettings();
                 }
                 
                 virtual void setColor(const std::shared_ptr<Color>& color) override {
-                    m_settingsChanged = true;
                     SimpleLedDevice<LED>::setColor(color);
                     distributeSettings();
                 }
 
                 virtual void setHue(uint32_t hue) override {
-                    m_settingsChanged = true;
                     SimpleLedDevice<LED>::setHue(hue);
                     distributeSettings();
                 }
 
                 virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) override {
-                    m_settingsChanged = true;
                     SimpleLedDevice<LED>::setEffect(effect);
                     distributeSettings();
                 }
 
                 virtual void setEffect(int effect) override {
-                    m_settingsChanged = true;
                     SimpleLedDevice<LED>::setEffect(effect);
                     distributeSettings();
                 }
 
                 virtual void setTimePerEffect(const std::chrono::minutes& timePerEffect) override {
-                    m_settingsChanged = true;
                     SimpleLedDevice<LED>::setTimePerEffect(timePerEffect);
                     distributeSettings();
                 }

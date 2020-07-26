@@ -11,6 +11,15 @@
 #include <Components/Output/FastLedComponent.hpp>
 #include <Devices/SimpleAbsoluteHue.h>
 
+//***************************************************************************//
+// Basecamp and Rovi initialize 
+//***************************************************************************//
+#include <Basecamp.hpp>
+// Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
+Basecamp iot{
+  Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
+};
+
 // RotaryEncoder
 const uint8_t rotaryPinA = 12;
 const uint8_t rotaryPinB = 13;
@@ -31,6 +40,7 @@ std::shared_ptr<Rovi::Devices::SimpleAbsoluteHue<
 void setup() {
 	sleep(5);
     std::cout << "--- setup() ---" << std::endl;
+	iot.begin();
 
     auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(rotaryPinA, rotaryPinB, rotaryPinButton, "rotary");
     
@@ -50,8 +60,16 @@ void setup() {
     absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue<
         Rovi::Components::RotaryEncoderWithButton, 
         Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>(
-      rotary, leds, effects, "AbsoluteHue");
+      iot, rotary, leds, effects, "AbsoluteHue");
 
+	// Activate Over-the-Air updates
+	String otaPassword = iot.configuration.get("OTAPassword"); // The prefedined variable OTAPassword is always reset to '1'; TODO: Check why/fix?
+	std::cout << "*******************************************" << endl
+			<< "* OTA PASSWORD:" <<  otaPassword.c_str() << endl
+			<< "*******************************************" << endl;
+
+	ArduinoOTA.setPassword(otaPassword.c_str());
+	ArduinoOTA.begin();
 }
 
 
@@ -59,6 +77,7 @@ void setup() {
 // Arduino loop()
 //***************************************************************************//
 void loop() {
-  absolutHue->update();
+	ArduinoOTA.handle();
+	absolutHue->update();
 }
 
