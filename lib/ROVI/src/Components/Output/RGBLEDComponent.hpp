@@ -7,9 +7,9 @@
 
 #include <ArduinoIostream.hpp>
 
-#include "LED/LEDComponent.hpp"
-#include "LED/ColorTypes.h"
-#include "LEDEffect.hpp"
+#include "LEDComponent.hpp"
+#include "Common/LED/ColorTypes.h"
+#include "Common/LED/LEDEffect.hpp"
 #include "UtilFunctions.hpp"
 
 namespace Rovi {
@@ -22,7 +22,7 @@ namespace Rovi {
                 , m_pinG{pinG}
                 , m_pinB{pinB}
                 , m_invert{invert}
-                , m_ledArray{1, 2, 3}, // three led channels
+                , m_ledArray{1, 2, 3} // three led channels
                 {
                     ledcAttachPin(m_pinR, m_ledArray[0]); // assign RGB led pins to channels
                     ledcAttachPin(m_pinG, m_ledArray[1]);
@@ -31,9 +31,9 @@ namespace Rovi {
                     // Initialize channels 
                     // channels 0-15, resolution 1-16 bits, freq limits depend on resolution
                     // ledcSetup(uint8_t channel, uint32_t freq, uint8_t resolution_bits);
-                    ledcSetup(ledArray[0], 12000, 8); // 12 kHz PWM, 8-bit resolution
-                    ledcSetup(ledArray[1], 12000, 8);
-                    ledcSetup(ledArray[2], 12000, 8);
+                    ledcSetup(m_ledArray[0], 12000, 8); // 12 kHz PWM, 8-bit resolution
+                    ledcSetup(m_ledArray[1], 12000, 8);
+                    ledcSetup(m_ledArray[2], 12000, 8);
 
                     setOn(true);
                 };
@@ -53,7 +53,7 @@ namespace Rovi {
 
             virtual void setBrightnessImpl(uint8_t brightness) override {
                 Serial << "--- LEDRGB::setBrightness" << endl;
-                auto hsvColor = lastColor->toHSV();
+                auto hsvColor = m_color->toHSV();
                 hsvColor->v = Utils::scale(brightness, 1.0f);
                 setColor(hsvColor);
             }

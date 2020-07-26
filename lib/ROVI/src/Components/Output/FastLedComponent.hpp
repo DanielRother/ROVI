@@ -10,7 +10,6 @@
 
 #include <FastLED.h>
 
-#include "BaseClasses/RoviComponent.hpp"
 #include "LEDComponent.hpp"
 #include "Common/LED/ColorTypes.h"
 #include "Common/LED/LEDEffect.hpp"
