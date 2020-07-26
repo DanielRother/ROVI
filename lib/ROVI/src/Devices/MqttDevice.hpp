@@ -13,7 +13,7 @@
 
 namespace Rovi {
     namespace Devices {
-        class MqttDevice : public BasicDevice {
+        class MqttDevice : public virtual BasicDevice {
             public:
                 MqttDevice(Basecamp& iot)
                 : BasicDevice(iot)
