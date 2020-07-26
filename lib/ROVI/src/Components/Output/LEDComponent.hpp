@@ -86,12 +86,17 @@ namespace Rovi {
             virtual bool isAdressable() const override;
             virtual size_t nbPixel() const override;
 
+            void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues) {
+                m_swapRGValues = newSwapRGValues;
+            }
+
         protected:
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx);
             virtual std::shared_ptr<Color> colorImpl(size_t pixelIdx) const;
 
             size_t m_nbPixel;
             std::vector<std::shared_ptr<Color>> m_colors;
+            std::vector<uint32_t> m_swapRGValues;
         };
     }
 }

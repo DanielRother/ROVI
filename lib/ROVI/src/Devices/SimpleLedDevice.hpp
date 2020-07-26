@@ -36,7 +36,7 @@ namespace Rovi {
                     m_leds->update();
 
                     auto now = std::chrono::system_clock::now();
-                    if(now > m_nextEffectSelection && m_timePerEffect != std::chrono::minutes(0)) {
+                    if(now > m_nextEffectSelection && m_timePerEffect != std::chrono::minutes(0) && m_on) {
                         selectRandomEffect();
                     }
                 }
@@ -56,7 +56,7 @@ namespace Rovi {
                 }
 
                 virtual void setBrightness(uint8_t brightness) {
-                    std::cout << "SimpleLedDevice::setBrightness(" << brightness << ")" << std::endl;
+                    std::cout << "SimpleLedDevice::setBrightness(" << (int) brightness << ")" << std::endl;
                     setOn(true);
                     m_leds->setBrightness(brightness);
                     // Not sure why this is required but otherwise the brightness is not set at all when changing

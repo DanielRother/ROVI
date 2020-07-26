@@ -48,7 +48,11 @@ namespace Rovi {
 
                 auto rgb = color->toRGB();
                 for(uint16_t pixelIdx = 0; pixelIdx < NB_PIXEL; ++pixelIdx) {
-                    m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
+                    if(m_swapRGValues[pixelIdx] == 0) {
+                        m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
+                    } else {
+                        m_leds[pixelIdx] = CRGB(rgb->g, rgb->r, rgb->b); 
+                    }
                 }
                 FastLED.show();
                 m_color = color;
@@ -66,7 +70,11 @@ namespace Rovi {
                 }
 
                 auto rgb = color->toRGB();
-                m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b);
+                if(m_swapRGValues[pixelIdx] == 0) {
+                    m_leds[pixelIdx] = CRGB(rgb->r, rgb->g, rgb->b); 
+                } else {
+                    m_leds[pixelIdx] = CRGB(rgb->g, rgb->r, rgb->b); 
+                }
                 FastLED.show();
                 m_color = color; 
             }

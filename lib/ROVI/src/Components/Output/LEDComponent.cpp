@@ -21,7 +21,8 @@ namespace Rovi {
         LEDComponent::LEDComponent(const std::string& name) 
         : m_on(true), m_brightness(128)
         , m_color(std::make_shared<HSVColor>(0,0,0.2))
-        , m_effect(std::make_shared<WhiteStatic>(this)) {
+        , m_effect(std::make_shared<WhiteStatic>(this))
+        {
             std::cout << "LEDComponent ctor" << std::endl;
         }
 
@@ -230,6 +231,7 @@ namespace Rovi {
         : LEDComponent{name}
         , m_nbPixel{nbPixel}
         , m_colors{nbPixel}
+        , m_swapRGValues(nbPixel, 0)        // TBD: Maybe make the Pixeltype dynamic as well
         {
 
         }

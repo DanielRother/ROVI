@@ -23,7 +23,6 @@ namespace Rovi {
             NeoPixelComponent(uint8_t pin, uint16_t nbPixel, const std::string& name = "NeoPixel") 
                 : AdressableLedComponent{nbPixel, name}
                 , pixels{nbPixel, pin, NEO_GRB + NEO_KHZ800}
-                , swapRGValues(nbPixel, 0)        // TBD: Maybe make the Pixeltype dynamic as well
                 {
                     pixels.begin();                                                     // This initializes the NeoPixel library.
                                                                                         // TBD: Must this be called by the setup method
@@ -43,7 +42,7 @@ namespace Rovi {
                 // pixels.setPixelColor(0,0,0,0);
                 for(uint16_t pixelIdx = 0; pixelIdx < pixels.numPixels(); ++pixelIdx) {
                     // std::cout << "pixelIdx: " << pixelIdx;
-                    if(swapRGValues[pixelIdx] == 0) {
+                    if(m_swapRGValues[pixelIdx] == 0) {
                         // std::cout << " RGB" << std::endl;
                         pixels.setPixelColor(pixelIdx, rgb->r, rgb->g, rgb->b);
                     } else {
@@ -67,7 +66,7 @@ namespace Rovi {
                 auto rgb = color->toRGB();
 
                 // std::cout << "pixelIdx: " << pixelIdx;
-                if(swapRGValues[pixelIdx] == 0) {
+                if(m_swapRGValues[pixelIdx] == 0) {
                     // std::cout << " RGB" << std::endl;
                     pixels.setPixelColor(pixelIdx, rgb->r, rgb->g, rgb->b);
                 } else {
@@ -105,13 +104,8 @@ namespace Rovi {
                 pixels.show();
             }
 
-            void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues) {
-                swapRGValues = newSwapRGValues;
-            }
-
         protected:
             Adafruit_NeoPixel pixels;
-            std::vector<uint32_t> swapRGValues;
         };
     }
 }
