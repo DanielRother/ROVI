@@ -52,6 +52,7 @@ namespace Rovi {
                     return millis() - lastStateStatusSend_ms > STATE_STATUS_SEND_TIMEOUT_MS;
                 }
 
+                //TODO/TBD: Rename and break diamond inheritance?
                 virtual void distributeSettings() {
                     std::cout << "BasicDevice::distributeSettings()" << std::endl;
 

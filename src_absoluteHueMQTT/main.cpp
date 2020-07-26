@@ -7,6 +7,7 @@
 #include <ArduinoIostream.hpp>
 
 #include <Components/Input/RotaryEncoderWithButton.hpp>
+#include <Components/Input/RotaryEncoderWithButtonMQTT.hpp>
 #include <Components/Output/NeoPixelComponent.hpp>
 #include <Components/Output/FastLedComponent.hpp>
 #include <Devices/AbsoluteHueMQTT.hpp>
@@ -31,7 +32,7 @@ const uint16_t nbNeoPixelLEDs = 20;
 
 // std::shared_ptr<Rovi::Devices::SimpleAbsoluteHue> absolutHue;
 std::shared_ptr<Rovi::Devices::AbsoluteHueMQTT<
-	Rovi::Components::RotaryEncoderWithButton, 
+	Rovi::Components::RotaryEncoderWithButtonMQTT, 
 	Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>> absolutHue; 
 
 //***************************************************************************//
@@ -42,7 +43,7 @@ void setup() {
     std::cout << "--- setup() ---" << std::endl;
 	iot.begin();
 
-    auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(rotaryPinA, rotaryPinB, rotaryPinButton, "rotary");
+    auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButtonMQTT>(rotaryPinA, rotaryPinB, rotaryPinButton, "rotary");
     
 	auto leds = std::make_shared<Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>();
     auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
@@ -58,7 +59,7 @@ void setup() {
     effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow_slow", leds.get()));
 
     absolutHue = std::make_shared<Rovi::Devices::AbsoluteHueMQTT<
-        Rovi::Components::RotaryEncoderWithButton, 
+        Rovi::Components::RotaryEncoderWithButtonMQTT, 
         Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>(
       iot, rotary, leds, effects, "AbsoluteHue");
 

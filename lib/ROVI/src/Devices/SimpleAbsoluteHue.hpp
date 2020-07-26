@@ -57,7 +57,12 @@ namespace Rovi {
                 virtual void setEffect(const std::shared_ptr<LEDEffect>& effect) {
                     std::cout << "SimpleAbsoluteHue()::setEffect(" << effect->name() << ")" << std::endl;
                     SimpleLedDevice<LED>::setEffect(effect);
-                    // TODO: Search effect index and set rotary encoder accordingly
+                    for(auto effectIdx = 0; effectIdx < this->m_effects.size(); ++effectIdx) {
+                        if(this->m_effects[effectIdx]->name() == effect->name()) {
+                            m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::HOLDED, effectIdx);
+                            break;
+                        }
+                    }
                 }
 
                 virtual void setEffect(int effect) {
