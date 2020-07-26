@@ -8,6 +8,7 @@
 #include <Common/LED/LEDEffectFactory.hpp>
 #include <Common/LED/Effects/AllEffects.hpp>
 #include <Common/LED/Color/KnownColors.hpp>
+// #include "BasicDevice.hpp"
 
 namespace Rovi {
     namespace Devices {
