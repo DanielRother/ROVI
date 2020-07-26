@@ -102,7 +102,7 @@ namespace Rovi {
                     settings["possibleEffects"] = possibleEffects;
                     obj["settings"] = settings;
 
-                    auto rotaryMqtt = std::static_pointer_cast<Components::RotaryEncoderWithButtonMQTT>(this->m_rotary);
+                    auto rotaryMqtt = std::static_pointer_cast<ROTARY>(this->m_rotary);
                     auto rotaryJsonSize = rotaryMqtt->jsonSize();
                     auto rotaryJson = new char[rotaryJsonSize];
                     rotaryMqtt->status(rotaryJson, rotaryJsonSize);
