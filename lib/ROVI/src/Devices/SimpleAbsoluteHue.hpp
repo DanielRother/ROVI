@@ -29,11 +29,6 @@ namespace Rovi {
 
                     std::cout << "SimpleAbsoluteHue(): Init led" << std::endl;
                     // Attention: Do NOT init the leds here again. Otherwise the application hangs.:!
-                    // this->restoreSettings();
-                    // this->setOn(this->m_on);
-                    // this->setBrightness(this->m_brightness);
-                    // this->setColor(this->m_color);
-
                 }
                                 
                 virtual void update() {
@@ -41,36 +36,29 @@ namespace Rovi {
                     SimpleLedDevice<LED>::update();
                 }
 
-                // bool isOn() const;
-                // virtual void setOn(bool on);
-                // uint8_t brightness() const;
                 virtual void setBrightness(uint8_t brightness) {
                     std::cout << "SimpleAbsoluteHue()::setBrightness(" << (int) brightness << ")" << std::endl;
                     SimpleLedDevice<LED>::setBrightness(brightness);
                     m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::NORMAL, this->m_brightness);
                 }
-                // std::shared_ptr<Color> color();
+
                 virtual void setColor(const std::shared_ptr<Color>& color) {
                     std::cout << "SimpleAbsoluteHue()::setColor(" << color->toString() << ")" << std::endl;
                     SimpleLedDevice<LED>::setColor(color);
                     m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, this->m_color->toHSV()->h);
                 }
-                // uint32_t hue() const;
+
                 virtual void setHue(uint32_t hue) {
                     std::cout << "SimpleAbsoluteHue()::setHue(" << hue << ")" << std::endl;
                     SimpleLedDevice<LED>::setHue(hue);
                     m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED, this->m_color->toHSV()->h);
                 }
-                // std::shared_ptr<LEDEffect> effect() const;
-                // virtual void setEffect(const std::shared_ptr<LEDEffect>& effect);
+
                 virtual void setEffect(int effect) {
                     std::cout << "SimpleAbsoluteHue()::setEffect(" << effect << ")" << std::endl;
                     SimpleLedDevice<LED>::setEffect(effect);
                     m_rotary->setValue(Components::RotaryEncoderWithButton::ButtonStates::HOLDED, effect);                    
                 }
-
-                // TODO: Move to base class
-                // void setSwapRGValues(const std::vector<uint32_t> newSwapRGValues);
 
             protected:
                 void setupNormal() {
@@ -123,15 +111,12 @@ namespace Rovi {
                         std::cout << "DOUBLE_CLICKED state activation callback - Hue selection active" << std::endl;
                         std::cout << "--- Set effect to color_static and double blink" << std::endl;
 
-                        // TODO?
                         for(auto effectIdx = 0; effectIdx < this->m_effects.size(); ++effectIdx) {
                             if(this->m_effects[effectIdx]->name() == "color_static") {
                                 this->setEffect(effectIdx);
                                 break;
                             }
-                        }
-                        // auto effect = LEDEffectFactory::getEffect("color_static", this->m_leds.get());
-                        // this->setEffect(effect);   
+                        } 
                         doubleBlink();
                     };
 
@@ -159,7 +144,6 @@ namespace Rovi {
 
                     auto valueChangeCallback = [&](int effectNumber) {
                         std::cout << "HOLDED value change callback - Select effect number " << effectNumber << ", i.e. effect '" << this->m_effects[effectNumber]->name() << "'" << std::endl;
-                        // TODO?
                         this->setEffect(effectNumber);
                     };
 
@@ -183,14 +167,6 @@ namespace Rovi {
                 }
 
                 std::shared_ptr<ROTARY> m_rotary;
-                // std::shared_ptr<LED> leds;
-
-                // bool m_on;
-                // uint8_t m_brightness;
-                // std::shared_ptr<Color> m_color;
-                // std::shared_ptr<LEDEffect> m_effect;
-
-                // std::vector<std::string> m_possibleEffects;
         };
     }
 }

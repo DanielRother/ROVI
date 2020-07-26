@@ -9,7 +9,7 @@
 #include <Components/Input/RotaryEncoderWithButton.hpp>
 #include <Components/Output/NeoPixelComponent.hpp>
 #include <Components/Output/FastLedComponent.hpp>
-#include <Devices/SimpleAbsoluteHue.h>
+#include <Devices/SimpleAbsoluteHue.hpp>
 
 //***************************************************************************//
 // Basecamp and Rovi initialize 

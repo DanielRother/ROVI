@@ -30,10 +30,6 @@ namespace Rovi {
                     std::cout << "Init led" << std::endl;
                     m_leds->init();
                     restoreSettings();
-
-                    // setOn(m_on);
-                    // setBrightness(m_brightness);
-                    // setColor(m_color);
                 }
 
                 virtual void update() {
