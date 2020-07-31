@@ -54,6 +54,10 @@ void setup() {
 	sleep(5);
     std::cout << "--- setup() ---" << std::endl;
 	iot.begin();
+  std::cout << "*********************************" << std::endl;
+  std::cout << "WiFi SSID" << iot.configuration.get("WifiEssid").c_str() << "; PW: " << iot.configuration.get("WifiPassword").c_str() << std::endl;
+  std::cout << "*********************************" << std::endl;
+	iot.preferences.putUInt("bootcounter", 0);
 
 	auto leds = std::make_shared<Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>();
     auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);

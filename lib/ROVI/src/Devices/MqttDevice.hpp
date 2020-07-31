@@ -54,6 +54,8 @@ namespace Rovi {
                     std::cout << "mqttConnected()" << std::endl;
 
                     m_iot.mqtt.subscribe(m_setTopic.c_str(),2);
+                    auto bootcounter = m_iot.preferences.getUInt("bootcounter", 0);
+                    m_iot.mqtt.publish(std::string{"rovi/" + m_hostname + "/bootcounter"}.c_str(), 1, true, String{bootcounter}.c_str());
                     m_isConnected = true;
                     distributeSettings();
                 }
