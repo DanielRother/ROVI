@@ -24,7 +24,8 @@ namespace Rovi {
                 , m_willTopic{"rovi/" + m_hostname + "/connection"}
                 {
                     std::cout << "Set last will on topic: " << m_willTopic << std::endl;
-                    m_iot.mqtt.setWill(m_willTopic.c_str(), 1, true, "{\"status\":\"offline\"}");
+                    // m_iot.mqtt.setWill(m_willTopic.c_str(), 1, true, "{\"status\":\"offline\"}");
+                    m_iot.mqtt.setWill(m_willTopic.c_str(), 1, true, "{\"online\":false}");
 
                     m_iot.mqtt.onConnect([&](bool sessionPresent) {mqttConnected(sessionPresent);});
                     m_iot.mqtt.onSubscribe([&](uint16_t packetId, uint8_t qos) {mqttSubscribed(packetId, qos);});
@@ -45,7 +46,8 @@ namespace Rovi {
                         auto output = String{""};
                         createMqttMessage(output);
 
-                        m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
+                        // m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"status\":\"online\"}");
+                        m_iot.mqtt.publish(m_willTopic.c_str(), 1, true, "{\"online\":true}");
                         m_iot.mqtt.publish(m_statusTopic.c_str(), 1, true, output.c_str());
                     }
                 }
