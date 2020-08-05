@@ -10,6 +10,7 @@
 #include "UtilFunctions.hpp"
 #include "MqttDevice.hpp"
 #include "SimpleAbsoluteHue.hpp"
+#include "Components/Input/RotaryEncoderWithButtonMQTT.hpp"
 
 namespace Rovi {
     namespace Devices {
@@ -103,19 +104,19 @@ namespace Rovi {
                     obj["settings"] = settings;
 
                     auto rotaryMqtt = std::static_pointer_cast<ROTARY>(this->m_rotary);
-                    auto rotaryJsonSize = rotaryMqtt->jsonSize();
-                    auto rotaryJson = new char[rotaryJsonSize];
-                    rotaryMqtt->status(rotaryJson, rotaryJsonSize);
+                    auto rotaryJson = new char[ROTARY::MAX_SIZE];
+                    rotaryMqtt->status(rotaryJson, ROTARY::MAX_SIZE);
                     obj["rotary_button"] = RawJson(rotaryJson);                    
 
                     obj.printTo(output);
                     std::cout << "msg: " << output << std::endl;
+                    delete[] rotaryJson;
                 }
 
                 void receiveMqttMessage(const char* payload) override {
                     Serial << "LedDeviceMQTT::receiveMqttMessage() " << endl;
 
-                    const int capacity = 2000; //JSON_OBJECT_SIZE(10);
+                    const int capacity = 2500; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
                     JsonObject& obj = jb.parseObject(payload);
                     if(obj.success()) {

@@ -45,7 +45,7 @@ namespace Rovi {
     			obj.printTo(json, maxSize);
 			}
 
-			static const size_t MAX_SIZE = 2000;//1146 = 450 + 2*JSON_ARRAY_SIZE(4) + 4*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(4) + 4*JSON_OBJECT_SIZE(5);
+			static const size_t MAX_SIZE = 2500;//1146 = 450 + 2*JSON_ARRAY_SIZE(4) + 4*JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(4) + 4*JSON_OBJECT_SIZE(5);
         };
 
     }
