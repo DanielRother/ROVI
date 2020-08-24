@@ -38,6 +38,16 @@ namespace Rovi {
                 virtual void createMqttMessage(String& output) = 0;
                 virtual void receiveMqttMessage(const char* payload) = 0;
 
+                virtual void update() {
+                    BasicDevice::update();
+
+                    if(millis() - m_lastMqttUpdateSend > NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS) {
+                        std::cout << "No MQTT message send for at least " << NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS << " ms. Probably wifi connection is lost -> Restarting" << std::endl;
+                        ESP.restart();
+                    }
+                }
+
+
                 virtual void distributeSettings() {
                     std::cout << "MqttDevice::distributeSettings()" << std::endl;
                     BasicDevice::distributeSettings();
@@ -68,6 +78,7 @@ namespace Rovi {
 
                 void mqttPublished(uint16_t packetId) {
                     std::cout << "mqttPublished()" << std::endl;
+                    m_lastMqttUpdateSend = millis();
                 }
 
                 void receiveSetMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -86,11 +97,13 @@ namespace Rovi {
                 std::string m_setTopic;
                 std::string m_willTopic;
 
+                unsigned long m_lastMqttUpdateSend;
                 static const uint16_t IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS;
+                static const unsigned long NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS;
         };
 
         const uint16_t MqttDevice::IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS = 0;
-
+        const unsigned long MqttDevice::NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS = 60 * 60 * 1000;
     };
 };
 
