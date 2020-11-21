@@ -65,6 +65,7 @@ namespace Rovi {
 
             virtual std::shared_ptr<Color> colorImpl(size_t pixelIdx) const override {
                 Serial << "Not supported. Never should come here..." << endl;
+                return nullptr;
             }
 
             virtual void showImpl() override {

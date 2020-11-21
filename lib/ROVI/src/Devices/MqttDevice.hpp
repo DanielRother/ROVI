@@ -22,6 +22,7 @@ namespace Rovi {
                 , m_statusTopic{"rovi/" + m_hostname + "/status"}
                 , m_setTopic{"rovi/" + m_hostname + "/set"}
                 , m_willTopic{"rovi/" + m_hostname + "/connection"}
+                , m_lastMqttUpdateSend(0)
                 {
                     std::cout << "Set last will on topic: " << m_willTopic << std::endl;
                     // m_iot.mqtt.setWill(m_willTopic.c_str(), 1, true, "{\"status\":\"offline\"}");
@@ -41,7 +42,7 @@ namespace Rovi {
                 virtual void update() {
                     BasicDevice::update();
 
-                    if(millis() - m_lastMqttUpdateSend > NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS) {
+                    if((millis() - m_lastMqttUpdateSend) > NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS) {
                         std::cout << "No MQTT message send for at least " << NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS << " ms. Probably wifi connection is lost -> Restarting" << std::endl;
                         ESP.restart();
                     }

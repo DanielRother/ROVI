@@ -52,6 +52,12 @@ void setup()
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_blue", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_green", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_purple", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow_random", leds.get()));
 
 
 #ifndef USE_MQTT

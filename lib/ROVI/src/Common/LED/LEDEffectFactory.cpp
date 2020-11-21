@@ -12,6 +12,8 @@ namespace Rovi {
         auto delay_ms    = getDelay(effectLower);
 
         // TODO: Use enum instead of strings
+        // TODO: currently the speed postfix is not working for rainbow and running_onoff,
+        //       because there the names are not unique
         if(effectLower.find("white_static") != std::string::npos) {
             auto effect = std::make_shared<WhiteStatic>(led, delay_ms);
             effect->setName(effectLower);
@@ -28,7 +30,7 @@ namespace Rovi {
             auto effect = std::make_shared<RandomColor>(led, delay_ms);
             effect->setName(effectLower);
             return effect;
-        } else if(effectLower.find("rainbow") != std::string::npos) {
+        } else if(effectLower.find("rainbow") != std::string::npos && effectLower.size() == 7) {
             auto effect = std::make_shared<Rainbow>(led, delay_ms);
             effect->setName(effectLower);
             return effect;
@@ -66,6 +68,30 @@ namespace Rovi {
                         std::make_shared<Rovi::RGBColor>(Rovi::tuPurple),
                         std::make_shared<Rovi::RGBColor>(Rovi::tuDarkPurple)
                         }, led, delay_ms * 5);
+            return effect;
+        } else if(effectLower.find("running_onoff_single") != std::string::npos && effectLower.size() == std::string{"running_onoff_single"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::SINGLE, RunningOnOff::PositionModes::LINEAR, led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
+        } else if(effectLower.find("running_onoff_multi") != std::string::npos && effectLower.size() == std::string{"running_onoff_multi"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::MULTI, RunningOnOff::PositionModes::LINEAR, led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
+        } else if(effectLower.find("running_onoff_rainbow") != std::string::npos && effectLower.size() == std::string{"running_onoff_rainbow"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::RAINBOW, RunningOnOff::PositionModes::LINEAR, led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
+        } else if(effectLower.find("running_onoff_single_random") != std::string::npos && effectLower.size() == std::string{"running_onoff_single_random"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::SINGLE, RunningOnOff::PositionModes::RANDOM, led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
+        } else if(effectLower.find("running_onoff_multi_random") != std::string::npos && effectLower.size() == std::string{"running_onoff_multi_random"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::MULTI, RunningOnOff::PositionModes::RANDOM, led, delay_ms);
+            effect->setName(effectLower);
+            return effect;
+        } else if(effectLower.find("running_onoff_rainbow_random") != std::string::npos && effectLower.size() == std::string{"running_onoff_rainbow_random"}.size()) {
+            auto effect = std::make_shared<RunningOnOff>(RunningOnOff::ColorModes::RAINBOW, RunningOnOff::PositionModes::RANDOM, led, delay_ms);
+            effect->setName(effectLower);
             return effect;
         }
 
