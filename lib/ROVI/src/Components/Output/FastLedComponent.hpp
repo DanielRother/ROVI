@@ -38,7 +38,7 @@ namespace Rovi {
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color) override {
-                Serial << "--- FastLedComponent::setColor(): " << color->toString() << endl;
+                // Serial << "--- FastLedComponent::setColor(): " << color->toString() << endl;
 
                 if(!m_isInit) {
                     std::cout << "Not initialized!" << std::endl;

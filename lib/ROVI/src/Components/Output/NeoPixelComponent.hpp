@@ -60,7 +60,7 @@ namespace Rovi {
             }
 
             virtual void setColorImpl(const std::shared_ptr<Color>& color, size_t pixelIdx) override {
-                std::cout << "--- NeoPixel::setColorImpl() to " << color->toRGB()->toString() << std::endl;
+                // std::cout << "--- NeoPixel::setColorImpl() to " << color->toRGB()->toString() << std::endl;
                 AdressableLedComponent::setColorImpl(color, pixelIdx);
 
                 auto rgb = color->toRGB();

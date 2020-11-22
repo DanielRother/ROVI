@@ -54,9 +54,11 @@ void setup()
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_purple", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single_random", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor_zufall", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow_random", leds.get()));
 
 
