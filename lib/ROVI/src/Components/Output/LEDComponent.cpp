@@ -109,12 +109,17 @@ namespace Rovi {
         // }
 
         std::shared_ptr<Color> LEDComponent::color() const {
-            // std::cout << "--- LEDComponent::color(): " << m_color->toString() << std::endl;
+            // std::cout << "--- LEDComponent::color(): " << m_color->toRGB()->toString() << std::endl;
             return m_color;
         }
 
+        std::shared_ptr<Color> LEDComponent::color1() const {
+            // std::cout << "--- LEDComponent::color1(): " << m_color1->toRGB()->toString() << std::endl;
+            return m_color1;
+        }
+
         std::shared_ptr<Color> LEDComponent::color2() const {
-            // std::cout << "--- LEDComponent::color2(): " << m_color2->toString() << std::endl;
+            // std::cout << "--- LEDComponent::color2(): " << m_color2->toRGB()->toString() << std::endl;
             return m_color2;
         }
 
@@ -122,8 +127,17 @@ namespace Rovi {
             // std::cout << "--- LEDComponent::setColor() to " << color->toRGB()->toString() << std::endl;
 
             m_on = true;
-            setColorImpl(color);
+            // setColorImpl(color);
             m_color = color;
+        }
+
+
+        void LEDComponent::setColor1(const std::shared_ptr<Color>& color) {
+            // std::cout << "--- LEDComponent::setColor1() to " << color->toRGB()->toString() << std::endl;
+
+            m_on = true;
+            // Not neccessary to set anything. Just store the value
+            m_color1 = color;
         }
 
         void LEDComponent::setColor2(const std::shared_ptr<Color>& color) {

@@ -17,10 +17,11 @@ Basecamp iot{
 #include <Components/Output/NeoPixelComponent.hpp>
 #include <Components/Output/RGBLEDComponent.hpp>
 
+#include<Common/LED/ColorTypes.h>
 
 const auto nbPixel = 27;
 const auto pin = 13;
-auto name = "weihnachtsbaum";
+auto name = "krippenbild";
 auto colorCircleDelay = 500;
 
 #ifndef USE_MQTT
@@ -42,10 +43,16 @@ void setup()
   auto leds = std::make_shared<Rovi::Components::FastLedComponent<pin, nbPixel>>();
 //   auto leds = std::make_shared<Rovi::Components::NeoPixelComponent>(pin, nbPixel);
 
+    auto swapRGValues = std::vector<uint32_t>(nbPixel, 0);
+    for(size_t pixelIdx = 0; pixelIdx < nbPixel; ++pixelIdx) {
+      swapRGValues[pixelIdx] = 1;
+    }
+    leds->setSwapRGValues(swapRGValues);
+
   auto effects = std::vector<std::shared_ptr<Rovi::LEDEffect>>();
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_gradient", leds.get()));
   // effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
   // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
   // effects.push_back(Rovi::LEDEffectFactory::getEffect("rainbow", leds.get()));
   // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_rgb", leds.get()));

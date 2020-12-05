@@ -75,7 +75,7 @@ namespace Rovi {
                 virtual void createMqttMessage(String& output) override {
                     Serial << "LedDeviceMQTT::createMqttMessage() " << endl;
 
-                    const int capacity = 2000; //JSON_OBJECT_SIZE(10);
+                    const int capacity = 3000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
 
                     // Create a JsonObject
@@ -84,24 +84,31 @@ namespace Rovi {
                     obj["power"] = this->m_on;
                     obj["brightness"] = this->m_brightness;
                     obj["colorType"] = "rgb";
-                    auto curRgbColor = this->color()->toRGB();
-                    std::cout << "    send color via mqttt: " << curRgbColor->toString() << std::endl;
-                    JsonObject& color = jb.createObject();
-                    color["r"] = curRgbColor->r;       
-                    color["g"] = curRgbColor->g;       
-                    color["b"] = curRgbColor->b;  
-                    obj["color"] = color;  
-                    auto curRgbColor2 = this->color2()->toRGB();
-                    JsonObject& color2 = jb.createObject();
-                    color2["r"] = curRgbColor2->r;       
-                    color2["g"] = curRgbColor2->g;       
-                    color2["b"] = curRgbColor2->b;  
-                    obj["color2"] = color2;   
+                    {
+                        auto curRgbColor = this->color()->toRGB();
+                        std::cout << "    send color via mqttt: " << curRgbColor->toString() << std::endl;
+                        JsonObject& color = jb.createObject();
+                        color["r"] = curRgbColor->r;       
+                        color["g"] = curRgbColor->g;       
+                        color["b"] = curRgbColor->b;  
+                        obj["color"] = color;  
+                        std::cout << "    color added to JSON" << std::endl;
+                    }
+                    {
+                        auto curRgbColor2 = this->color2()->toRGB();
+                        std::cout << "    send color2 via mqttt: " << curRgbColor2->toString() << std::endl;
+                        JsonObject& color2 = jb.createObject();
+                        color2["r"] = curRgbColor2->r;       
+                        color2["g"] = curRgbColor2->g;       
+                        color2["b"] = curRgbColor2->b;  
+                        obj["color2"] = color2;  
+                        std::cout << "    color2 added to JSON" << std::endl;
+                    } 
                     obj["effect"] = String{this->m_effect->name().c_str()};
                     std::stringstream ss;
                     ss << this->m_timePerEffect.count();
                     obj["timePerEffect_m"] = String{ss.str().c_str()}.toInt();
-
+                
                     JsonObject& settings = jb.createObject();
                     JsonArray& possibleEffects =jb.createArray();
                     for(const auto effect : this->m_effects) {
@@ -111,13 +118,13 @@ namespace Rovi {
                     obj["settings"] = settings;
 
                     obj.printTo(output);
-                    std::cout << "msg: " << output << std::endl;
+                    std::cout << "msg: " << output.c_str() << std::endl;
                 }
 
                 void receiveMqttMessage(const char* payload) override {
                     Serial << "LedDeviceMQTT::receiveMqttMessage() " << endl;
 
-                    const int capacity = 2000; //JSON_OBJECT_SIZE(10);
+                    const int capacity = 3000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
                     JsonObject& obj = jb.parseObject(payload);
                     if(obj.success()) {

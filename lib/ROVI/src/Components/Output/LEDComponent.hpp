@@ -35,8 +35,10 @@ namespace Rovi {
             uint8_t brightness() const;
             void setBrightness(uint8_t brightness);
             std::shared_ptr<Color> color() const ;
+            std::shared_ptr<Color> color1() const ;
             std::shared_ptr<Color> color2() const ;
             void setColor(const std::shared_ptr<Color>& color);
+            void setColor1(const std::shared_ptr<Color>& color);
             void setColor2(const std::shared_ptr<Color>& color);
             std::shared_ptr<LEDEffect> effect() const;
             uint32_t hue() const;
@@ -65,6 +67,7 @@ namespace Rovi {
             bool m_on;
             uint8_t m_brightness;
             std::shared_ptr<Color> m_color;
+            std::shared_ptr<Color> m_color1;        // Aus irgendeinem verfickten Grund wird m_color nicht immer ordentlich gesetzt...
             std::shared_ptr<Color> m_color2;
             std::shared_ptr<LEDEffect> m_effect;
         };

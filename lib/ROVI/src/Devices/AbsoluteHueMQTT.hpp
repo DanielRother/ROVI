@@ -116,7 +116,7 @@ namespace Rovi {
                 void receiveMqttMessage(const char* payload) override {
                     Serial << "LedDeviceMQTT::receiveMqttMessage() " << endl;
 
-                    const int capacity = 2500; //JSON_OBJECT_SIZE(10);
+                    const int capacity = 3000; //JSON_OBJECT_SIZE(10);
                     StaticJsonBuffer<capacity>jb;
                     JsonObject& obj = jb.parseObject(payload);
                     if(obj.success()) {

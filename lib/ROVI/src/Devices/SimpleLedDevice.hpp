@@ -73,7 +73,7 @@ namespace Rovi {
                 }
 
                 virtual std::shared_ptr<Color> color() {
-                    m_color = m_leds->color();
+                    // m_color = m_leds->color();
                     return m_color;
                 }
 
@@ -82,40 +82,41 @@ namespace Rovi {
                 }
 
                 virtual void setColor(const std::shared_ptr<Color>& color) {
-                    std::cout << "SimpleLedDevice::setColor(" << color << ")" << std::endl;
+                    std::cout << "SimpleLedDevice::setColor(" << color->toString() << ")" << std::endl;
                     m_settingsChanged = true;
-                    setOn(true);
 
-                    auto selectedEffect = std::string{"color_static"};
-                    bool effectFound = false;
-                    for(auto effect : this->m_effects) {
-                        if(effect->name() == selectedEffect) {
-                            effectFound = true;
-                            setEffect(effect);
-                            break;
-                        }
-                    }  
-                    if(!effectFound) {
-                        auto effect = LEDEffectFactory::getEffect(selectedEffect, m_leds.get());
-                        setEffect(effect); 
-                        // Delay processing, otherwise the effect will update to really set color to the effect's default one...
-                        sleep(1);
-                        effect->update();
-                    }
+                    // m_effect->stop();
+
+                    // auto selectedEffect = std::string{"color_static"};
+                    // bool effectFound = false;
+                    // for(auto effect : this->m_effects) {
+                    //     if(effect->name() == selectedEffect) {
+                    //         effectFound = true;
+                    //         setEffect(effect);
+                    //         break;
+                    //     }
+                    // }  
+                    // if(!effectFound) {
+                    //     auto effect = LEDEffectFactory::getEffect(selectedEffect, m_leds.get());
+                    //     setEffect(effect); 
+                    //     // Delay processing, otherwise the effect will update to really set color to the effect's default one...
+                    //     sleep(1);
+                    //     effect->update();
+                    // }
 
                     std::cout << "    finally realy set color" << std::endl;
-                    m_leds->setColor(color);
-                    m_color = m_leds->color();
+                    m_leds->setColor1(color);
+                    m_color = color;
                 }
 
                 virtual void setColor2(const std::shared_ptr<Color>& color) {
-                    std::cout << "SimpleLedDevice::setColor2(" << color << ")" << std::endl;
+                    std::cout << "SimpleLedDevice::setColor2(" << color->toString() << ")" << std::endl;
                     m_settingsChanged = true;
-                    setOn(true);
 
                     std::cout << "    finally realy set color" << std::endl;
                     m_leds->setColor2(color);
                     m_color2 = color;
+                    // setOn(true);
                 }
 
                 virtual uint32_t hue() const {
@@ -127,7 +128,7 @@ namespace Rovi {
                     m_settingsChanged = true;
                     setOn(true);
                     m_leds->setHue(hue);
-                    m_color = m_leds->color();
+                    // m_color = m_leds->color();
                 }
 
                 virtual std::shared_ptr<LEDEffect> effect() const {
@@ -217,13 +218,19 @@ namespace Rovi {
                     auto g = this->m_iot.configuration.get("rovi-g");
                     auto b = this->m_iot.configuration.get("rovi-b");
                     auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
+                    // Debug: Overwrite stored settings
+                    // auto color = std::make_shared<HSVColor>(0, 1.0f, 1.0f);
                     setColor(color);
                     auto r2 = this->m_iot.configuration.get("rovi-r2");
                     auto g2 = this->m_iot.configuration.get("rovi-g2");
                     auto b2 = this->m_iot.configuration.get("rovi-b2");
                     auto color2 = std::make_shared<RGBColor>(r2.toInt(), g2.toInt(), b2.toInt());
+                    // Debug: Overwrite stored settings
+                    // auto color2 = std::make_shared<HSVColor>(60, 1.0f, 1.0f);
                     setColor2(color2);
                     auto selectedEffect = std::string{this->m_iot.configuration.get("rovi-effect").c_str()};
+                    // Debug: Overwrite stored settings
+                    // selectedEffect = "color_gradient";
                     for(auto effect : this->m_effects) {
                         if(effect->name() == selectedEffect) {
                             setEffect(effect);
