@@ -41,6 +41,11 @@ namespace Rovi {
                     distributeSettings();
                 }
 
+                virtual void setColor2(const std::shared_ptr<Color>& color) override {
+                    SimpleLedDevice<LED>::setColor2(color);
+                    distributeSettings();
+                }
+
                 virtual void setHue(uint32_t hue) override {
                     SimpleLedDevice<LED>::setHue(hue);
                     distributeSettings();
@@ -85,7 +90,13 @@ namespace Rovi {
                     color["r"] = curRgbColor->r;       
                     color["g"] = curRgbColor->g;       
                     color["b"] = curRgbColor->b;  
-                    obj["color"] = color;     
+                    obj["color"] = color;  
+                    auto curRgbColor2 = this->color2()->toRGB();
+                    JsonObject& color2 = jb.createObject();
+                    color2["r"] = curRgbColor2->r;       
+                    color2["g"] = curRgbColor2->g;       
+                    color2["b"] = curRgbColor2->b;  
+                    obj["color2"] = color2;   
                     obj["effect"] = String{this->m_effect->name().c_str()};
                     std::stringstream ss;
                     ss << this->m_timePerEffect.count();
@@ -141,6 +152,29 @@ namespace Rovi {
                             auto v = Utils::clamp(color["v"].as<float>(), 0.0f, 1.0f);
                             auto newColor = std::make_shared<HSVColor>(h, s, v);
                             setColor(newColor);
+                        } else {
+                            std::cout << "Error: Unknown colortype" << std::endl;
+                        }
+                    }
+                    if(obj.containsKey("colorType") && obj.containsKey("color2")) {
+                        auto colorType = std::string{obj["colorType"].as<char*>()};
+                        std::cout << "Set color2 for type " << colorType << std::endl;
+                        if(colorType == "rgb") {
+                            auto color = obj["color2"];
+                            auto r = Utils::clamp(color["r"].as<int>(), 0, 255);
+                            auto g = Utils::clamp(color["g"].as<int>(), 0, 255);
+                            auto b = Utils::clamp(color["b"].as<int>(), 0, 255);
+                            auto newColor = std::make_shared<RGBColor>(r, g, b);
+                            std::cout << "    r: " << r << ", g: " << g << ", b: " << b << std::endl;
+                            std::cout << "    new color received via MQTT is " << newColor->toString();
+                            setColor2(newColor);
+                        } else if(colorType == "hsv") {
+                            auto color = obj["color2"];
+                            auto h = Utils::clamp(color["h"].as<int>(), 0, 359);
+                            auto s = Utils::clamp(color["s"].as<float>(), 0.0f, 1.0f);
+                            auto v = Utils::clamp(color["v"].as<float>(), 0.0f, 1.0f);
+                            auto newColor = std::make_shared<HSVColor>(h, s, v);
+                            setColor2(newColor);
                         } else {
                             std::cout << "Error: Unknown colortype" << std::endl;
                         }

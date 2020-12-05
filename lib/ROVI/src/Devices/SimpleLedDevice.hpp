@@ -22,6 +22,7 @@ namespace Rovi {
                 , m_on{true}
                 , m_brightness{128}
                 , m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)}
+                , m_color2{std::make_shared<HSVColor>(180.0f, 1.0f, 0.5f)}
                 , m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())} 
                 , m_effects{effects}
                 , m_timePerEffect{timePerEffect}
@@ -76,6 +77,10 @@ namespace Rovi {
                     return m_color;
                 }
 
+                virtual std::shared_ptr<Color> color2() {
+                    return m_color2;
+                }
+
                 virtual void setColor(const std::shared_ptr<Color>& color) {
                     std::cout << "SimpleLedDevice::setColor(" << color << ")" << std::endl;
                     m_settingsChanged = true;
@@ -101,6 +106,15 @@ namespace Rovi {
                     std::cout << "    finally realy set color" << std::endl;
                     m_leds->setColor(color);
                     m_color = m_leds->color();
+                }
+
+                virtual void setColor2(const std::shared_ptr<Color>& color) {
+                    std::cout << "SimpleLedDevice::setColor2(" << color << ")" << std::endl;
+                    m_settingsChanged = true;
+                    setOn(true);
+
+                    std::cout << "    finally realy set color" << std::endl;
+                    m_color2 = color;
                 }
 
                 virtual uint32_t hue() const {
@@ -181,6 +195,11 @@ namespace Rovi {
                     m_iot.configuration.set("rovi-r", String{curRgbColor->r});
                     m_iot.configuration.set("rovi-g", String{curRgbColor->g});
                     m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+                    auto curRgbColor2 = this->color2()->toRGB();
+                    std::cout << "    save settings color2: " << curRgbColor2->toString() << std::endl;
+                    m_iot.configuration.set("rovi-r2", String{curRgbColor2->r});
+                    m_iot.configuration.set("rovi-g2", String{curRgbColor2->g});
+                    m_iot.configuration.set("rovi-b2", String{curRgbColor2->b});
                     m_iot.configuration.set("rovi-effect", String{this->m_effect->name().c_str()});
                     std::cout << "    save settings effect: " << this->m_effect->name() << std::endl;
                     std::stringstream ss;
@@ -198,6 +217,11 @@ namespace Rovi {
                     auto b = this->m_iot.configuration.get("rovi-b");
                     auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
                     setColor(color);
+                    auto r2 = this->m_iot.configuration.get("rovi-r2");
+                    auto g2 = this->m_iot.configuration.get("rovi-g2");
+                    auto b2 = this->m_iot.configuration.get("rovi-b2");
+                    auto color2 = std::make_shared<RGBColor>(r2.toInt(), g2.toInt(), b2.toInt());
+                    setColor2(color2);
                     auto selectedEffect = std::string{this->m_iot.configuration.get("rovi-effect").c_str()};
                     for(auto effect : this->m_effects) {
                         if(effect->name() == selectedEffect) {
@@ -222,6 +246,7 @@ namespace Rovi {
                 bool m_on;
                 uint8_t m_brightness;
                 std::shared_ptr<Color> m_color;
+                std::shared_ptr<Color> m_color2;
                 std::shared_ptr<LEDEffect> m_effect;
 
                 std::vector<std::shared_ptr<Rovi::LEDEffect>> m_effects;
