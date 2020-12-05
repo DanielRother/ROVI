@@ -104,7 +104,7 @@ namespace Rovi {
         };
 
         const uint16_t MqttDevice::IGNORE_MQTT_MSG_ON_STARTUP_TIME_MS = 0;
-        const unsigned long MqttDevice::NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS = 60 * 60 * 1000;
+        const unsigned long MqttDevice::NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS = 5 * 60 * 1000;
     };
 };
 
