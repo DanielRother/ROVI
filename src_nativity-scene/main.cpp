@@ -51,23 +51,23 @@ void setup()
 
   auto effects = std::vector<std::shared_ptr<Rovi::LEDEffect>>();
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_gradient", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
   effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("rainbow", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_rgb", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_red", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_blue", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_green", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_purple", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single_random", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi_random", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor_zufall", leds.get()));
-  // effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("rainbow", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_rgb", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_red", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_blue", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_green", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("color_circle_purple", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_single_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_multi_random", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_twocolor_zufall", leds.get()));
+  effects.push_back(Rovi::LEDEffectFactory::getEffect("running_onoff_rainbow_random", leds.get()));
 
 
 #ifndef USE_MQTT
