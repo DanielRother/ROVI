@@ -8,5 +8,6 @@
 #include "Rainbow.hpp"
 #include "ColorCircle.hpp"
 #include "RunningOnOff.hpp"
+#include "ColorGradient.hpp"
 
 #endif /* __ALLLEDEFFECTS__ */

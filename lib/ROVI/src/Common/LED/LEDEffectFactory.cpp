@@ -120,6 +120,11 @@ namespace Rovi {
             effect->setName(effectLower);
             std::cout << "found effect: "  << effect->name() << std::endl;
             return effect;
+        } else if(effectLower.find("color_gradient") != std::string::npos && effectLower.size() == std::string{"color_gradient"}.size()) {
+            auto effect = std::make_shared<ColorGradient>(led, delay_ms);
+            effect->setName(effectLower);
+            std::cout << "found effect: "  << effect->name() << std::endl;
+            return effect;
         }
 
         Serial << "Warning: No such defect defined (" << effectLower << "). Using default (does nothing)." << endl;

@@ -14,7 +14,15 @@
 namespace Rovi {
     HSVColor::HSVColor(float h, float s, float v)
         : h(h), s(s), v(v)
-    {}
+    {
+        // Limit range
+        while(h > 359) {
+            h -= 360.0f;
+        }
+        while(h < 0) {
+            h += 360.0f;
+        }
+    }
 
     HSVColor::HSVColor()
         : h(0.0f), s(1.0f), v(1.0f)

@@ -114,6 +114,7 @@ namespace Rovi {
                     setOn(true);
 
                     std::cout << "    finally realy set color" << std::endl;
+                    m_leds->setColor2(color);
                     m_color2 = color;
                 }
 

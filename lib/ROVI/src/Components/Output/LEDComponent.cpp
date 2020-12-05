@@ -113,12 +113,25 @@ namespace Rovi {
             return m_color;
         }
 
+        std::shared_ptr<Color> LEDComponent::color2() const {
+            // std::cout << "--- LEDComponent::color2(): " << m_color2->toString() << std::endl;
+            return m_color2;
+        }
+
         void LEDComponent::setColor(const std::shared_ptr<Color>& color) {
             // std::cout << "--- LEDComponent::setColor() to " << color->toRGB()->toString() << std::endl;
 
             m_on = true;
             setColorImpl(color);
             m_color = color;
+        }
+
+        void LEDComponent::setColor2(const std::shared_ptr<Color>& color) {
+            // std::cout << "--- LEDComponent::setColor2() to " << color->toRGB()->toString() << std::endl;
+
+            m_on = true;
+            // Not neccessary to set anything. Just store the value
+            m_color2 = color;
         }
 
         // void LEDComponent::setColor(const std::string& payload) {
