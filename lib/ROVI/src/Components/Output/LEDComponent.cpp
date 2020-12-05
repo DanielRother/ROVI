@@ -47,11 +47,20 @@ namespace Rovi {
 
             if(power) {
                 setColor(m_color);
+                setColor1(m_color1);
+                setColor2(m_color2);
                 m_effect->start();
             } else {
+                std::cout << "------ turn off" << std::endl;
                 auto tmpLastColor = m_color;
+                auto tmpLastColor1 = m_color1;
+                auto tmpLastColor2 = m_color2;
                 setColor(std::make_shared<RGBColor>(0,0,0));
+                setColor1(std::make_shared<RGBColor>(0,0,0));
+                setColor2(std::make_shared<RGBColor>(0,0,0));
                 m_color = tmpLastColor;
+                m_color1 = tmpLastColor1;
+                m_color2 = tmpLastColor2;
                 m_effect->stop();
             }
 
@@ -127,7 +136,7 @@ namespace Rovi {
             // std::cout << "--- LEDComponent::setColor() to " << color->toRGB()->toString() << std::endl;
 
             m_on = true;
-            // setColorImpl(color);
+            setColorImpl(color);
             m_color = color;
         }
 

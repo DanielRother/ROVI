@@ -18,18 +18,17 @@ namespace Rovi {
             }
 
         void step() {
+            if(!led->isAdressable()) {
+                std::cout << "Effect not available for this kind of led" << std::endl;
+                return;
+            }
+
+            auto nbPixel = led->nbPixel();
+            auto color = led->color1()->toHSV();
+            auto color2 = led->color2()->toHSV();
+            // std::cout << "color = " << color->toRGB()->toString() << ", color2 = " << color2->toRGB()->toString() << std::endl;
 
             if(!done) {
-                if(!led->isAdressable()) {
-                    std::cout << "Effect not available for this kind of led" << std::endl;
-                    return;
-                }
-
-                auto nbPixel = led->nbPixel();
-                auto color = led->color1()->toHSV();
-                auto color2 = led->color2()->toHSV();
-                // std::cout << "color = " << color->toRGB()->toString() << ", color2 = " << color2->toRGB()->toString() << std::endl;
-
                 auto hueDif = color2->h - color->h;
                 auto hueDifAbs = fabs(hueDif);
                 auto hueDifSign = hueDif > 0.0f;

@@ -51,6 +51,13 @@ namespace Rovi {
                 virtual void setOn(bool on) {
                     std::cout << "SimpleLedDevice::setOn(" << on << ")" << std::endl;
                     m_settingsChanged = true;
+                    if(!on) {
+                        m_effect->stop();
+                    }
+                    m_leds->setOn(on);
+                    delay(10);
+                    m_leds->setOn(on);
+                    delay(10);
                     m_leds->setOn(on);
                     m_on = m_leds->isOn();
                 }
