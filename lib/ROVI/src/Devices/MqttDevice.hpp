@@ -44,8 +44,15 @@ namespace Rovi {
 
                     if((millis() - m_lastMqttUpdateSend) > NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS) {
                         std::cout << "No MQTT message send for at least " << NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS << " ms. Probably wifi connection is lost -> Restarting" << std::endl;
+                        auto wifiReconnnected = iot.wifi.reconnect(); // Not implemented?!
+                        //if(wifiReconnnected && !iot.mqtt.connected()) {
+                        //if(! && millis() > 15000) {
+                        //    iot.mqtt.connect();
+                        //}
+                    } else if((millis() - m_lastMqttUpdateSend) > 2 * NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS) {
                         ESP.restart();
                     }
+
                 }
 
 
