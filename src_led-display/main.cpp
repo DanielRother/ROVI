@@ -276,7 +276,7 @@ void setup()
 void loop()
 {
   // display_runningPixel();
-  // display_scrollText("Hello World 2!");
+  display_scrollText("Hello World");
   // display_scrollText("foobar2000!");
   // display_scrollText("ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöü1234567890");
   display_icon();
