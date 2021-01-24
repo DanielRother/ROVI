@@ -1,10 +1,10 @@
 #include <Arduino.h>
+#include <WiFi.h>
 
 #include <ArduinoIostream.hpp>
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <Config/RoviWiFiManager.hpp>
 
@@ -17,5 +17,9 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  if (WiFi.status() != WL_CONNECTED) {
+    std::cerr << "WiFi isn't connected anymore. Restart ESP" << std::endl;
+    delay(2000);
+    ESP.restart();
+  } // put your main code here, to run repeatedly:
 }
