@@ -7,7 +7,7 @@
 namespace Rovi {
 namespace Config {
 
-MqttConfig::MqttConfig() : server{""}, port{1889}, user{""}, password{""} {
+MqttConfig::MqttConfig() : server{""}, port{1883}, user{""}, password{""} {
   server.reserve(DEFAULT_PARAMETER_SIZE);
   user.reserve(DEFAULT_PARAMETER_SIZE);
   password.reserve(DEFAULT_PARAMETER_SIZE);

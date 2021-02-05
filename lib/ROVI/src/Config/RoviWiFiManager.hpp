@@ -4,7 +4,7 @@
 #include <string>
 
 #include "MqttConfig.hpp"
-#include "WiFiDefaultConfig.hpp"
+#include "WiFiConfig.hpp"
 
 namespace Rovi {
 namespace Config {
@@ -13,17 +13,18 @@ class RoviWiFiManager {
 public:
   RoviWiFiManager();
 
+  // define your default values here, if there are different values in
+  // config.json, they are overwritten.
+  WiFiConfig wiFiConfig;
+  MqttConfig mqttConfig;
+  std::string otaPassword;
+
+protected:
   // callback notifying us of the need to save config
   void saveConfigCallback();
   void setupSpiffs();
 
-protected:
-  // define your default values here, if there are different values in
-  // config.json, they are overwritten.
-  WiFiDefaultConfig wiFiDefaultConfig;
-  MqttConfig mqttConfig;
-  std::string otaPassword;
-
+  WiFiConfig wiFiDefaultConfig;
   // flag for saving data
   bool shouldSaveConfig;
 };

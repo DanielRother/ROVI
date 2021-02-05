@@ -1,4 +1,4 @@
-#include "WiFiDefaultConfig.hpp"
+#include "WiFiConfig.hpp"
 
 #include <Esp.h>
 
@@ -6,7 +6,7 @@
 
 namespace Rovi {
 namespace Config {
-WiFiDefaultConfig::WiFiDefaultConfig() : SSID{""}, password{"hakunamatata"} {
+WiFiConfig::WiFiConfig() : SSID{""}, password{"hakunamatata"} {
   uint32_t id = 0;
   for (int i = 0; i < 17; i = i + 8) {
     id |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
@@ -16,5 +16,9 @@ WiFiDefaultConfig::WiFiDefaultConfig() : SSID{""}, password{"hakunamatata"} {
   sprintf(idStr, "RoviConnectAP-%08X\n", id);
   SSID = idStr;
 }
+
+WiFiConfig::WiFiConfig(const std::string &ssid, const std::string &password)
+    : SSID{ssid}, password{password} {}
+
 } // namespace Config
 } // namespace Rovi

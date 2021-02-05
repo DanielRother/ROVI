@@ -15,8 +15,8 @@
 namespace Rovi {
 namespace Config {
 RoviWiFiManager::RoviWiFiManager()
-    : wiFiDefaultConfig{}, mqttConfig{}, otaPassword{""}, shouldSaveConfig{
-                                                              false} {
+    : wiFiConfig{}, mqttConfig{}, otaPassword{""}, wiFiDefaultConfig{},
+      shouldSaveConfig{false} {
   otaPassword.reserve(40);
 
   setupSpiffs();
@@ -82,6 +82,7 @@ RoviWiFiManager::RoviWiFiManager()
     ESP.restart();
     delay(5000);
   }
+  wiFiConfig = WiFiConfig{wm.getWiFiSSID().c_str(), wm.getWiFiPass().c_str()};
 
   // always start configportal for a little while
   // wm.setConfigPortalTimeout(60);
@@ -98,6 +99,11 @@ RoviWiFiManager::RoviWiFiManager()
   mqttConfig.print();
   otaPassword = custom_ota_password.getValue();
   std::cout << "Set OTA password: " << otaPassword << std::endl;
+
+  // Overwrite settings for testing
+  //   shouldSaveConfig = true;
+  //   mqttConfig.server = "omv.local";
+  //   mqttConfig.port = 1883;
 
   // save the custom parameters to FS
   if (shouldSaveConfig) {

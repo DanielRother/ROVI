@@ -1,12 +1,14 @@
 #include <Arduino.h>
-#include <WiFi.h>
 
 #include <ArduinoIostream.hpp>
 
 #include <iostream>
 #include <string>
 
+#include <Common/MqttTest.hpp>
 #include <Config/RoviWiFiManager.hpp>
+
+Rovi::Common::MqttTest mqttClient;
 
 void setup() {
   // put your setup code here, to run once:
@@ -14,7 +16,10 @@ void setup() {
   Serial.println();
 
   auto rwm = Rovi::Config::RoviWiFiManager();
+  mqttClient.start(rwm);
 }
+
+auto start = millis();
 
 void loop() {
   if (WiFi.status() != WL_CONNECTED) {
