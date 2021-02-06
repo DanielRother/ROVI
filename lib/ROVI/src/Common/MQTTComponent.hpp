@@ -6,7 +6,7 @@
 namespace Rovi {
     namespace Components {
         template<class C>
-        class MQTTComponent {
+        class MqttComponent {
             public:
                 virtual void status(char* json, size_t maxSize) const = 0;
 

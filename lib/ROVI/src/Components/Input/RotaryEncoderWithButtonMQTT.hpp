@@ -8,7 +8,7 @@
 
 namespace Rovi {
     namespace Components {
-        class RotaryEncoderWithButtonMQTT : public RotaryEncoderWithButton, public MQTTComponent<RotaryEncoderWithButtonMQTT> {
+        class RotaryEncoderWithButtonMQTT : public RotaryEncoderWithButton, public MqttComponent<RotaryEncoderWithButtonMQTT> {
         public:
 			RotaryEncoderWithButtonMQTT(const uint8_t pinA, const uint8_t pinB, const uint8_t pinButton, const std::string& name= "RotaryEncoderMQTT")
 				: RotaryEncoderWithButton(pinA, pinB, pinButton, name)
