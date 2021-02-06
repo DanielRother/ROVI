@@ -16,7 +16,7 @@ public:
   SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt)
       : mqtt{mqtt}, lastUpdate_ms{millis()} {
     mqtt.setWill(
-        TEST_TOPIC, 1, true,
+        TEST_TOPIC, Rovi::Common::MqttQoS::AT_LEAST_ONCE, true,
         WILL_MSG); // Attention: topic and will must be at least a member, as
                    // AsyncMqttClient only holds a pointer and hence these
                    // variable cannot go out of scope...
@@ -41,13 +41,17 @@ public:
   void onMqttConnect(bool sessionPresent) {
     std::cout << "Connected to MQTT." << std::endl;
     std::cout << "Session present: " << sessionPresent << std::endl;
-    uint16_t packetIdSub = mqtt.subscribe("test/lol", 2);
+    uint16_t packetIdSub =
+        mqtt.subscribe("test/lol", Rovi::Common::MqttQoS::EXCACTLY_ONCE);
     std::cout << "Subscribing at QoS 2, packetId: " << packetIdSub << std::endl;
-    mqtt.publish("test/lol", 0, true, "test 1");
+    mqtt.publish("test/lol", Rovi::Common::MqttQoS::AT_MOST_ONCE, true,
+                 "test 1");
     std::cout << "Publishing at QoS 0" << std::endl;
-    uint16_t packetIdPub1 = mqtt.publish("test/lol", 1, true, "test 2");
+    uint16_t packetIdPub1 = mqtt.publish(
+        "test/lol", Rovi::Common::MqttQoS::AT_LEAST_ONCE, true, "test 2");
     std::cout << "Publishing at QoS 1, packetId: " << packetIdPub1 << std::endl;
-    uint16_t packetIdPub2 = mqtt.publish("test/lol", 2, true, "test 3");
+    uint16_t packetIdPub2 = mqtt.publish(
+        "test/lol", Rovi::Common::MqttQoS::EXCACTLY_ONCE, true, "test 3");
     std::cout << "Publishing at QoS 2, packetId: " << packetIdPub2 << std::endl;
   }
 
@@ -98,7 +102,8 @@ public:
 
       std::cout << "Update -> Send MQTT message" << std::endl;
       auto msg = "{\"power\": true}";
-      mqtt.publish("esp/online", 1, true, msg);
+      mqtt.publish("esp/online", Rovi::Common::MqttQoS::AT_LEAST_ONCE, true,
+                   msg);
 
       lastUpdate_ms = now_ms;
     }

@@ -7,12 +7,15 @@
 #include <iostream>
 #include <list>
 
-#include <ArduinoIostream.hpp>
+#include <enum.h>
 
+#include <ArduinoIostream.hpp>
 #include <Config/RoviWiFiManager.hpp>
 
 namespace Rovi {
 namespace Common {
+
+BETTER_ENUM(MqttQoS, int, AT_MOST_ONCE, AT_LEAST_ONCE, EXCACTLY_ONCE);
 
 class MqttConnection {
 public:
@@ -116,20 +119,20 @@ public:
 
   void disconnect(bool force = false) { mqtt.disconnect(force); }
 
-  // TODO: Use enum instead of plain int
-  uint16_t subscribe(const std::string &topic, uint8_t qos = 0) {
+  uint16_t subscribe(const std::string &topic,
+                     MqttQoS qos = MqttQoS::AT_MOST_ONCE) {
     return mqtt.subscribe(topic.c_str(), qos);
   }
   uint16_t unsubscribe(const std::string &topic) {
     mqtt.unsubscribe(topic.c_str());
   }
 
-  uint16_t publish(const std::string &topic, uint8_t qos, bool retain,
+  uint16_t publish(const std::string &topic, MqttQoS qos, bool retain,
                    const std::string &payload) {
     return mqtt.publish(topic.c_str(), qos, retain, payload.c_str(),
                         payload.size());
   }
-  void setWill(const std::string &topic, uint8_t qos, bool retain,
+  void setWill(const std::string &topic, MqttQoS qos, bool retain,
                const std::string &payload) {
     mqtt.setWill(topic.c_str(), qos, retain, payload.c_str(), payload.length());
   }
