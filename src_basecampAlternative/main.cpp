@@ -10,30 +10,46 @@
 #include <Common/MqttConnection.hpp>
 #include <Config/RoviWiFiManager.hpp>
 
+// void WiFiEvent(WiFiEvent_t event) {
+//   Serial.printf("[WiFi-event] event: %d\n", event);
+//   switch (event) {
+//   case SYSTEM_EVENT_STA_GOT_IP:
+//     Serial.println("WiFi connected");
+//     Serial.println("IP address: ");
+//     Serial.println(WiFi.localIP());
+//     connectToMqtt();
+//     break;
+//   case SYSTEM_EVENT_STA_DISCONNECTED:
+//     Serial.println("WiFi lost connection");
+//     //   xTimerStop(
+//     //       mqttReconnectTimer,
+//     //       0); // ensure we don't reconnect to MQTT while
+//     reconnecting to
+//     //       Wi-Fi
+//     //   xTimerStart(wifiReconnectTimer, 0);
+//     break;
+//   }
+// }
+
 class SomeMqttTestClass {
 public:
-  SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt) : mqtt{mqtt} {};
-
-  //   // void WiFiEvent(WiFiEvent_t event) {
-  //   //   Serial.printf("[WiFi-event] event: %d\n", event);
-  //   //   switch (event) {
-  //   //   case SYSTEM_EVENT_STA_GOT_IP:
-  //   //     Serial.println("WiFi connected");
-  //   //     Serial.println("IP address: ");
-  //   //     Serial.println(WiFi.localIP());
-  //   //     connectToMqtt();
-  //   //     break;
-  //   //   case SYSTEM_EVENT_STA_DISCONNECTED:
-  //   //     Serial.println("WiFi lost connection");
-  //   //     //   xTimerStop(
-  //   //     //       mqttReconnectTimer,
-  //   //     //       0); // ensure we don't reconnect to MQTT while
-  //   //     reconnecting to
-  //   //     //       Wi-Fi
-  //   //     //   xTimerStart(wifiReconnectTimer, 0);
-  //   //     break;
-  //   //   }
-  //   // }
+  SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt) : mqtt{mqtt} {
+    mqtt.addOnConnectCallback(std::bind(&SomeMqttTestClass::onMqttConnect, this,
+                                        std::placeholders::_1));
+    mqtt.addOnDisconnectCallback(std::bind(&SomeMqttTestClass::onMqttDisconnect,
+                                           this, std::placeholders::_1));
+    mqtt.addOnSubscribeCallback(std::bind(&SomeMqttTestClass::onMqttSubscribe,
+                                          this, std::placeholders::_1,
+                                          std::placeholders::_2));
+    mqtt.addOnUnsubscribeCallback(std::bind(
+        &SomeMqttTestClass::onMqttUnsubscribe, this, std::placeholders::_1));
+    mqtt.addOnMessageCallback(std::bind(
+        &SomeMqttTestClass::onMqttMessage, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+        std::placeholders::_5, std::placeholders::_6));
+    mqtt.addOnPublishCallback(std::bind(&SomeMqttTestClass::onMqttPublish, this,
+                                        std::placeholders::_1));
+  };
 
   void onMqttConnect(bool sessionPresent) {
     std::cout << "Connected to MQTT." << std::endl;
@@ -70,8 +86,9 @@ public:
   void onMqttMessage(char *topic, char *payload,
                      AsyncMqttClientMessageProperties properties, size_t len,
                      size_t index, size_t total) {
-    std::cout << "Publish received." << std::endl
+    std::cout << "Message received." << std::endl
               << "\ttopic: " << topic << std::endl
+              << "\tpayload: " << payload << std::endl
               << "\tqos: " << (int)properties.qos << std::endl
               << "\tdup: " << properties.dup << std::endl
               << "\tretain: " << properties.retain << std::endl
@@ -93,28 +110,9 @@ Rovi::Common::MqttConnection mqttConnection;
 SomeMqttTestClass mqttTest(mqttConnection);
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
-  Serial.println();
 
   auto rwm = Rovi::Config::RoviWiFiManager();
-
-  mqttConnection.addOnConnectCallback(std::bind(
-      &SomeMqttTestClass::onMqttConnect, mqttTest, std::placeholders::_1));
-  mqttConnection.addOnDisconnectCallback(std::bind(
-      &SomeMqttTestClass::onMqttDisconnect, mqttTest, std::placeholders::_1));
-  mqttConnection.addOnSubscribeCallback(
-      std::bind(&SomeMqttTestClass::onMqttSubscribe, mqttTest,
-                std::placeholders::_1, std::placeholders::_2));
-  mqttConnection.addOnUnsubscribeCallback(std::bind(
-      &SomeMqttTestClass::onMqttUnsubscribe, mqttTest, std::placeholders::_1));
-  mqttConnection.addOnMessageCallback(std::bind(
-      &SomeMqttTestClass::onMqttMessage, mqttTest, std::placeholders::_1,
-      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-      std::placeholders::_5, std::placeholders::_6));
-  mqttConnection.addOnPublishCallback(std::bind(
-      &SomeMqttTestClass::onMqttPublish, mqttTest, std::placeholders::_1));
-
   mqttConnection.start(rwm);
 }
 
