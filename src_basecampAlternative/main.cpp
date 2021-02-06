@@ -92,6 +92,10 @@ public:
   void update() {
     auto now_ms = millis();
     if (now_ms - lastUpdate_ms > TIME_BETWEEN_UPDATES_MS) {
+      if (!mqtt.connected()) {
+        mqtt.connect();
+      }
+
       std::cout << "Update -> Send MQTT message" << std::endl;
       auto msg = "{\"power\": true}";
       mqtt.publish("esp/online", 1, true, msg);

@@ -33,6 +33,9 @@ public:
 
   // MqttConnection(){};
   void start(Config::RoviWiFiManager &rwm) {
+    addOnConnectCallback(
+        std::bind(&MqttConnection::onMqttConnect, this, std::placeholders::_1));
+
     for (auto c : onConnectCalbacks) {
       mqtt.onConnect(c);
     }
@@ -91,15 +94,12 @@ public:
   void connect() {
     std::cout << "Connecting to MQTT..." << std::endl;
 
-    // From Bascamp
-    bool mqttIsConnecting = false;
-
-    // TODO: What is the sense behind these magics?
-    // If the MQTT client is not connected force a disconnect.
-    if (mqtt.connected() != 1) {
-      mqttIsConnecting = false;
-      mqtt.disconnect(true);
-    }
+    // // TODO: What is the sense behind these magics?
+    // // If the MQTT client is not connected force a disconnect.
+    // if (mqtt.connected() != 1) {
+    //   mqttIsConnecting = false;
+    //   mqtt.disconnect(true);
+    // }
     // If the MQTT client is not connecting, not already connected and the WiFi
     // has a connection, try to connect
     if (!mqttIsConnecting) {
@@ -135,6 +135,8 @@ public:
   }
 
 protected:
+  void onMqttConnect(bool sessionPresent) { mqttIsConnecting = false; }
+
   AsyncMqttClient mqtt;
 
   std::list<OnConnectCallback> onConnectCalbacks;
@@ -143,6 +145,8 @@ protected:
   std::list<OnUnsubscribeCallback> onUnsubscribeCallbacks;
   std::list<OnMessageCallback> onMessageCallbacks;
   std::list<OnPublishCallback> onPublishCallbacks;
+
+  bool mqttIsConnecting = false;
 
   // Not sure why but the stupid old cstrings require a local copy. Otherwise
   // something seems to go out of scope or the pointer are for some other
