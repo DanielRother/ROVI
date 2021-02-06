@@ -8,28 +8,8 @@
 #include <string>
 
 #include <Common/MqttConnection.hpp>
+#include <Common/WifiEventHandler.hpp>
 #include <Config/RoviWiFiManager.hpp>
-
-// void WiFiEvent(WiFiEvent_t event) {
-//   Serial.printf("[WiFi-event] event: %d\n", event);
-//   switch (event) {
-//   case SYSTEM_EVENT_STA_GOT_IP:
-//     Serial.println("WiFi connected");
-//     Serial.println("IP address: ");
-//     Serial.println(WiFi.localIP());
-//     connectToMqtt();
-//     break;
-//   case SYSTEM_EVENT_STA_DISCONNECTED:
-//     Serial.println("WiFi lost connection");
-//     //   xTimerStop(
-//     //       mqttReconnectTimer,
-//     //       0); // ensure we don't reconnect to MQTT while
-//     reconnecting to
-//     //       Wi-Fi
-//     //   xTimerStart(wifiReconnectTimer, 0);
-//     break;
-//   }
-// }
 
 class SomeMqttTestClass {
 public:
@@ -111,6 +91,7 @@ SomeMqttTestClass mqttTest(mqttConnection);
 
 void setup() {
   Serial.begin(115200);
+  WiFi.onEvent(wiFiEventHandler);
 
   auto rwm = Rovi::Config::RoviWiFiManager();
   mqttConnection.start(rwm);
@@ -118,10 +99,4 @@ void setup() {
 
 auto start = millis();
 
-void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
-    std::cerr << "WiFi isn't connected anymore. Restart ESP" << std::endl;
-    delay(2000);
-    ESP.restart();
-  } // put your main code here, to run repeatedly:
-}
+void loop() {}
