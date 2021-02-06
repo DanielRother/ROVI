@@ -36,24 +36,20 @@ public:
   //   // }
 
   void onMqttConnect(bool sessionPresent) {
-    Serial.println("Connected to MQTT.");
-    Serial.print("Session present: ");
-    Serial.println(sessionPresent);
+    std::cout << "Connected to MQTT." << std::endl;
+    std::cout << "Session present: " << sessionPresent << std::endl;
     uint16_t packetIdSub = mqtt.subscribe("test/lol", 2);
-    Serial.print("Subscribing at QoS 2, packetId: ");
-    Serial.println(packetIdSub);
+    std::cout << "Subscribing at QoS 2, packetId: " << packetIdSub << std::endl;
     mqtt.publish("test/lol", 0, true, "test 1");
-    Serial.println("Publishing at QoS 0");
+    std::cout << "Publishing at QoS 0" << std::endl;
     uint16_t packetIdPub1 = mqtt.publish("test/lol", 1, true, "test 2");
-    Serial.print("Publishing at QoS 1, packetId: ");
-    Serial.println(packetIdPub1);
+    std::cout << "Publishing at QoS 1, packetId: " << packetIdPub1 << std::endl;
     uint16_t packetIdPub2 = mqtt.publish("test/lol", 2, true, "test 3");
-    Serial.print("Publishing at QoS 2, packetId: ");
-    Serial.println(packetIdPub2);
+    std::cout << "Publishing at QoS 2, packetId: " << packetIdPub2 << std::endl;
   }
 
   void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    Serial.println("Disconnected from MQTT.");
+    std::cout << "Disconnected from MQTT." << std::endl;
 
     if (WiFi.isConnected()) {
       //   xTimerStart(mqttReconnectTimer, 0);
@@ -61,43 +57,32 @@ public:
   }
 
   void onMqttSubscribe(uint16_t packetId, uint8_t qos) {
-    Serial.println("Subscribe acknowledged.");
-    Serial.print("  packetId: ");
-    Serial.println(packetId);
-    Serial.print("  qos: ");
-    Serial.println(qos);
+    std::cout << "Subscribe acknowledged." << std::endl
+              << "\tpacketId: " << packetId << std::endl
+              << "\tqos: " << (int)qos << std::endl;
   }
 
   void onMqttUnsubscribe(uint16_t packetId) {
-    Serial.println("Unsubscribe acknowledged.");
-    Serial.print("  packetId: ");
-    Serial.println(packetId);
+    std::cout << "Unsubscribe acknowledged." << std::endl
+              << "\tpacketId: " << packetId << std::endl;
   }
 
   void onMqttMessage(char *topic, char *payload,
                      AsyncMqttClientMessageProperties properties, size_t len,
                      size_t index, size_t total) {
-    Serial.println("Publish received.");
-    Serial.print("  topic: ");
-    Serial.println(topic);
-    Serial.print("  qos: ");
-    Serial.println(properties.qos);
-    Serial.print("  dup: ");
-    Serial.println(properties.dup);
-    Serial.print("  retain: ");
-    Serial.println(properties.retain);
-    Serial.print("  len: ");
-    Serial.println(len);
-    Serial.print("  index: ");
-    Serial.println(index);
-    Serial.print("  total: ");
-    Serial.println(total);
+    std::cout << "Publish received." << std::endl
+              << "\ttopic: " << topic << std::endl
+              << "\tqos: " << (int)properties.qos << std::endl
+              << "\tdup: " << properties.dup << std::endl
+              << "\tretain: " << properties.retain << std::endl
+              << "\tlen: " << len << std::endl
+              << "\tindex: " << index << std::endl
+              << "\ttotal: " << total << std::endl;
   }
 
   void onMqttPublish(uint16_t packetId) {
-    Serial.println("Publish acknowledged.");
-    Serial.print("  packetId: ");
-    Serial.println(packetId);
+    std::cout << "Publish acknowledged." << std::endl;
+    std::cout << "\tpacketId: " << packetId << std::endl;
   }
 
 protected:

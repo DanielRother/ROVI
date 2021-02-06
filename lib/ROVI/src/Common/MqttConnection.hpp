@@ -4,7 +4,10 @@
 #include <AsyncMqttClient.h>
 #include <WiFi.h>
 
+#include <iostream>
 #include <list>
+
+#include <ArduinoIostream.hpp>
 
 #include <Config/RoviWiFiManager.hpp>
 
@@ -29,10 +32,7 @@ public:
   // }
 
   // MqttConnection(){};
-  void start(Config::RoviWiFiManager &rwm) /*: rwm{rwm}*/ {
-    Serial.println();
-    Serial.println();
-
+  void start(Config::RoviWiFiManager &rwm) {
     for (auto c : onConnectCalbacks) {
       mqtt.onConnect(c);
     }
@@ -52,12 +52,10 @@ public:
       mqtt.onPublish(c);
     }
 
-    Serial.println("Set mqtt server config:");
-    Serial.println(rwm.mqttConfig.server.c_str());
-    Serial.println(rwm.mqttConfig.port);
-    Serial.println("Set mqtt server credentials:");
-    Serial.println(rwm.mqttConfig.user.c_str());
-    Serial.println(rwm.mqttConfig.password.c_str());
+    std::cout << "Set mqtt server config = " << rwm.mqttConfig.server.c_str()
+              << ":" << rwm.mqttConfig.port << std::endl;
+    std::cout << "Set mqtt server credentials = " << rwm.mqttConfig.user.c_str()
+              << ", " << rwm.mqttConfig.password.c_str() << std::endl;
 
     strcpy(server, rwm.mqttConfig.server.c_str());
     port = rwm.mqttConfig.port;
@@ -91,7 +89,7 @@ public:
 
   bool connected() const { return mqtt.connected(); }
   void connect() {
-    Serial.println("Connecting to MQTT...");
+    std::cout << "Connecting to MQTT..." << std::endl;
 
     // From Bascamp
     bool mqttIsConnecting = false;
