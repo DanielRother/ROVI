@@ -13,7 +13,14 @@
 
 class SomeMqttTestClass {
 public:
-  SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt) : mqtt{mqtt} {
+  SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt)
+      : mqtt{mqtt}, lastUpdate_ms{millis()} {
+    mqtt.setWill(
+        TEST_TOPIC, 1, true,
+        WILL_MSG); // Attention: topic and will must be at least a member, as
+                   // AsyncMqttClient only holds a pointer and hence these
+                   // variable cannot go out of scope...
+
     mqtt.addOnConnectCallback(std::bind(&SomeMqttTestClass::onMqttConnect, this,
                                         std::placeholders::_1));
     mqtt.addOnDisconnectCallback(std::bind(&SomeMqttTestClass::onMqttDisconnect,
@@ -82,12 +89,29 @@ public:
     std::cout << "\tpacketId: " << packetId << std::endl;
   }
 
+  void update() {
+    auto now_ms = millis();
+    if (now_ms - lastUpdate_ms > TIME_BETWEEN_UPDATES_MS) {
+      std::cout << "Update -> Send MQTT message" << std::endl;
+      auto msg = "{\"power\": true}";
+      mqtt.publish("esp/online", 1, true, msg);
+
+      lastUpdate_ms = now_ms;
+    }
+  }
+
 protected:
   Rovi::Common::MqttConnection &mqtt;
+  unsigned long lastUpdate_ms;
+  static const unsigned long TIME_BETWEEN_UPDATES_MS = 5000;
+  static const std::string TEST_TOPIC;
+  static const std::string WILL_MSG;
 };
+const std::string SomeMqttTestClass::TEST_TOPIC = "esp/online";
+const std::string SomeMqttTestClass::WILL_MSG = "{\"power\": false}";
 
 Rovi::Common::MqttConnection mqttConnection;
-SomeMqttTestClass mqttTest(mqttConnection);
+SomeMqttTestClass mqttTestDevice(mqttConnection);
 
 void setup() {
   Serial.begin(115200);
@@ -99,4 +123,4 @@ void setup() {
 
 auto start = millis();
 
-void loop() {}
+void loop() { mqttTestDevice.update(); }

@@ -129,6 +129,10 @@ public:
     return mqtt.publish(topic.c_str(), qos, retain, payload.c_str(),
                         payload.size());
   }
+  void setWill(const std::string &topic, uint8_t qos, bool retain,
+               const std::string &payload) {
+    mqtt.setWill(topic.c_str(), qos, retain, payload.c_str(), payload.length());
+  }
 
 protected:
   AsyncMqttClient mqtt;
