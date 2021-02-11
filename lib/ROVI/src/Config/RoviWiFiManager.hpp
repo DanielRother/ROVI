@@ -13,8 +13,9 @@ class RoviWiFiManager {
 public:
   RoviWiFiManager();
 
-  // define your default values here, if there are different values in
+  // Define your default values here, if there are different values in
   // config.json, they are overwritten.
+  std::string deviceName;
   WiFiConfig wiFiConfig;
   MqttConfig mqttConfig;
   std::string otaPassword;
@@ -27,6 +28,9 @@ protected:
   WiFiConfig wiFiDefaultConfig;
   // flag for saving data
   bool shouldSaveConfig;
+
+  static const int DEFAULT_STRING_PARAMETER_SIZE = 40;
+  static const int CONFIG_PORTAL_TIMEOUT_SECONDS = 180;
 };
 
 } // namespace Config

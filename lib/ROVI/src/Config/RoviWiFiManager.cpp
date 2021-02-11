@@ -15,9 +15,10 @@
 namespace Rovi {
 namespace Config {
 RoviWiFiManager::RoviWiFiManager()
-    : wiFiConfig{}, mqttConfig{}, otaPassword{""}, wiFiDefaultConfig{},
-      shouldSaveConfig{false} {
-  otaPassword.reserve(40);
+    : deviceName{""}, wiFiConfig{}, mqttConfig{}, otaPassword{""},
+      wiFiDefaultConfig{}, shouldSaveConfig{false} {
+  deviceName.reserve(DEFAULT_STRING_PARAMETER_SIZE);
+  otaPassword.reserve(DEFAULT_STRING_PARAMETER_SIZE);
 
   setupSpiffs();
 
@@ -37,37 +38,40 @@ RoviWiFiManager::RoviWiFiManager()
   mqttConfig.print();
   std::cout << "OTA password: " << otaPassword << std::endl;
 
-  WiFiManagerParameter custom_mqtt_server("server", "MQTT server",
-                                          mqttConfig.server.c_str(),
-                                          mqttConfig.server.capacity());
+  WiFiManagerParameter customDeviceName(
+      "device_name", "Device name", deviceName.c_str(), deviceName.capacity());
+  WiFiManagerParameter customMqttServer("server", "MQTT server",
+                                        mqttConfig.server.c_str(),
+                                        mqttConfig.server.capacity());
   const int PORT_STRING_LENGTH = 6;
   char mqttPortStr[PORT_STRING_LENGTH];
   sprintf(mqttPortStr, "%i", mqttConfig.port);
-  WiFiManagerParameter custom_mqtt_port("port", "MQTT port", mqttPortStr,
-                                        PORT_STRING_LENGTH);
-  WiFiManagerParameter custom_mqtt_user("mqttUser", "MQTT user",
-                                        mqttConfig.user.c_str(),
-                                        mqttConfig.user.capacity());
+  WiFiManagerParameter customMqttPort("port", "MQTT port", mqttPortStr,
+                                      PORT_STRING_LENGTH);
+  WiFiManagerParameter customMqttUser("mqttUser", "MQTT user",
+                                      mqttConfig.user.c_str(),
+                                      mqttConfig.user.capacity());
   // TODO: Don't show password in cleartext in frontend
-  WiFiManagerParameter custom_mqtt_password("mqttPassword", "MQTT password",
-                                            mqttConfig.password.c_str(),
-                                            mqttConfig.password.capacity());
+  WiFiManagerParameter customMqttPassword("mqttPassword", "MQTT password",
+                                          mqttConfig.password.c_str(),
+                                          mqttConfig.password.capacity());
   // TODO: Don't show password in cleartext in frontend
-  WiFiManagerParameter custom_ota_password("otaPassword", "OTA password",
-                                           otaPassword.c_str(),
-                                           otaPassword.capacity());
+  WiFiManagerParameter customOtaPassword("otaPassword", "OTA password",
+                                         otaPassword.c_str(),
+                                         otaPassword.capacity());
 
   // add all your parameters here
-  wm.addParameter(&custom_mqtt_server);
-  wm.addParameter(&custom_mqtt_port);
-  wm.addParameter(&custom_mqtt_user);
-  wm.addParameter(&custom_mqtt_password);
-  wm.addParameter(&custom_ota_password);
+  wm.addParameter(&customDeviceName);
+  wm.addParameter(&customMqttServer);
+  wm.addParameter(&customMqttPort);
+  wm.addParameter(&customMqttUser);
+  wm.addParameter(&customMqttPassword);
+  wm.addParameter(&customOtaPassword);
 
   // reset settings - wipe credentials for testing
   // wm.resetSettings();
 
-  wm.setConfigPortalTimeout(180);
+  wm.setConfigPortalTimeout(CONFIG_PORTAL_TIMEOUT_SECONDS);
 
   // automatically connect using saved credentials if they exist
   // If connection fails it starts an access point with the specified name
@@ -92,16 +96,19 @@ RoviWiFiManager::RoviWiFiManager()
   std::cout << "Connected...yeey :)" << std::endl;
 
   // read updated parameters
+  deviceName = customDeviceName.getValue();
+  std::cout << "Set device name: " << deviceName << std::endl;
   mqttConfig =
-      MqttConfig{custom_mqtt_server.getValue(), custom_mqtt_port.getValue(),
-                 custom_mqtt_user.getValue(), custom_mqtt_password.getValue()};
+      MqttConfig{customMqttServer.getValue(), customMqttPort.getValue(),
+                 customMqttUser.getValue(), customMqttPassword.getValue()};
   std::cout << "Set MQTT config: " << std::endl;
   mqttConfig.print();
-  otaPassword = custom_ota_password.getValue();
+  otaPassword = customOtaPassword.getValue();
   std::cout << "Set OTA password: " << otaPassword << std::endl;
 
   // Overwrite settings for testing
-  //   shouldSaveConfig = true;
+  // shouldSaveConfig = true;
+  // deviceName = "MqttTestDevice";
   //   mqttConfig.server = "omv.local";
   //   mqttConfig.port = 1883;
 
@@ -110,6 +117,7 @@ RoviWiFiManager::RoviWiFiManager()
     std::cout << "Saving config" << std::endl;
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
+    json["deviceName"] = deviceName.c_str();
     JsonObject &mqtt = jsonBuffer.createObject();
     mqtt["server"] = mqttConfig.server.c_str();
     mqtt["port"] = mqttConfig.port;
@@ -171,13 +179,19 @@ void RoviWiFiManager::setupSpiffs() {
         json.printTo(Serial);
         if (json.success()) {
           std::cout << std::endl << "JSON parsed" << std::endl;
-          std::cout << std::endl << "Loaded MQTT config: " << std::endl;
+          char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
+          strcpy(tmpDeviceName, json["deviceName"]);
+          deviceName = tmpDeviceName;
+          std::cout << std::endl;
+          std::cout << "Loaded deviceName: " << deviceName << std::endl;
+          std::cout << "Loaded MQTT config: " << std::endl;
           auto mqtt = json["mqtt"];
           mqttConfig = MqttConfig{mqtt["server"], mqtt["port"], mqtt["user"],
                                   mqtt["password"]};
-          char tmpOtaPassword[40];
+          char tmpOtaPassword[DEFAULT_STRING_PARAMETER_SIZE];
           strcpy(tmpOtaPassword, json["otaPassword"]);
           otaPassword = tmpOtaPassword;
+          std::cout << "Loaded OTA password: " << otaPassword << std::endl;
         } else {
           std::cerr << "Failed to load json config" << std::endl;
         }
