@@ -52,6 +52,8 @@ RoviWiFiManager::RoviWiFiManager()
                                       mqttConfig.user.c_str(),
                                       mqttConfig.user.capacity());
   // TODO: Don't show password in cleartext in frontend
+  // Maybe something like: m_iot.web.setInterfaceElementAttribute("OTAPassword",
+  // "type", "password");
   WiFiManagerParameter customMqttPassword("mqttPassword", "MQTT password",
                                           mqttConfig.password.c_str(),
                                           mqttConfig.password.capacity());
@@ -125,13 +127,12 @@ RoviWiFiManager::RoviWiFiManager()
     mqtt["password"] = mqttConfig.password.c_str();
     json["mqtt"] = mqtt;
     json["otaPassword"] = otaPassword.c_str();
+    json.prettyPrintTo(Serial);
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
       std::cerr << "Failed to open config file for writing" << std::endl;
     }
-
-    json.prettyPrintTo(Serial);
     json.printTo(configFile);
     configFile.close();
     // end save

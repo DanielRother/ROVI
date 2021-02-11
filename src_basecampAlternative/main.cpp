@@ -1,5 +1,10 @@
 #include <Arduino.h>
+#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
+#include <FS.h> // this needs to be first, or it all crashes and burns...
 #include <WiFi.h>
+#ifdef ESP32
+#include <SPIFFS.h>
+#endif
 
 #include <ArduinoIostream.hpp>
 
@@ -60,6 +65,9 @@ public:
 
     if (WiFi.isConnected()) {
       //   xTimerStart(mqttReconnectTimer, 0);
+      std::cerr << "Device lost wifi connection --> Restarting" << std::endl;
+      delay(2000);
+      ESP.restart();
     }
   }
 
@@ -109,10 +117,114 @@ public:
     }
   }
 
+  void saveSettings() {
+    std::cout << "Saving settings" << std::endl;
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+    saveSettings(json, jsonBuffer);
+    json.prettyPrintTo(Serial);
+
+    File configFile = SPIFFS.open("/settings.json", "w");
+    if (!configFile) {
+      std::cerr << "Failed to open config file for writing" << std::endl;
+    }
+    json.printTo(configFile);
+    configFile.close();
+  }
+
+  // Should become a pure virtual function of a base class
+  void saveSettings(JsonObject &settings, DynamicJsonBuffer &buffer) {
+    settings["value1"] = 1;
+    settings["value2"] = 42;
+    settings["value3"] = 999;
+    settings["string"] = "foobar";
+    settings["float"] = 123.456f;
+    settings["double"] = 123.456;
+    settings["bool"] = true;
+    JsonObject &stackedObject = buffer.createObject();
+    stackedObject["server"] = "localhost";
+    stackedObject["port"] = 42;
+    stackedObject["user"] = "admin";
+    settings["stacked"] = stackedObject;
+  }
+
+  void restoreSettings() {
+    // read configuration from FS json
+    std::cout << "Mounting file system..." << std::endl;
+
+    if (SPIFFS.begin()) {
+      std::cout << "... file system mounted" << std::endl;
+      if (SPIFFS.exists("/settings.json")) {
+        // file exists, reading and loading
+        std::cout << "Reading config file..." << std::endl;
+        File settingsFile = SPIFFS.open("/settings.json", "r");
+        if (settingsFile) {
+          std::cout << "...config file read" << std::endl;
+          size_t size = settingsFile.size();
+          // Allocate a buffer to store contents of the file.
+          std::unique_ptr<char[]> buf(new char[size]);
+
+          settingsFile.readBytes(buf.get(), size);
+          DynamicJsonBuffer jsonBuffer;
+          JsonObject &json = jsonBuffer.parseObject(buf.get());
+          json.printTo(Serial);
+          if (json.success()) {
+            std::cout << std::endl << "JSON parsed" << std::endl;
+            restoreSettings(json);
+          } else {
+            std::cerr << "Failed to load json config" << std::endl;
+          }
+        }
+      }
+    } else {
+      std::cerr << "Failed to mount FS" << std::endl;
+    }
+  }
+
+  // Should become a pure virtual function of a base class
+  void restoreSettings(JsonObject &settings) {
+    // stackedObject["server"] = "localhost";
+    // stackedObject["port"] = 42;
+    // stackedObject["user"] = "admin";
+    // settings["stacked"] = stackedObject;
+
+    int value1 = settings["value1"];
+    std::cout << "Read value1 = " << value1 << std::endl;
+    int value2 = settings["value2"];
+    std::cout << "Read value2 = " << value2 << std::endl;
+    int value3 = settings["value3"];
+    std::cout << "Read value3 = " << value3 << std::endl;
+    auto someString = restoreString(settings, "string");
+    std::cout << "Read someString = " << someString << std::endl;
+    float f = settings["float"];
+    std::cout << "Read float = " << f << std::endl;
+    double d = settings["double"];
+    std::cout << "Read double = " << d << std::endl;
+    bool b = settings["bool"];
+    std::cout << "Read bool = " << b << std::endl;
+    auto stacked = settings["stacked"];
+    std::string server = restoreString(stacked, "server");
+    std::cout << "Read server = " << server << std::endl;
+    int port = stacked["port"];
+    std::cout << "Read port = " << port << std::endl;
+    std::string user = restoreString(stacked, "user");
+    std::cout << "Read user = " << user << std::endl;
+  }
+
+  template <typename T>
+  std::string restoreString(T &json, const std::string key) {
+    char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
+    strcpy(tmpDeviceName, json[key.c_str()]);
+    return std::string{tmpDeviceName};
+  }
+
 protected:
   Rovi::Common::MqttConnection &mqtt;
   unsigned long lastUpdate_ms;
+
   static const unsigned long TIME_BETWEEN_UPDATES_MS = 5000;
+  static const int DEFAULT_STRING_PARAMETER_SIZE = 40;
+
   static const std::string TEST_TOPIC;
   static const std::string WILL_MSG;
 };
@@ -128,6 +240,9 @@ void setup() {
 
   auto rwm = Rovi::Config::RoviWiFiManager();
   mqttConnection.start(rwm);
+
+  mqttTestDevice.saveSettings();
+  mqttTestDevice.restoreSettings();
 }
 
 auto start = millis();
