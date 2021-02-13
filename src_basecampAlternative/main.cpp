@@ -113,7 +113,6 @@ protected:
     std::cout << "\tpacketId: " << packetId << std::endl;
   }
 
-  // Should become a pure virtual function of a base class
   virtual void saveSettingsImpl(JsonObject &settings,
                                 DynamicJsonBuffer &buffer) {
     settings["value1"] = 1;
@@ -130,13 +129,7 @@ protected:
     settings["stacked"] = stackedObject;
   }
 
-  // Should become a pure virtual function of a base class
   virtual void restoreSettingsImpl(JsonObject &settings) {
-    // stackedObject["server"] = "localhost";
-    // stackedObject["port"] = 42;
-    // stackedObject["user"] = "admin";
-    // settings["stacked"] = stackedObject;
-
     int value1 = settings["value1"];
     std::cout << "Read value1 = " << value1 << std::endl;
     int value2 = settings["value2"];

@@ -33,6 +33,9 @@ public:
   }
 
   virtual void restoreSettings() {
+    // clean FS, for testing
+    // SPIFFS.format();
+
     // read configuration from FS json
     std::cout << "Mounting file system..." << std::endl;
 

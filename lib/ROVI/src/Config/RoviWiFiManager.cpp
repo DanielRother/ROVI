@@ -1,12 +1,6 @@
 #include "RoviWiFiManager.hpp"
 
-#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
-#include <FS.h> // this needs to be first, or it all crashes and burns...
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-
-#ifdef ESP32
-#include <SPIFFS.h>
-#endif
 
 #include <iostream>
 #include <sstream>
@@ -15,12 +9,13 @@
 namespace Rovi {
 namespace Config {
 RoviWiFiManager::RoviWiFiManager()
-    : deviceName{""}, wiFiConfig{}, mqttConfig{}, otaPassword{""},
-      wiFiDefaultConfig{}, shouldSaveConfig{false} {
+    : SPIFFSSettingsInterface{"/config.json"}, deviceName{""}, wiFiConfig{},
+      mqttConfig{}, otaPassword{""}, wiFiDefaultConfig{}, shouldSaveConfig{
+                                                              false} {
   deviceName.reserve(DEFAULT_STRING_PARAMETER_SIZE);
   otaPassword.reserve(DEFAULT_STRING_PARAMETER_SIZE);
 
-  setupSpiffs();
+  restoreSettings();
 
   // WiFiManager, Local intialization. Once its business is done, there is no
   // need to keep it around
@@ -116,26 +111,7 @@ RoviWiFiManager::RoviWiFiManager()
 
   // save the custom parameters to FS
   if (shouldSaveConfig) {
-    std::cout << "Saving config" << std::endl;
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &json = jsonBuffer.createObject();
-    json["deviceName"] = deviceName.c_str();
-    JsonObject &mqtt = jsonBuffer.createObject();
-    mqtt["server"] = mqttConfig.server.c_str();
-    mqtt["port"] = mqttConfig.port;
-    mqtt["user"] = mqttConfig.user.c_str();
-    mqtt["password"] = mqttConfig.password.c_str();
-    json["mqtt"] = mqtt;
-    json["otaPassword"] = otaPassword.c_str();
-    json.prettyPrintTo(Serial);
-
-    File configFile = SPIFFS.open("/config.json", "w");
-    if (!configFile) {
-      std::cerr << "Failed to open config file for writing" << std::endl;
-    }
-    json.printTo(configFile);
-    configFile.close();
-    // end save
+    saveSettings();
     shouldSaveConfig = false;
   }
 
@@ -155,53 +131,29 @@ void RoviWiFiManager::saveConfigCallback() {
   shouldSaveConfig = true;
 }
 
-void RoviWiFiManager::setupSpiffs() {
-  // clean FS, for testing
-  // SPIFFS.format();
+void RoviWiFiManager::saveSettingsImpl(JsonObject &json,
+                                       DynamicJsonBuffer &buffer) {
+  json["deviceName"] = deviceName.c_str();
+  JsonObject &mqtt = buffer.createObject();
+  mqtt["server"] = mqttConfig.server.c_str();
+  mqtt["port"] = mqttConfig.port;
+  mqtt["user"] = mqttConfig.user.c_str();
+  mqtt["password"] = mqttConfig.password.c_str();
+  json["mqtt"] = mqtt;
+  json["otaPassword"] = otaPassword.c_str();
+}
 
-  // read configuration from FS json
-  std::cout << "Mounting file system..." << std::endl;
-
-  if (SPIFFS.begin()) {
-    std::cout << "... file system mounted" << std::endl;
-    if (SPIFFS.exists("/config.json")) {
-      // file exists, reading and loading
-      std::cout << "Reading config file..." << std::endl;
-      File configFile = SPIFFS.open("/config.json", "r");
-      if (configFile) {
-        std::cout << "...config file read" << std::endl;
-        size_t size = configFile.size();
-        // Allocate a buffer to store contents of the file.
-        std::unique_ptr<char[]> buf(new char[size]);
-
-        configFile.readBytes(buf.get(), size);
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject &json = jsonBuffer.parseObject(buf.get());
-        json.printTo(Serial);
-        if (json.success()) {
-          std::cout << std::endl << "JSON parsed" << std::endl;
-          char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
-          strcpy(tmpDeviceName, json["deviceName"]);
-          deviceName = tmpDeviceName;
-          std::cout << std::endl;
-          std::cout << "Loaded deviceName: " << deviceName << std::endl;
-          std::cout << "Loaded MQTT config: " << std::endl;
-          auto mqtt = json["mqtt"];
-          mqttConfig = MqttConfig{mqtt["server"], mqtt["port"], mqtt["user"],
-                                  mqtt["password"]};
-          char tmpOtaPassword[DEFAULT_STRING_PARAMETER_SIZE];
-          strcpy(tmpOtaPassword, json["otaPassword"]);
-          otaPassword = tmpOtaPassword;
-          std::cout << "Loaded OTA password: " << otaPassword << std::endl;
-        } else {
-          std::cerr << "Failed to load json config" << std::endl;
-        }
-      }
-    }
-  } else {
-    std::cerr << "Failed to mount FS" << std::endl;
-  }
-  // end read
+void RoviWiFiManager::restoreSettingsImpl(JsonObject &json) {
+  char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
+  deviceName = restoreString(json, "deviceName");
+  std::cout << std::endl;
+  std::cout << "Loaded deviceName: " << deviceName << std::endl;
+  std::cout << "Loaded MQTT config: " << std::endl;
+  auto mqtt = json["mqtt"];
+  mqttConfig =
+      MqttConfig{mqtt["server"], mqtt["port"], mqtt["user"], mqtt["password"]};
+  otaPassword = restoreString(json, "otaPassword");
+  std::cout << "Loaded OTA password: " << otaPassword << std::endl;
 }
 
 } // namespace Config

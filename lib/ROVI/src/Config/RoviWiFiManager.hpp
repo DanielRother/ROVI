@@ -6,10 +6,12 @@
 #include "MqttConfig.hpp"
 #include "WiFiConfig.hpp"
 
+#include <Common/SPIFFSSettingsInterface.hpp>
+
 namespace Rovi {
 namespace Config {
 
-class RoviWiFiManager {
+class RoviWiFiManager : public SPIFFSSettingsInterface {
 public:
   RoviWiFiManager();
 
@@ -23,7 +25,8 @@ public:
 protected:
   // callback notifying us of the need to save config
   void saveConfigCallback();
-  void setupSpiffs();
+  virtual void saveSettingsImpl(JsonObject &json, DynamicJsonBuffer &buffer);
+  virtual void restoreSettingsImpl(JsonObject &settings);
 
   WiFiConfig wiFiDefaultConfig;
   // flag for saving data
