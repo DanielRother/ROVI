@@ -124,7 +124,7 @@ public:
     return mqtt.subscribe(topic.c_str(), qos);
   }
   uint16_t unsubscribe(const std::string &topic) {
-    mqtt.unsubscribe(topic.c_str());
+    return mqtt.unsubscribe(topic.c_str());
   }
 
   uint16_t publish(const std::string &topic, MqttQoS qos, bool retain,
