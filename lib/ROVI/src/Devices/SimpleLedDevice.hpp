@@ -14,16 +14,15 @@ namespace Rovi {
 namespace Devices {
 template <class LED> class SimpleLedDevice : virtual BasicDevice {
 public:
-  SimpleLedDevice(Basecamp &iot, const std::shared_ptr<LED> led,
+  SimpleLedDevice(const std::shared_ptr<LED> led,
                   const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects,
                   const std::string &name = "led",
                   std::chrono::minutes timePerEffect = std::chrono::minutes{15})
-      : BasicDevice(iot), m_name{name}, m_leds{led}, m_on{true},
-        m_brightness{128}, m_color{std::make_shared<HSVColor>(0.0f, 1.0f,
-                                                              0.5f)},
+      : m_name{name}, m_leds{led}, m_on{true}, m_brightness{128},
+        m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)},
         m_color2{std::make_shared<HSVColor>(180.0f, 1.0f, 0.5f)},
         m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())},
-        m_effects{effects}, m_timePerEffect{timePerEffect},
+        m_tmpEffectName{}, m_effects{effects}, m_timePerEffect{timePerEffect},
         m_nextEffectSelection{std::chrono::system_clock::now()} {
     std::cout << "Init led" << std::endl;
     m_leds->init();
@@ -181,75 +180,68 @@ protected:
     m_nextEffectSelection = now + m_timePerEffect;
   }
 
-  virtual void saveSettings() override {
-    Serial << "LedDeviceMQTT::saveSettings() " << endl;
+  virtual void saveSettingsImpl(JsonObject &settings,
+                                DynamicJsonBuffer &buffer) override {
+    Serial << "SimpleLedDevice::saveSettings() " << endl;
 
-    m_iot.configuration.set("rovi-power", String{this->m_on});
-    std::cout << "    save settings power: " << this->m_on << std::endl;
-    m_iot.configuration.set("rovi-brightness", String{this->m_brightness});
+    settings["power"] = this->m_on;
+    settings["brightness"] = this->m_brightness;
+    JsonObject &color = buffer.createObject();
     auto curRgbColor = this->color()->toRGB();
-    std::cout << "    save settings color: " << curRgbColor->toString()
-              << std::endl;
-    m_iot.configuration.set("rovi-r", String{curRgbColor->r});
-    m_iot.configuration.set("rovi-g", String{curRgbColor->g});
-    m_iot.configuration.set("rovi-b", String{curRgbColor->b});
+    color["r"] = curRgbColor->r;
+    color["g"] = curRgbColor->g;
+    color["b"] = curRgbColor->b;
+    settings["color"] = color;
+    JsonObject &color2 = buffer.createObject();
     auto curRgbColor2 = this->color2()->toRGB();
-    std::cout << "    save settings color2: " << curRgbColor2->toString()
-              << std::endl;
-    m_iot.configuration.set("rovi-r2", String{curRgbColor2->r});
-    m_iot.configuration.set("rovi-g2", String{curRgbColor2->g});
-    m_iot.configuration.set("rovi-b2", String{curRgbColor2->b});
-    m_iot.configuration.set("rovi-effect",
-                            String{this->m_effect->name().c_str()});
-    std::cout << "    save settings effect: " << this->m_effect->name()
-              << std::endl;
-    std::stringstream ss;
-    ss << this->m_timePerEffect.count();
-    m_iot.configuration.set("rovi-timePerEffect_m", String{ss.str().c_str()});
+    color2["r"] = curRgbColor2->r;
+    color2["g"] = curRgbColor2->g;
+    color2["b"] = curRgbColor2->b;
+    settings["color2"] = color2;
+    m_tmpEffectName =
+        this->m_effect->name(); // Must be a not temporary local copy. Otherwise
+                                // the char* points to nirvana...
+    settings["effect"] = m_tmpEffectName.c_str();
+    settings["timePerEffect_m"] = (int)this->m_timePerEffect.count();
   }
 
-  virtual void restoreSettings() override {
+  virtual void restoreSettingsImpl(JsonObject &settings) override {
     Serial << "LedDeviceMQTT::restoreSettings() " << endl;
 
-    auto brightness = this->m_iot.configuration.get("rovi-brightness");
-    setBrightness(brightness.toInt());
-    auto r = this->m_iot.configuration.get("rovi-r");
-    auto g = this->m_iot.configuration.get("rovi-g");
-    auto b = this->m_iot.configuration.get("rovi-b");
-    auto color = std::make_shared<RGBColor>(r.toInt(), g.toInt(), b.toInt());
-    // Debug: Overwrite stored settings
-    // auto color = std::make_shared<HSVColor>(0, 1.0f, 1.0f);
+    uint8_t brightness = settings["brightness"];
+    setBrightness(brightness);
+    auto colorSettings = settings["color"];
+    uint8_t r = colorSettings["r"];
+    uint8_t g = colorSettings["g"];
+    uint8_t b = colorSettings["b"];
+    auto color = std::make_shared<RGBColor>(r, g, b);
     setColor(color);
-    auto r2 = this->m_iot.configuration.get("rovi-r2");
-    auto g2 = this->m_iot.configuration.get("rovi-g2");
-    auto b2 = this->m_iot.configuration.get("rovi-b2");
-    auto color2 =
-        std::make_shared<RGBColor>(r2.toInt(), g2.toInt(), b2.toInt());
-    // Debug: Overwrite stored settings
-    // auto color2 = std::make_shared<HSVColor>(60, 1.0f, 1.0f);
+    auto colorSettings2 = settings["color2"];
+    uint8_t r2 = colorSettings2["r"];
+    uint8_t g2 = colorSettings2["g"];
+    uint8_t b2 = colorSettings2["b"];
+    auto color2 = std::make_shared<RGBColor>(r2, g2, b2);
     setColor2(color2);
-    auto selectedEffect =
-        std::string{this->m_iot.configuration.get("rovi-effect").c_str()};
-    // Debug: Overwrite stored settings
-    // selectedEffect = "color_gradient";
+    auto selectedEffect = restoreString(settings, "effect");
     for (auto effect : this->m_effects) {
       if (effect->name() == selectedEffect) {
         setEffect(effect);
         break;
       }
     }
-    auto timePerEffect =
-        this->m_iot.configuration.get("rovi-timePerEffect_m").toInt();
+    int timePerEffect = settings["timePerEffect_m"];
     setTimePerEffect(std::chrono::minutes{timePerEffect});
-
     // Check power last as power == false should always turn the bulb off
-    auto power = this->m_iot.configuration.get("rovi-power");
-    setOn(power.toInt());
+    bool power = settings["power"];
+    setOn(power);
+
     std::cout << "****** Restored setting ******" << std::endl;
     std::cout << "p = " << this->m_on
               << ", b = " << (uint32_t)this->m_brightness
-              << "; c = " << color->toString()
-              << "; e = " << this->m_effect->name() << std::endl;
+              << "; c = " << this->m_color->toString()
+              << "; c2 = " << this->m_color2->toString()
+              << "; e = " << this->m_effect->name()
+              << "; t = " << this->m_timePerEffect.count() << std::endl;
     std::cout << "******************************" << std::endl;
   }
 
@@ -261,6 +253,7 @@ protected:
   std::shared_ptr<Color> m_color;
   std::shared_ptr<Color> m_color2;
   std::shared_ptr<LEDEffect> m_effect;
+  std::string m_tmpEffectName;
 
   std::vector<std::shared_ptr<Rovi::LEDEffect>> m_effects;
   std::chrono::minutes m_timePerEffect;

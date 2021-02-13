@@ -11,10 +11,14 @@
 #include <Common/WifiEventHandler.hpp>
 #include <Config/RoviWiFiManager.hpp>
 
+#include <Devices/MqttDevice.hpp>
+#include <Devices/SimpleLedDevice.hpp>
+
 class SomeMqttTestClass : public SPIFFSSettingsInterface {
 public:
   SomeMqttTestClass(Rovi::Common::MqttConnection &mqtt)
-      : SPIFFSSettingsInterface{}, mqtt{mqtt}, lastUpdate_ms{millis()} {
+      : SPIFFSSettingsInterface{"/settingsTest.json"}, mqtt{mqtt},
+        lastUpdate_ms{millis()} {
     mqtt.setWill(
         TEST_TOPIC, Rovi::Common::MqttQoS::AT_LEAST_ONCE, true,
         WILL_MSG); // Attention: topic and will must be at least a member, as
@@ -168,6 +172,15 @@ const std::string SomeMqttTestClass::WILL_MSG = "{\"power\": false}";
 Rovi::Common::MqttConnection mqttConnection;
 SomeMqttTestClass mqttTestDevice(mqttConnection);
 
+const auto nbPixel = 50;
+const auto pin = 15;
+auto name = "weihnachtsbaum";
+auto colorCircleDelay = 500;
+#include <Components/Output/FastLedComponent.hpp>
+std::shared_ptr<Rovi::Devices::SimpleLedDevice<
+    Rovi::Components::FastLedComponent<pin, nbPixel>>>
+    xmastree;
+
 void setup() {
   Serial.begin(115200);
   WiFi.onEvent(wiFiEventHandler);
@@ -175,10 +188,25 @@ void setup() {
   auto rwm = Rovi::Config::RoviWiFiManager();
   mqttConnection.start(rwm);
 
-  mqttTestDevice.saveSettings();
-  mqttTestDevice.restoreSettings();
+  // mqttTestDevice.saveSettings();
+  // mqttTestDevice.restoreSettings();
+
+  auto leds =
+      std::make_shared<Rovi::Components::FastLedComponent<pin, nbPixel>>();
+  auto effects = std::vector<std::shared_ptr<Rovi::LEDEffect>>();
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
+  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<
+      Rovi::Components::FastLedComponent<pin, nbPixel>>>(leds, effects, name);
 }
 
 auto start = millis();
 
-void loop() { mqttTestDevice.update(); }
+void loop() {
+  mqttTestDevice.update();
+  xmastree->update();
+}

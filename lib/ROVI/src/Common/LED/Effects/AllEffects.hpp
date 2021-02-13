@@ -1,13 +1,15 @@
 #ifndef __ALLLEDEFFECTS__
 #define __ALLLEDEFFECTS__
 
-#include "WhiteStatic.h"
-#include "ColorStatic.h"
-#include "ColorFlow.hpp"
-#include "RandomColor.hpp"
-#include "Rainbow.hpp"
+#include <Components/Output/LEDComponent.hpp>
+
 #include "ColorCircle.hpp"
-#include "RunningOnOff.hpp"
+#include "ColorFlow.hpp"
 #include "ColorGradient.hpp"
+#include "ColorStatic.h"
+#include "Rainbow.hpp"
+#include "RandomColor.hpp"
+#include "RunningOnOff.hpp"
+#include "WhiteStatic.h"
 
 #endif /* __ALLLEDEFFECTS__ */
