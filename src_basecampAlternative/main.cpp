@@ -11,6 +11,7 @@
 #include <Common/WifiEventHandler.hpp>
 #include <Config/RoviWiFiManager.hpp>
 
+#include <Devices/LedDeviceMQTT.hpp>
 #include <Devices/MqttDevice.hpp>
 #include <Devices/SimpleLedDevice.hpp>
 
@@ -186,7 +187,6 @@ void setup() {
   WiFi.onEvent(wiFiEventHandler);
 
   auto rwm = Rovi::Config::RoviWiFiManager();
-  mqttConnection.start(rwm);
 
   // mqttTestDevice.saveSettings();
   // mqttTestDevice.restoreSettings();
@@ -200,13 +200,19 @@ void setup() {
       Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
   effects.push_back(
       Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
-  xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<
-      Rovi::Components::FastLedComponent<pin, nbPixel>>>(leds, effects, name);
+  // xmastree = std::make_shared<Rovi::Devices::SimpleLedDevice<
+  //     Rovi::Components::FastLedComponent<pin, nbPixel>>>(leds, effects,
+  //     name);
+  xmastree = std::make_shared<Rovi::Devices::LedDeviceMQTT<
+      Rovi::Components::FastLedComponent<pin, nbPixel>>>(mqttConnection, rwm,
+                                                         leds, effects, name);
+
+  mqttConnection.start(rwm);
 }
 
 auto start = millis();
 
 void loop() {
-  mqttTestDevice.update();
+  // mqttTestDevice.update();
   xmastree->update();
 }

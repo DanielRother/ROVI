@@ -18,7 +18,7 @@ public:
                   const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects,
                   const std::string &name = "led",
                   std::chrono::minutes timePerEffect = std::chrono::minutes{15})
-      : m_name{name}, m_leds{led}, m_on{true}, m_brightness{128},
+      : BasicDevice{}, m_name{name}, m_leds{led}, m_on{true}, m_brightness{128},
         m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)},
         m_color2{std::make_shared<HSVColor>(180.0f, 1.0f, 0.5f)},
         m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())},
