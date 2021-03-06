@@ -45,7 +45,6 @@ public:
 
   virtual void setOn(bool on) {
     std::cout << "SimpleLedDevice::setOn(" << on << ")" << std::endl;
-    m_settingsChanged = true;
     if (!on) {
       m_effect->stop();
     }
@@ -55,6 +54,9 @@ public:
     delay(10);
     m_leds->setOn(on);
     m_on = m_leds->isOn();
+    // Always set this a last. Otherwise new values may be ignored (if
+    // distributeSettings happens sometime in between)
+    m_settingsChanged = true;
   }
 
   virtual uint8_t brightness() const { return m_brightness; }
@@ -62,7 +64,6 @@ public:
   virtual void setBrightness(uint8_t brightness) {
     std::cout << "SimpleLedDevice::setBrightness(" << (int)brightness << ")"
               << std::endl;
-    m_settingsChanged = true;
     setOn(true);
     m_leds->setBrightness(brightness);
     // Not sure why this is required but otherwise the brightness is not set at
@@ -71,6 +72,7 @@ public:
       m_leds->setBrightness(brightness);
     }
     m_brightness = m_leds->brightness();
+    m_settingsChanged = true;
   }
 
   virtual std::shared_ptr<Color> color() {
@@ -83,8 +85,6 @@ public:
   virtual void setColor(const std::shared_ptr<Color> &color) {
     std::cout << "SimpleLedDevice::setColor(" << color->toString() << ")"
               << std::endl;
-    m_settingsChanged = true;
-
     // m_effect->stop();
 
     // auto selectedEffect = std::string{"color_static"};
@@ -106,52 +106,52 @@ public:
     std::cout << "    finally realy set color" << std::endl;
     m_leds->setColor1(color);
     m_color = color;
+    m_settingsChanged = true;
   }
 
   virtual void setColor2(const std::shared_ptr<Color> &color) {
     std::cout << "SimpleLedDevice::setColor2(" << color->toString() << ")"
               << std::endl;
-    m_settingsChanged = true;
-
     std::cout << "    finally realy set color" << std::endl;
     m_leds->setColor2(color);
     m_color2 = color;
     // setOn(true);
+    m_settingsChanged = true;
   }
 
   virtual uint32_t hue() const { return m_leds->hue(); }
 
   virtual void setHue(uint32_t hue) {
     std::cout << "SimpleLedDevice::setHue(" << hue << ")" << std::endl;
-    m_settingsChanged = true;
     setOn(true);
     m_leds->setHue(hue);
     // m_color = m_leds->color();
+    m_settingsChanged = true;
   }
 
   virtual std::shared_ptr<LEDEffect> effect() const { return m_effect; }
 
   // TBD: Adapt?
   virtual void setEffect(const std::shared_ptr<LEDEffect> &effect) {
-    m_settingsChanged = true;
     setOn(true);
     m_leds->setEffect(effect);
     m_effect = m_leds->effect();
+    m_settingsChanged = true;
   }
 
   virtual void setEffect(int effect) {
-    m_settingsChanged = true;
     setOn(true);
     m_leds->setEffect(effect);
     m_effect = m_leds->effect();
+    m_settingsChanged = true;
   }
 
   virtual void
   setEffects(const std::vector<std::shared_ptr<LEDEffect>> &effects) {
-    m_settingsChanged = true;
     setOn(true);
     m_effects = effects;
     selectRandomEffect();
+    m_settingsChanged = true;
   }
 
   virtual std::vector<std::shared_ptr<LEDEffect>> getEffects() const {
@@ -161,9 +161,9 @@ public:
   virtual std::chrono::minutes timePerEffect() const { return m_timePerEffect; }
 
   virtual void setTimePerEffect(const std::chrono::minutes &timePerEffect) {
-    m_settingsChanged = true;
     m_timePerEffect = timePerEffect;
     m_nextEffectSelection = std::chrono::system_clock::now() + m_timePerEffect;
+    m_settingsChanged = true;
   }
 
 protected:
