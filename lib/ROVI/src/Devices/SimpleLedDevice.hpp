@@ -56,7 +56,7 @@ public:
     m_on = m_leds->isOn();
     // Always set this a last. Otherwise new values may be ignored (if
     // distributeSettings happens sometime in between)
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual uint8_t brightness() const { return m_brightness; }
@@ -72,7 +72,7 @@ public:
       m_leds->setBrightness(brightness);
     }
     m_brightness = m_leds->brightness();
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual std::shared_ptr<Color> color() {
@@ -106,7 +106,7 @@ public:
     std::cout << "    finally realy set color" << std::endl;
     m_leds->setColor1(color);
     m_color = color;
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual void setColor2(const std::shared_ptr<Color> &color) {
@@ -116,7 +116,7 @@ public:
     m_leds->setColor2(color);
     m_color2 = color;
     // setOn(true);
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual uint32_t hue() const { return m_leds->hue(); }
@@ -126,7 +126,7 @@ public:
     setOn(true);
     m_leds->setHue(hue);
     // m_color = m_leds->color();
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual std::shared_ptr<LEDEffect> effect() const { return m_effect; }
@@ -136,14 +136,14 @@ public:
     setOn(true);
     m_leds->setEffect(effect);
     m_effect = m_leds->effect();
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual void setEffect(int effect) {
     setOn(true);
     m_leds->setEffect(effect);
     m_effect = m_leds->effect();
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual void
@@ -151,7 +151,7 @@ public:
     setOn(true);
     m_effects = effects;
     selectRandomEffect();
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
   virtual std::vector<std::shared_ptr<LEDEffect>> getEffects() const {
@@ -163,7 +163,7 @@ public:
   virtual void setTimePerEffect(const std::chrono::minutes &timePerEffect) {
     m_timePerEffect = timePerEffect;
     m_nextEffectSelection = std::chrono::system_clock::now() + m_timePerEffect;
-    m_settingsChanged = true;
+    m_settingsChangedTimestamp = millis();
   }
 
 protected:

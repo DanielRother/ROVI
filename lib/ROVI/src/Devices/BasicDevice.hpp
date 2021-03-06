@@ -15,18 +15,20 @@ namespace Rovi {
 namespace Devices {
 class BasicDevice : public SPIFFSSettingsInterface {
 public:
-  BasicDevice() : SPIFFSSettingsInterface{}, m_settingsChanged{false} {}
+  BasicDevice() : SPIFFSSettingsInterface{}, m_settingsChangedTimestamp{0} {}
 
 protected:
   virtual void update() {
-    if (m_settingsChanged) {
+    if (m_settingsChangedTimestamp != 0 &&
+        millis() - m_settingsChangedTimestamp > SAVE_SETTINGS_THRESHOLD_MS) {
       saveSettings();
-      m_settingsChanged = false;
+      m_settingsChangedTimestamp = 0;
       std::cout << "BasicDevice::update() - Settings saved to disc" << endl;
     }
   }
 
-  bool m_settingsChanged;
+  unsigned long m_settingsChangedTimestamp;
+  static const unsigned long SAVE_SETTINGS_THRESHOLD_MS = 1000;
 };
 
 }; // namespace Devices
