@@ -68,13 +68,14 @@ public:
     }
   }
 
-protected:
+  // TODO: Rename me
   // Why the hell can't these function be overloads of save/restoreSettings()?
   // Maybe https://isocpp.org/wiki/faq/strange-inheritance#overload-derived ?
   virtual void saveSettingsImpl(JsonObject &settings,
                                 DynamicJsonBuffer &buffer) = 0;
   virtual void restoreSettingsImpl(JsonObject &settings) = 0;
 
+protected:
   template <typename T>
   std::string restoreString(T &json, const std::string key) {
     char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];

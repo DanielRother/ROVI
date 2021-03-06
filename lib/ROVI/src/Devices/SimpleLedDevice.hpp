@@ -12,13 +12,13 @@
 
 namespace Rovi {
 namespace Devices {
-template <class LED> class SimpleLedDevice : virtual BasicDevice {
+template <class LED> class SimpleLedDevice : public BasicDevice {
 public:
   SimpleLedDevice(const std::shared_ptr<LED> led,
                   const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects,
                   const std::string &name = "led",
                   std::chrono::minutes timePerEffect = std::chrono::minutes{15})
-      : BasicDevice{}, m_name{name}, m_leds{led}, m_on{true}, m_brightness{128},
+      : BasicDevice{name}, m_leds{led}, m_on{true}, m_brightness{128},
         m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)},
         m_color2{std::make_shared<HSVColor>(180.0f, 1.0f, 0.5f)},
         m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())},
@@ -38,6 +38,7 @@ public:
       selectRandomEffect();
     }
 
+    // Don't forget to call the mother update here!
     BasicDevice::update();
   }
 
@@ -317,7 +318,16 @@ protected:
     std::cout << "******************************" << std::endl;
   }
 
-  std::string m_name;
+  virtual void getOptions(JsonObject &options,
+                          DynamicJsonBuffer &jsonBuffer) override {
+    JsonArray &possibleEffects = jsonBuffer.createArray();
+    for (auto e : this->m_effects) {
+      String effectS = e->name().c_str();
+      possibleEffects.add(effectS);
+    }
+    options["possibleEffects"] = possibleEffects;
+  }
+
   std::shared_ptr<LED> m_leds;
 
   bool m_on;

@@ -15,7 +15,20 @@ namespace Rovi {
 namespace Devices {
 class BasicDevice : public SPIFFSSettingsInterface {
 public:
-  BasicDevice() : SPIFFSSettingsInterface{}, m_settingsChangedTimestamp{0} {}
+  BasicDevice(const std::string &name = "basicDevice")
+      : SPIFFSSettingsInterface{}, m_name{name}, m_settingsChangedTimestamp{0} {
+  }
+
+  virtual std::string getType() { return this->m_name; }
+
+  virtual void getOptions(JsonObject &options, DynamicJsonBuffer &jsonBuffer) {
+    std::cout << "BasicDevice has got no options" << std::endl;
+  }
+
+  // TODO: Remove me
+  virtual void saveSettingsImpl(JsonObject &settings,
+                                DynamicJsonBuffer &buffer){};
+  virtual void restoreSettingsImpl(JsonObject &settings){};
 
 protected:
   virtual void update() {
@@ -27,6 +40,7 @@ protected:
     }
   }
 
+  std::string m_name;
   unsigned long m_settingsChangedTimestamp;
   static const unsigned long SAVE_SETTINGS_THRESHOLD_MS = 1000;
 };
