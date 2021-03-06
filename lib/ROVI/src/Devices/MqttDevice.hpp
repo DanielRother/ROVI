@@ -24,9 +24,14 @@ public:
                                                                m_hostname +
                                                                "/connection"},
         m_lastStateStatusSend_ms{0}, m_lastMqttMsgPublished(0) {
-    std::cout << "Set last will on topic: " << m_willTopic << std::endl;
+    std::cout << "MQTT topics: " << std::endl
+              << "m_hostname: " << m_hostname << std::endl
+              << "m_statusTopic: " << m_statusTopic << std::endl
+              << "m_setTopic: " << m_setTopic << std::endl
+              << "m_willTopic: " << m_willTopic << std::endl;
+
     m_mqtt.setWill(m_willTopic, Common::MqttQoS::AT_LEAST_ONCE, true,
-                   "{\"online\":false}");
+                   "{\"online\": false}");
 
     m_mqtt.addOnConnectCallback(
         std::bind(&MqttDevice::mqttConnected, this, std::placeholders::_1));
@@ -76,7 +81,7 @@ protected:
       auto output = createMqttMessage();
 
       m_mqtt.publish(m_willTopic, Common::MqttQoS::AT_LEAST_ONCE, true,
-                     "{\"online\":true}");
+                     "{\"online\": true}");
       m_mqtt.publish(m_statusTopic, Common::MqttQoS::AT_LEAST_ONCE, true,
                      output.c_str());
     }
@@ -88,6 +93,7 @@ protected:
 
   void mqttConnected(bool sessionPresent) {
     std::cout << "mqttConnected()" << std::endl;
+    std::cout << "subscribe to topic: " << m_setTopic << std::endl;
 
     m_mqtt.subscribe(m_setTopic, Common::MqttQoS::EXCACTLY_ONCE);
     m_isConnected = true;

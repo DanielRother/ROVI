@@ -74,7 +74,7 @@ public:
 
 protected:
   virtual std::string createMqttMessage() override {
-    Serial << "LedDeviceMQTT::createMqttMessage() " << endl;
+    std::cout << "LedDeviceMQTT::createMqttMessage() " << std::endl;
 
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
@@ -88,105 +88,17 @@ protected:
   }
 
   void receiveMqttMessage(const std::string &payload) override {
-    Serial << "LedDeviceMQTT::receiveMqttMessage() " << endl;
+    std::cout << "LedDeviceMQTT::receiveMqttMessage() " << std::endl;
+    // std::cout << "payload: " << payload << std::endl;
 
-    // DynamicJsonBuffer jsonBuffer;
-    // JsonObject &json = jsonBuffer.parseObject(payload);
-    json.printTo(Serial);
-    std::cout << "Currently not restored as this requires are more robust "
-                 "implementation"
-              << std::endl;
+    DynamicJsonBuffer jsonBuffer;
+    String convPayload = payload.c_str();
+    JsonObject &json = jsonBuffer.parseObject(convPayload);
+    json.prettyPrintTo(Serial);
     // See below for such an implementation
-    // restoreSettingsImpl(json);
-    // Maybe distributeSettings() afterwards?
-
-    // const int capacity = 3000; // JSON_OBJECT_SIZE(10);
-    // StaticJsonBuffer<capacity> jb;
-    // JsonObject &obj = jb.parseObject(payload);
-    // if (obj.success()) {
-    //   std::cout << "parseObject() succeeded" << std::endl;
-    // } else {
-    //   std::cout << "parseObject() failed" << std::endl;
-    //   return;
-    // }
-
-    // // Check possible inputs
-    // if (obj.containsKey("brightness")) {
-    //   auto brightness = Utils::clamp(obj["brightness"].as<int>(), 0, 100);
-    //   std::cout << "Set brightness to " << brightness << endl;
-    //   setBrightness(brightness);
-    // }
-    // if (obj.containsKey("colorType") && obj.containsKey("color")) {
-    //   auto colorType = std::string{obj["colorType"].as<char *>()};
-    //   std::cout << "Set color for type " << colorType << std::endl;
-    //   if (colorType == "rgb") {
-    //     auto color = obj["color"];
-    //     auto r = Utils::clamp(color["r"].as<int>(), 0, 255);
-    //     auto g = Utils::clamp(color["g"].as<int>(), 0, 255);
-    //     auto b = Utils::clamp(color["b"].as<int>(), 0, 255);
-    //     auto newColor = std::make_shared<RGBColor>(r, g, b);
-    //     std::cout << "    r: " << r << ", g: " << g << ", b: " << b
-    //               << std::endl;
-    //     std::cout << "    new color received via MQTT is "
-    //               << newColor->toString();
-    //     setColor(newColor);
-    //   } else if (colorType == "hsv") {
-    //     auto color = obj["color"];
-    //     auto h = Utils::clamp(color["h"].as<int>(), 0, 359);
-    //     auto s = Utils::clamp(color["s"].as<float>(), 0.0f, 1.0f);
-    //     auto v = Utils::clamp(color["v"].as<float>(), 0.0f, 1.0f);
-    //     auto newColor = std::make_shared<HSVColor>(h, s, v);
-    //     setColor(newColor);
-    //   } else {
-    //     std::cout << "Error: Unknown colortype" << std::endl;
-    //   }
-    // }
-    // if (obj.containsKey("colorType") && obj.containsKey("color2")) {
-    //   auto colorType = std::string{obj["colorType"].as<char *>()};
-    //   std::cout << "Set color2 for type " << colorType << std::endl;
-    //   if (colorType == "rgb") {
-    //     auto color = obj["color2"];
-    //     auto r = Utils::clamp(color["r"].as<int>(), 0, 255);
-    //     auto g = Utils::clamp(color["g"].as<int>(), 0, 255);
-    //     auto b = Utils::clamp(color["b"].as<int>(), 0, 255);
-    //     auto newColor = std::make_shared<RGBColor>(r, g, b);
-    //     std::cout << "    r: " << r << ", g: " << g << ", b: " << b
-    //               << std::endl;
-    //     std::cout << "    new color received via MQTT is "
-    //               << newColor->toString();
-    //     setColor2(newColor);
-    //   } else if (colorType == "hsv") {
-    //     auto color = obj["color2"];
-    //     auto h = Utils::clamp(color["h"].as<int>(), 0, 359);
-    //     auto s = Utils::clamp(color["s"].as<float>(), 0.0f, 1.0f);
-    //     auto v = Utils::clamp(color["v"].as<float>(), 0.0f, 1.0f);
-    //     auto newColor = std::make_shared<HSVColor>(h, s, v);
-    //     setColor2(newColor);
-    //   } else {
-    //     std::cout << "Error: Unknown colortype" << std::endl;
-    //   }
-    // }
-    // if (obj.containsKey("effect")) {
-    //   auto selectedEffect = std::string{obj["effect"].as<char *>()};
-    //   std::cout << "Set effect to " << selectedEffect << endl;
-    //   for (auto effect : this->m_effects) {
-    //     if (effect->name() == selectedEffect) {
-    //       setEffect(effect);
-    //       break;
-    //     }
-    //   }
-    // }
-    // if (obj.containsKey("timePerEffect_m")) {
-    //   auto timePerEffect = obj["timePerEffect_m"].as<int>();
-    //   std::cout << "Set timePerEffect to " << timePerEffect << endl;
-    //   setTimePerEffect(std::chrono::minutes{timePerEffect});
-    // }
-    // // Check power last as power == false should always turn the bulb off
-    // if (obj.containsKey("power")) {
-    //   auto power = obj["power"].as<bool>();
-    //   std::cout << "Set power to " << power << endl;
-    //   setOn(power);
-    // }
+    SimpleLedDevice<LED>::restoreSettingsImpl(json);
+    // distributeSettings() not required, as it is already triggered by the
+    // value changes
   }
 };
 

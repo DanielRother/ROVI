@@ -78,8 +78,15 @@ protected:
   template <typename T>
   std::string restoreString(T &json, const std::string key) {
     char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
-    strcpy(tmpDeviceName, json[key.c_str()]);
-    return std::string{tmpDeviceName};
+    auto value = json[key.c_str()];
+    if ((const char *)value) {
+      std::cout << "read successful" << std::endl;
+      strcpy(tmpDeviceName, value);
+      return std::string{tmpDeviceName};
+    } else {
+      std::cout << "read failed" << std::endl;
+      return "";
+    }
   }
 
   std::string filename;

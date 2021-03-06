@@ -134,7 +134,8 @@ public:
   }
   void setWill(const std::string &topic, MqttQoS qos, bool retain,
                const std::string &payload) {
-    mqtt.setWill(topic.c_str(), qos, retain, payload.c_str(), payload.length());
+    strcpy(willMessage, payload.c_str());
+    mqtt.setWill(topic.c_str(), qos, retain, willMessage, payload.length());
   }
 
 protected:
@@ -159,6 +160,7 @@ protected:
   int port;
   char user[maxCStringLength];
   char password[maxCStringLength];
+  char willMessage[maxCStringLength];
 };
 } // namespace Common
 } // namespace Rovi

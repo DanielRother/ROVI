@@ -144,6 +144,7 @@ void RoviWiFiManager::saveSettingsImpl(JsonObject &json,
 }
 
 void RoviWiFiManager::restoreSettingsImpl(JsonObject &json) {
+  std::cout << "RoviWiFiManager::restoreSettingsImpl" << std::endl;
   char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
   deviceName = restoreString(json, "deviceName");
   std::cout << std::endl;

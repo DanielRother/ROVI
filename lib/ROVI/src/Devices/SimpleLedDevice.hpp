@@ -186,6 +186,7 @@ protected:
 
     settings["power"] = this->m_on;
     settings["brightness"] = this->m_brightness;
+    settings["colorType"] = "rgb";
     JsonObject &color = buffer.createObject();
     auto curRgbColor = this->color()->toRGB();
     color["r"] = curRgbColor->r;
@@ -208,20 +209,77 @@ protected:
   virtual void restoreSettingsImpl(JsonObject &settings) override {
     Serial << "LedDeviceMQTT::restoreSettings() " << endl;
 
+    std::cout << "Check brightness" << std::endl;
     uint8_t brightness = settings["brightness"];
-    setBrightness(brightness);
-    auto colorSettings = settings["color"];
-    uint8_t r = colorSettings["r"];
-    uint8_t g = colorSettings["g"];
-    uint8_t b = colorSettings["b"];
-    auto color = std::make_shared<RGBColor>(r, g, b);
-    setColor(color);
-    auto colorSettings2 = settings["color2"];
-    uint8_t r2 = colorSettings2["r"];
-    uint8_t g2 = colorSettings2["g"];
-    uint8_t b2 = colorSettings2["b"];
-    auto color2 = std::make_shared<RGBColor>(r2, g2, b2);
-    setColor2(color2);
+    if (brightness) {
+      std::cout << "New brightness value received" << std::endl;
+      setBrightness(brightness);
+    } else {
+      std::cout << "NO brightness received" << std::endl;
+    }
+
+    std::cout << "Check colorType" << std::endl;
+    auto colorType = restoreString(settings, "colorType");
+    if (colorType != "") {
+      std::cout << "New colorType value received" << std::endl;
+      std::cout << "Check color" << std::endl;
+      auto colorSettings = settings["color"];
+      if (colorSettings && colorType == "rgb") {
+        std::cout << "color and colorType == rgb" << std::endl;
+        std::cout << "Check rgb" << std::endl;
+        auto r = colorSettings["r"];
+        auto g = colorSettings["g"];
+        auto b = colorSettings["b"];
+        if ((const char *)r && (const char *)g && (const char *)b) {
+          std::cout << "all components included in message" << std::endl;
+          auto color =
+              std::make_shared<RGBColor>((uint8_t)r, (uint8_t)g, (uint8_t)b);
+          setColor(color);
+        }
+      } else if (colorSettings && colorType == "hsv") {
+        std::cout << "color and colorType == hsv" << std::endl;
+        std::cout << "Check hsv" << std::endl;
+        auto h = colorSettings["h"];
+        auto s = colorSettings["s"];
+        auto v = colorSettings["v"];
+        if ((const char *)h && (const char *)s && (const char *)v) {
+          std::cout << "all components included in message" << std::endl;
+          auto color = std::make_shared<HSVColor>((float)h, (float)s, (float)v);
+          setColor(color);
+        }
+      }
+
+      std::cout << "Check color2" << std::endl;
+      auto colorSettings2 = settings["color2"];
+      if (colorSettings2 && colorType == "rgb") {
+        std::cout << "color2 and colorType == rgb" << std::endl;
+        std::cout << "Check rgb" << std::endl;
+        auto r = colorSettings2["r"];
+        auto g = colorSettings2["g"];
+        auto b = colorSettings2["b"];
+        if ((const char *)r && (const char *)g && (const char *)b) {
+          std::cout << "all components included in message" << std::endl;
+          auto color =
+              std::make_shared<RGBColor>((uint8_t)r, (uint8_t)g, (uint8_t)b);
+          setColor2(color);
+        }
+      } else if (colorSettings2 && colorType == "hsv") {
+        std::cout << "color2 and colorType == hsv" << std::endl;
+        std::cout << "Check hsv" << std::endl;
+        auto h = colorSettings2["h"];
+        auto s = colorSettings2["s"];
+        auto v = colorSettings2["v"];
+        if ((const char *)h && (const char *)s && (const char *)v) {
+          std::cout << "all components included in message" << std::endl;
+          auto color = std::make_shared<HSVColor>((float)h, (float)s, (float)v);
+          setColor2(color);
+        }
+      }
+    } else {
+      std::cout << "NO colorType received" << std::endl;
+    }
+
+    std::cout << "Check effect" << std::endl;
     auto selectedEffect = restoreString(settings, "effect");
     for (auto effect : this->m_effects) {
       if (effect->name() == selectedEffect) {
@@ -229,11 +287,25 @@ protected:
         break;
       }
     }
+
+    std::cout << "Check timePerEffect" << std::endl;
     int timePerEffect = settings["timePerEffect_m"];
-    setTimePerEffect(std::chrono::minutes{timePerEffect});
+    if (timePerEffect) {
+      std::cout << "New timePerEffect value received" << std::endl;
+      setTimePerEffect(std::chrono::minutes{timePerEffect});
+    } else {
+      std::cout << "NO timePerEffect received" << std::endl;
+    }
+
     // Check power last as power == false should always turn the bulb off
-    bool power = settings["power"];
-    setOn(power);
+    std::cout << "Check power" << std::endl;
+    auto power = settings["power"];
+    if ((const char *)power) {
+      std::cout << "New power value received" << std::endl;
+      setOn((bool)power);
+    } else {
+      std::cout << "NO power received" << std::endl;
+    }
 
     std::cout << "****** Restored setting ******" << std::endl;
     std::cout << "p = " << this->m_on
