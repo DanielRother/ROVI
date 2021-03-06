@@ -21,7 +21,7 @@ public:
     std::cout << "Saving settings" << std::endl;
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
-    saveSettingsImpl(json, jsonBuffer);
+    settingsToJson(json, jsonBuffer);
     json.prettyPrintTo(Serial);
 
     File configFile = SPIFFS.open(filename.c_str(), "w");
@@ -57,7 +57,7 @@ public:
           json.printTo(Serial);
           if (json.success()) {
             std::cout << std::endl << "JSON parsed" << std::endl;
-            restoreSettingsImpl(json);
+            jsonToSettings(json);
           } else {
             std::cerr << "Failed to load json config" << std::endl;
           }
@@ -68,12 +68,11 @@ public:
     }
   }
 
-  // TODO: Rename me
   // Why the hell can't these function be overloads of save/restoreSettings()?
   // Maybe https://isocpp.org/wiki/faq/strange-inheritance#overload-derived ?
-  virtual void saveSettingsImpl(JsonObject &settings,
-                                DynamicJsonBuffer &buffer) = 0;
-  virtual void restoreSettingsImpl(JsonObject &settings) = 0;
+  virtual void settingsToJson(JsonObject &settings,
+                              DynamicJsonBuffer &buffer) = 0;
+  virtual void jsonToSettings(JsonObject &settings) = 0;
 
 protected:
   template <typename T>

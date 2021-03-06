@@ -25,8 +25,9 @@ public:
 protected:
   // callback notifying us of the need to save config
   void saveConfigCallback();
-  virtual void saveSettingsImpl(JsonObject &json, DynamicJsonBuffer &buffer);
-  virtual void restoreSettingsImpl(JsonObject &settings);
+  virtual void settingsToJson(JsonObject &json,
+                              DynamicJsonBuffer &buffer) override;
+  virtual void jsonToSettings(JsonObject &settings) override;
 
   WiFiConfig wiFiDefaultConfig;
   // flag for saving data

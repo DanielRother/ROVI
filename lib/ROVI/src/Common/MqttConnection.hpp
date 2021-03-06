@@ -30,10 +30,6 @@ public:
       size_t len, size_t index, size_t total)>;
   using OnPublishCallback = std::function<void(uint16_t packetId)>;
 
-  // TODO
-  // enum class QoS {
-  // }
-
   // MqttConnection(){};
   void start(Config::RoviWiFiManager &rwm) {
     addOnConnectCallback(

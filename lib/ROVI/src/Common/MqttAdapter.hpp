@@ -6,18 +6,16 @@
 #include <ArduinoIostream.hpp>
 #include <Common/MqttConnection.hpp>
 #include <Config/RoviWiFiManager.hpp>
+#include <Devices/BasicDevice.hpp>
 
 #include <iostream>
 #include <string>
 
-#include "BasicDevice.hpp"
-
-// TODO: Move somewhere else and adapt namespace
 namespace Rovi {
-namespace Devices {
+namespace Common {
 class MqttAdapter {
 public:
-  MqttAdapter(BasicDevice &device, Common::MqttConnection &mqtt,
+  MqttAdapter(Devices::BasicDevice &device, Common::MqttConnection &mqtt,
               Config::RoviWiFiManager &rwm)
       : m_device{device}, m_mqtt{mqtt}, m_rwm{rwm}, m_isConnected{false},
         m_hostname{rwm.deviceName}, m_statusTopic{"rovi/" + m_hostname +
@@ -49,7 +47,7 @@ public:
     //     std::bind(&MqttAdapter::onMqttUnsubscribe, this,
     //     std::placeholders::_1));
     m_mqtt.addOnMessageCallback(std::bind(
-        &MqttAdapter::receiveSetMessage, this, std::placeholders::_1,
+        &MqttAdapter::mqttMessageReceived, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
         std::placeholders::_5, std::placeholders::_6));
     m_mqtt.addOnPublishCallback(
@@ -57,6 +55,8 @@ public:
   }
 
   void update() {
+    m_device.update();
+
     if (isStatusUpdateRequired()) {
       distributeSettings();
 
@@ -82,7 +82,7 @@ protected:
     m_lastStateStatusSend_ms = millis();
 
     if (m_isConnected) {
-      auto output = createMqttMessage();
+      auto output = createStatusMessage();
 
       m_mqtt.publish(m_willTopic, Common::MqttQoS::AT_LEAST_ONCE, true,
                      "{\"online\": true}");
@@ -91,13 +91,12 @@ protected:
     }
   }
 
-  // TODO: Rename me to createStatusMessage
-  std::string createMqttMessage() {
+  std::string createStatusMessage() {
     std::cout << "MqttAdapter::createMqttMessage() " << std::endl;
 
     DynamicJsonBuffer jsonBuffer;
     JsonObject &json = jsonBuffer.createObject();
-    m_device.saveSettingsImpl(json, jsonBuffer);
+    m_device.settingsToJson(json, jsonBuffer);
     // Altough documented other, the library doesn't support std::string... :(
     // auto output = std::string{};
     // std::string output;
@@ -122,15 +121,14 @@ protected:
     return output.c_str();
   }
 
-  // TODO: Rename me to receiveSetMessage
-  void receiveMqttMessage(const std::string &payload) {
+  void receiveSetMessage(const std::string &payload) {
     std::cout << "MqttAdapter::receiveMqttMessage() " << std::endl;
 
     DynamicJsonBuffer jsonBuffer;
     String convPayload = payload.c_str();
     JsonObject &json = jsonBuffer.parseObject(convPayload);
     json.prettyPrintTo(Serial);
-    m_device.restoreSettingsImpl(json);
+    m_device.jsonToSettings(json);
     distributeSettings();
   }
 
@@ -167,16 +165,16 @@ protected:
     m_lastMqttMsgPublished = millis();
   }
 
-  void receiveSetMessage(char *topic, char *payload,
-                         AsyncMqttClientMessageProperties properties,
-                         size_t len, size_t index, size_t total) {
-    std::cout << "mqttMessage() -  topic = " << topic
+  void mqttMessageReceived(char *topic, char *payload,
+                           AsyncMqttClientMessageProperties properties,
+                           size_t len, size_t index, size_t total) {
+    std::cout << "mqttMessageReceived() -  topic = " << topic
               << ", payload = " << payload << std::endl;
 
-    receiveMqttMessage(payload);
+    receiveSetMessage(payload);
   }
 
-  BasicDevice &m_device;
+  Devices::BasicDevice &m_device;
   Common::MqttConnection &m_mqtt;
   Config::RoviWiFiManager &m_rwm;
 
@@ -194,7 +192,7 @@ protected:
   static const unsigned long NO_MQTT_MESSAGE_SEND_RESTART_TIMEOUT_MS =
       5 * 60 * 1000;
 };
-}; // namespace Devices
+}; // namespace Common
 }; // namespace Rovi
 
 #endif /* __MQTT_ADAPTER_H__ */

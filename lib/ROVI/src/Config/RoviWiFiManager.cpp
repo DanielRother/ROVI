@@ -131,8 +131,8 @@ void RoviWiFiManager::saveConfigCallback() {
   shouldSaveConfig = true;
 }
 
-void RoviWiFiManager::saveSettingsImpl(JsonObject &json,
-                                       DynamicJsonBuffer &buffer) {
+void RoviWiFiManager::settingsToJson(JsonObject &json,
+                                     DynamicJsonBuffer &buffer) {
   json["deviceName"] = deviceName.c_str();
   JsonObject &mqtt = buffer.createObject();
   mqtt["server"] = mqttConfig.server.c_str();
@@ -143,7 +143,7 @@ void RoviWiFiManager::saveSettingsImpl(JsonObject &json,
   json["otaPassword"] = otaPassword.c_str();
 }
 
-void RoviWiFiManager::restoreSettingsImpl(JsonObject &json) {
+void RoviWiFiManager::jsonToSettings(JsonObject &json) {
   std::cout << "RoviWiFiManager::restoreSettingsImpl" << std::endl;
   char tmpDeviceName[DEFAULT_STRING_PARAMETER_SIZE];
   deviceName = restoreString(json, "deviceName");

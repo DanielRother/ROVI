@@ -1,5 +1,5 @@
-#ifndef __SIMPLE_LED_DEVICE_H__
-#define __SIMPLE_LED_DEVICE_H__
+#ifndef __LED_DEVICE_H__
+#define __LED_DEVICE_H__
 
 #include <chrono>
 #include <iostream>
@@ -12,12 +12,12 @@
 
 namespace Rovi {
 namespace Devices {
-template <class LED> class SimpleLedDevice : public BasicDevice {
+template <class LED> class LedDevice : public BasicDevice {
 public:
-  SimpleLedDevice(const std::shared_ptr<LED> led,
-                  const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects,
-                  const std::string &name = "led",
-                  std::chrono::minutes timePerEffect = std::chrono::minutes{15})
+  LedDevice(const std::shared_ptr<LED> led,
+            const std::vector<std::shared_ptr<Rovi::LEDEffect>> effects,
+            const std::string &name = "led",
+            std::chrono::minutes timePerEffect = std::chrono::minutes{15})
       : BasicDevice{name}, m_leds{led}, m_on{true}, m_brightness{128},
         m_color{std::make_shared<HSVColor>(0.0f, 1.0f, 0.5f)},
         m_color2{std::make_shared<HSVColor>(180.0f, 1.0f, 0.5f)},
@@ -45,7 +45,7 @@ public:
   virtual bool isOn() const { return m_on; }
 
   virtual void setOn(bool on) {
-    std::cout << "SimpleLedDevice::setOn(" << on << ")" << std::endl;
+    std::cout << "LedDevice::setOn(" << on << ")" << std::endl;
     if (!on) {
       m_effect->stop();
     }
@@ -63,7 +63,7 @@ public:
   virtual uint8_t brightness() const { return m_brightness; }
 
   virtual void setBrightness(uint8_t brightness) {
-    std::cout << "SimpleLedDevice::setBrightness(" << (int)brightness << ")"
+    std::cout << "LedDevice::setBrightness(" << (int)brightness << ")"
               << std::endl;
     setOn(true);
     m_leds->setBrightness(brightness);
@@ -84,7 +84,7 @@ public:
   virtual std::shared_ptr<Color> color2() { return m_color2; }
 
   virtual void setColor(const std::shared_ptr<Color> &color) {
-    std::cout << "SimpleLedDevice::setColor(" << color->toString() << ")"
+    std::cout << "LedDevice::setColor(" << color->toString() << ")"
               << std::endl;
     // m_effect->stop();
 
@@ -111,7 +111,7 @@ public:
   }
 
   virtual void setColor2(const std::shared_ptr<Color> &color) {
-    std::cout << "SimpleLedDevice::setColor2(" << color->toString() << ")"
+    std::cout << "LedDevice::setColor2(" << color->toString() << ")"
               << std::endl;
     std::cout << "    finally realy set color" << std::endl;
     m_leds->setColor2(color);
@@ -123,7 +123,7 @@ public:
   virtual uint32_t hue() const { return m_leds->hue(); }
 
   virtual void setHue(uint32_t hue) {
-    std::cout << "SimpleLedDevice::setHue(" << hue << ")" << std::endl;
+    std::cout << "LedDevice::setHue(" << hue << ")" << std::endl;
     setOn(true);
     m_leds->setHue(hue);
     // m_color = m_leds->color();
@@ -168,22 +168,9 @@ public:
   }
 
 protected:
-  virtual void selectRandomEffect() {
-    std::cout << "SimpleLedDevice::selectRandomEffect()" << std::endl;
-
-    setOn(true);
-    auto effectIndex = random(0, m_effects.size());
-    setEffect(m_effects[effectIndex]);
-
-    std::cout << "Effect " << (int)effectIndex << " selected" << std::endl;
-
-    auto now = std::chrono::system_clock::now();
-    m_nextEffectSelection = now + m_timePerEffect;
-  }
-
-  virtual void saveSettingsImpl(JsonObject &settings,
-                                DynamicJsonBuffer &buffer) override {
-    Serial << "SimpleLedDevice::saveSettingsImpl() " << endl;
+  virtual void settingsToJson(JsonObject &settings,
+                              DynamicJsonBuffer &buffer) override {
+    Serial << "LedDevice::settingsToJson() " << endl;
 
     settings["power"] = this->m_on;
     settings["brightness"] = this->m_brightness;
@@ -207,8 +194,8 @@ protected:
     settings["timePerEffect_m"] = (int)this->m_timePerEffect.count();
   }
 
-  virtual void restoreSettingsImpl(JsonObject &settings) override {
-    Serial << "LedDeviceMQTT::restoreSettings() " << endl;
+  virtual void jsonToSettings(JsonObject &settings) override {
+    Serial << "LedDeviceMQTT::jsonToSettings() " << endl;
 
     std::cout << "Check brightness" << std::endl;
     uint8_t brightness = settings["brightness"];
@@ -328,6 +315,19 @@ protected:
     options["possibleEffects"] = possibleEffects;
   }
 
+  virtual void selectRandomEffect() {
+    std::cout << "LedDevice::selectRandomEffect()" << std::endl;
+
+    setOn(true);
+    auto effectIndex = random(0, m_effects.size());
+    setEffect(m_effects[effectIndex]);
+
+    std::cout << "Effect " << (int)effectIndex << " selected" << std::endl;
+
+    auto now = std::chrono::system_clock::now();
+    m_nextEffectSelection = now + m_timePerEffect;
+  }
+
   std::shared_ptr<LED> m_leds;
 
   bool m_on;
@@ -344,4 +344,4 @@ protected:
 }; // namespace Devices
 }; // namespace Rovi
 
-#endif /* __SIMPLE_LED_DEVICE_H__ */
+#endif /* __LED_DEVICE_H__ */
