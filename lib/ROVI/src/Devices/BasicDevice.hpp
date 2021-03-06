@@ -22,7 +22,7 @@ protected:
     if (m_settingsChanged) {
       saveSettings();
       m_settingsChanged = false;
-      std::cout << "Settings saved to disc" << endl;
+      std::cout << "BasicDevice::update() - Settings saved to disc" << endl;
     }
   }
 

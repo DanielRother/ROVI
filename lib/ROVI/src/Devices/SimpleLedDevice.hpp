@@ -182,7 +182,7 @@ protected:
 
   virtual void saveSettingsImpl(JsonObject &settings,
                                 DynamicJsonBuffer &buffer) override {
-    Serial << "SimpleLedDevice::saveSettings() " << endl;
+    Serial << "SimpleLedDevice::saveSettingsImpl() " << endl;
 
     settings["power"] = this->m_on;
     settings["brightness"] = this->m_brightness;

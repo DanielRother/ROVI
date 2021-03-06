@@ -26,47 +26,6 @@ public:
       : BasicDevice{}, MqttDevice{mqtt, rwm}, SimpleLedDevice<LED>{led, effects,
                                                                    name} {}
 
-  virtual void setOn(bool on) override {
-    SimpleLedDevice<LED>::setOn(on);
-    this->distributeSettings();
-  }
-
-  virtual void setBrightness(uint8_t brightness) override {
-    SimpleLedDevice<LED>::setBrightness(brightness);
-    this->distributeSettings();
-  }
-
-  virtual void setColor(const std::shared_ptr<Color> &color) override {
-    SimpleLedDevice<LED>::setColor(color);
-    distributeSettings();
-  }
-
-  virtual void setColor2(const std::shared_ptr<Color> &color) override {
-    SimpleLedDevice<LED>::setColor2(color);
-    distributeSettings();
-  }
-
-  virtual void setHue(uint32_t hue) override {
-    SimpleLedDevice<LED>::setHue(hue);
-    distributeSettings();
-  }
-
-  virtual void setEffect(const std::shared_ptr<LEDEffect> &effect) override {
-    SimpleLedDevice<LED>::setEffect(effect);
-    distributeSettings();
-  }
-
-  virtual void setEffect(int effect) override {
-    SimpleLedDevice<LED>::setEffect(effect);
-    distributeSettings();
-  }
-
-  virtual void
-  setTimePerEffect(const std::chrono::minutes &timePerEffect) override {
-    SimpleLedDevice<LED>::setTimePerEffect(timePerEffect);
-    distributeSettings();
-  }
-
   virtual void update() override {
     SimpleLedDevice<LED>::update();
     MqttDevice::update();
@@ -89,14 +48,14 @@ protected:
 
   void receiveMqttMessage(const std::string &payload) override {
     std::cout << "LedDeviceMQTT::receiveMqttMessage() " << std::endl;
-    // std::cout << "payload: " << payload << std::endl;
 
     DynamicJsonBuffer jsonBuffer;
     String convPayload = payload.c_str();
     JsonObject &json = jsonBuffer.parseObject(convPayload);
     json.prettyPrintTo(Serial);
-    // See below for such an implementation
     SimpleLedDevice<LED>::restoreSettingsImpl(json);
+    distributeSettings();
+
     // distributeSettings() not required, as it is already triggered by the
     // value changes
   }
