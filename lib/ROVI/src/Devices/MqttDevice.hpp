@@ -23,6 +23,7 @@ public:
         m_setTopic{"rovi/" + m_hostname + "/set"}, m_willTopic{"rovi/" +
                                                                m_hostname +
                                                                "/connection"},
+        m_infoTopic{"rovi/" + m_hostname + "/info"},
         m_lastStateStatusSend_ms{0}, m_lastMqttMsgPublished(0) {
     std::cout << "MQTT topics: " << std::endl
               << "m_hostname: " << m_hostname << std::endl
@@ -56,6 +57,9 @@ public:
 protected:
   virtual std::string createMqttMessage() = 0;
   virtual void receiveMqttMessage(const std::string &payload) = 0;
+  virtual std::string getType() = 0;
+  virtual void getOptions(JsonObject &options,
+                          DynamicJsonBuffer &jsonBuffer) = 0;
 
   virtual void update() {
     if (isStatusUpdateRequired()) {
@@ -98,6 +102,26 @@ protected:
     m_mqtt.subscribe(m_setTopic, Common::MqttQoS::EXCACTLY_ONCE);
     m_isConnected = true;
     distributeSettings();
+
+    auto info = createInfoMessage();
+    m_mqtt.publish(m_infoTopic, Common::MqttQoS::AT_LEAST_ONCE, true,
+                   info.c_str());
+  }
+
+  std::string createInfoMessage() {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject &json = jsonBuffer.createObject();
+    json["ip"] = WiFi.localIP().toString();
+    json["mac"] = WiFi.macAddress();
+    json["type"] = getType().c_str();
+    JsonObject &options = jsonBuffer.createObject();
+    getOptions(options, jsonBuffer);
+    json["options"] = options;
+
+    String output;
+    json.printTo(output);
+    json.prettyPrintTo(Serial);
+    return output.c_str();
   }
 
   void mqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -137,6 +161,7 @@ protected:
   std::string m_statusTopic;
   std::string m_setTopic;
   std::string m_willTopic;
+  std::string m_infoTopic;
 
   unsigned long m_lastStateStatusSend_ms;
   unsigned long m_lastMqttMsgPublished;

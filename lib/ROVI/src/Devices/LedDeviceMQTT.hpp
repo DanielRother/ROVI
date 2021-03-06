@@ -100,6 +100,17 @@ protected:
     // distributeSettings() not required, as it is already triggered by the
     // value changes
   }
+
+  virtual std::string getType() override { return this->m_name; }
+  virtual void getOptions(JsonObject &options,
+                          DynamicJsonBuffer &jsonBuffer) override {
+    JsonArray &possibleEffects = jsonBuffer.createArray();
+    for (auto e : this->m_effects) {
+      String effectS = e->name().c_str();
+      possibleEffects.add(effectS);
+    }
+    options["possibleEffects"] = possibleEffects;
+  }
 };
 
 }; // namespace Devices
