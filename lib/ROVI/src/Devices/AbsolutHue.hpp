@@ -150,7 +150,27 @@ protected:
     settings["values"] = values;
   }
 
-  void jsonToRotarySettings(JsonObject &settings) {}
+  void jsonToRotarySettings(JsonObject &settings) {
+    std::cout << "AbsolutHue::jsonToRotarySettings()" << std::endl;
+    std::cout << "Check values" << std::endl;
+    String tmp;
+    settings.prettyPrintTo(tmp);
+    std::cout << "settings: " << tmp.c_str() << std::endl;
+
+    JsonArray &values = settings["values"];
+    for (auto &v : values) {
+      auto state = this->restoreString(v, "state");
+      auto value = v["value"];
+
+      if (state != "" && value) {
+        std::cout << "state: " << state << ", value: " << (int)value
+                  << std::endl;
+        m_rotary->setValue(
+            Components::ButtonStates::_from_string(state.c_str()), value);
+        this->m_settingsChangedTimestamp = millis();
+      }
+    }
+  }
 
   void getRotaryOptions(JsonObject &options, DynamicJsonBuffer &buffer) {
     JsonArray &settings = buffer.createArray();
