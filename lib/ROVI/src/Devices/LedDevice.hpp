@@ -105,7 +105,8 @@ public:
     // }
 
     std::cout << "    finally realy set color" << std::endl;
-    m_leds->setColor1(color);
+    m_leds->setColor(color);  // This really sets the color directly
+    m_leds->setColor1(color); // This is only for some effects
     m_color = color;
     m_settingsChangedTimestamp = millis();
   }
