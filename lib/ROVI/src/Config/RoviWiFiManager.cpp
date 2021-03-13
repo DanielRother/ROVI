@@ -75,6 +75,8 @@ RoviWiFiManager::RoviWiFiManager()
   // here  "AutoConnectAP" if empty will auto generate basedcon chipid, if
   // password is blank it will be anonymous and goes into a blocking loop
   // awaiting configuration
+  std::cout << "Start wifi - SSID: " << wiFiDefaultConfig.SSID
+            << ", password: " << wiFiDefaultConfig.password << std::endl;
   if (!wm.autoConnect(wiFiDefaultConfig.SSID.c_str(),
                       wiFiDefaultConfig.password.c_str())) {
     std::cerr << "Failed to connect and hit timeout" << std::endl;

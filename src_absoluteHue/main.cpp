@@ -1,30 +1,20 @@
-#define USE_MQTT
-
 #include <Arduino.h>
+#include <ArduinoOTA.h>
 
-#include <string>
 #include <stdint.h>
+#include <string>
 
-#include <prettyprint.hpp>
 #include <ArduinoIostream.hpp>
+#include <prettyprint.hpp>
 
-#ifndef USE_MQTT
-	#include <Components/Input/RotaryEncoderWithButton.hpp>
-#else
-	#include <Components/Input/RotaryEncoderWithButtonMQTT.hpp>
-#endif
-#include <Components/Output/NeoPixelComponent.hpp>
+#include <Common/MqttAdapter.hpp>
+#include <Common/MqttConnection.hpp>
+#include <Common/WifiEventHandler.hpp>
+#include <Components/Input/RotaryEncoderWithButton.hpp>
 #include <Components/Output/FastLedComponent.hpp>
-#include <Devices/AbsoluteHueMQTT.hpp>
-
-//***************************************************************************//
-// Basecamp and Rovi initialize 
-//***************************************************************************//
-#include <Basecamp.hpp>
-// Basecamp wird angewiesen einen verschlüsselten Acess-Point zu öffnen. Das Passwort erscheint in der seriellen Konsole.
-Basecamp iot{
-  Basecamp::SetupModeWifiEncryption::secured, Basecamp::ConfigurationUI::always
-};
+#include <Components/Output/NeoPixelComponent.hpp>
+#include <Config/RoviWiFiManager.hpp>
+#include <Devices/AbsolutHue.hpp>
 
 // RotaryEncoder
 const uint8_t rotaryPinA = 12;
@@ -32,78 +22,67 @@ const uint8_t rotaryPinB = 13;
 const uint8_t rotaryPinButton = 14;
 
 // LED
-const uint8_t  neoPixelPin    = 15;
+const uint8_t neoPixelPin = 15;
 const uint16_t nbNeoPixelLEDs = 20;
 
 const std::string name = "AbsoluteHue";
 
-#ifndef USE_MQTT
-std::shared_ptr<Rovi::Devices::SimpleAbsoluteHue<
-	Rovi::Components::RotaryEncoderWithButton, 
-	Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>> absolutHue; 
-#else
-std::shared_ptr<Rovi::Devices::AbsoluteHueMQTT<
-	Rovi::Components::RotaryEncoderWithButtonMQTT, 
-	Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>> absolutHue;
-#endif 
+std::shared_ptr<Rovi::Devices::AbsolutHue<
+    Rovi::Components::RotaryEncoderWithButton,
+    Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>
+    absolutHue;
+Rovi::Common::MqttConnection mqttConnection;
+std::shared_ptr<Rovi::Common::MqttAdapter> mqttAdapter;
 
 //***************************************************************************//
 // Arduino setup()
 //***************************************************************************//
 void setup() {
-	sleep(5);
-    std::cout << "--- setup() ---" << std::endl;
-	iot.begin();
-  std::cout << "*********************************" << std::endl;
-  std::cout << "WiFi SSID" << iot.configuration.get("WifiEssid").c_str() << "; PW: " << iot.configuration.get("WifiPassword").c_str() << std::endl;
-  std::cout << "*********************************" << std::endl;
-	iot.preferences.putUInt("bootcounter", 0);
+  Serial.begin(115200);
+  WiFi.onEvent(wiFiEventHandler);
 
-	auto leds = std::make_shared<Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>();
-    auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
-    // for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
-    for(size_t pixelIdx = 12; pixelIdx < nbNeoPixelLEDs; ++pixelIdx) {
-      swapRGValues[pixelIdx] = 1;
-    }
-    leds->setSwapRGValues(swapRGValues);
-	auto effects = std::vector<std::shared_ptr<Rovi::LEDEffect>>();
-    effects.push_back(Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
-    effects.push_back(Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
-    effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
-    effects.push_back(Rovi::LEDEffectFactory::getEffect("color_flow_slow", leds.get()));
+  auto rwm = Rovi::Config::RoviWiFiManager();
 
-#ifndef USE_MQTT
-    auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(rotaryPinA, rotaryPinB, rotaryPinButton);
+  auto leds = std::make_shared<
+      Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>();
+  auto swapRGValues = std::vector<uint32_t>(nbNeoPixelLEDs, 0);
+  // for(size_t pixelIdx = 0; pixelIdx < 12; ++pixelIdx) {
+  for (size_t pixelIdx = 12; pixelIdx < nbNeoPixelLEDs; ++pixelIdx) {
+    swapRGValues[pixelIdx] = 1;
+  }
+  leds->setSwapRGValues(swapRGValues);
+  auto effects = std::vector<std::shared_ptr<Rovi::LEDEffect>>();
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("white_static", leds.get()));
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("color_static", leds.get()));
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("color_flow", leds.get()));
+  effects.push_back(
+      Rovi::LEDEffectFactory::getEffect("color_flow_slow", leds.get()));
 
-    absolutHue = std::make_shared<Rovi::Devices::SimpleAbsoluteHue<
-        Rovi::Components::RotaryEncoderWithButton, 
-        Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>(
-      iot, rotary, leds, effects, name);
-#else
-    auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButtonMQTT>(rotaryPinA, rotaryPinB, rotaryPinButton);
+  auto rotary = std::make_shared<Rovi::Components::RotaryEncoderWithButton>(
+      rotaryPinA, rotaryPinB, rotaryPinButton);
 
-    absolutHue = std::make_shared<Rovi::Devices::AbsoluteHueMQTT<
-        Rovi::Components::RotaryEncoderWithButtonMQTT, 
-        Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>(
-      iot, rotary, leds, effects, name);
-#endif
+  absolutHue = std::make_shared<Rovi::Devices::AbsolutHue<
+      Rovi::Components::RotaryEncoderWithButton,
+      Rovi::Components::FastLedComponent<neoPixelPin, nbNeoPixelLEDs>>>(
+      rotary, leds, effects, name);
+  mqttAdapter = std::make_shared<Rovi::Common::MqttAdapter>(
+      *std::static_pointer_cast<Rovi::Devices::BasicDevice>(absolutHue),
+      mqttConnection, rwm);
 
-	// Activate Over-the-Air updates
-	String otaPassword = iot.configuration.get("OTAPassword"); // The prefedined variable OTAPassword is always reset to '1'; TODO: Check why/fix?
-	std::cout << "*******************************************" << endl
-			<< "* OTA PASSWORD:" <<  otaPassword.c_str() << endl
-			<< "*******************************************" << endl;
+  mqttConnection.start(rwm);
 
-	ArduinoOTA.setPassword(otaPassword.c_str());
-	ArduinoOTA.begin();
+  ArduinoOTA.setPassword(rwm.otaPassword.c_str());
+  ArduinoOTA.begin();
 }
-
 
 //***************************************************************************//
 // Arduino loop()
 //***************************************************************************//
 void loop() {
-	ArduinoOTA.handle();
-	absolutHue->update();
+  ArduinoOTA.handle();
+  // absolutHue->update();    // Only required, if no MQTT adapter is used.
+  mqttAdapter->update();
 }
-
