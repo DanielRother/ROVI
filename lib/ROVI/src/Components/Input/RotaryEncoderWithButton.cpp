@@ -139,7 +139,7 @@ RotaryEncoderWithButton::RotaryEncoderWithButton(const uint8_t pinA,
     Serial << "defaultButtonStateActivatedCallback" << endl;
   };
   auto defaultValueChangeCallback = [&](int value) {
-    auto buttonStateString = buttonStateToString(buttonState);
+    auto buttonStateString = buttonState._to_string();
     Serial << "defaultValueChangeCallback - New value = " << value
            << " for state " << buttonStateString << endl;
   };
@@ -182,7 +182,7 @@ void RotaryEncoderWithButton::setupState(
     const int increment, const bool preventOverflow,
     const std::function<void(void)> stateActivatedCallback,
     const std::function<void(int)> stateValueChangedCallback) {
-  std::cout << "Setup rotary state " << buttonStateToString(state)
+  std::cout << "Setup rotary state " << state._to_string()
             << ": minValue = " << minValue << ", maxValue = " << maxValue
             << ", increment = " << increment
             << ", preventOverflow = " << preventOverflow << endl;
@@ -229,14 +229,25 @@ void RotaryEncoderWithButton::onHold() {
   updateButtonState(ButtonStates::HOLDED);
 }
 
-RotaryEncoderWithButton::ButtonStates
-RotaryEncoderWithButton::getCurrentButtonState() {
+ButtonStates RotaryEncoderWithButton::getCurrentButtonState() {
   auto now = millis();
-  if (now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS &&
-      buttonState != ButtonStates::NORMAL) {
-    updateButtonState(ButtonStates::NORMAL);
+
+  // Don't know why but the following is not possible using better enums... :(
+  // Therefore the strange workaround below
+  //   if (now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS &&
+  //       (buttonState != ButtonStates::NORMAL)) {
+  //     updateButtonState(ButtonStates::NORMAL);
+  //   }
+
+  switch (buttonState) {
+  case ButtonStates::NORMAL:
+    return buttonState;
+    break;
   }
 
+  if (now - lastButtonStateUpdate_ms > BUTTON_STATE_TIMEOUT_MS) {
+    updateButtonState(ButtonStates::NORMAL);
+  }
   return buttonState;
 }
 
@@ -244,12 +255,11 @@ unsigned long RotaryEncoderWithButton::getLastButtonStateUpdateMs() const {
   return lastButtonStateUpdate_ms;
 }
 
-std::map<RotaryEncoderWithButton::ButtonStates,
-         RotaryEncoderWithButton::ButtonStateSetting>
+std::map<ButtonStates, RotaryEncoderWithButton::ButtonStateSetting>
 RotaryEncoderWithButton::getStateSettings() const {
   return stateSettings;
 }
-std::map<RotaryEncoderWithButton::ButtonStates, RotaryValue>
+std::map<ButtonStates, RotaryValue>
 RotaryEncoderWithButton::getStateValues() const {
   return stateValues;
 }
@@ -270,13 +280,8 @@ void RotaryEncoderWithButton::invokeRotaryValueChangeCallback(
     const ButtonStates state, const int value) {
   stateSettings[state].valueChangedCallback(value);
 
-  // // MQTT
-  std::string buttonStateString = buttonStateToString(state);
-  // std::string topic               = "state/" + buttonStateString;
-  // std::string valueString         = to_string(value);
-  // publishMQTTMessage(topic, valueString);
-
   // Debugging output
+  std::string buttonStateString = state._to_string();
   Serial << "Value changed to " << value
          << " for ButtonState = " << buttonStateString << endl;
 }
@@ -285,44 +290,10 @@ void RotaryEncoderWithButton::invokeButtonStateActivatedCallback(
     const ButtonStates state) {
   stateSettings[state].activationCallback();
 
-  // // MQTT here
-  // Serial << "RotaryEncoderWithButton - send MQTT message" << endl;
-  std::string buttonStateString = buttonStateToString(state);
-  // std::string topic               = "state/" + buttonStateString;
-  // std::string valueString         = "activated";
-  // Serial << "   variables got, send Message; topic: " << topic << " -
-  // valueString: " << valueString << endl; publishMQTTMessage(topic,
-  // valueString);
-
   // Debugging output
+  std::string buttonStateString = state._to_string();
   Serial << "ButtonState = " << buttonStateString << " activated" << endl;
 }
-
-std::string
-RotaryEncoderWithButton::buttonStateToString(const ButtonStates state) {
-  switch (state) {
-  case ButtonStates::NORMAL:
-    return "NORMAL";
-    break;
-  case ButtonStates::CLICKED:
-    return "CLICKED";
-    break;
-  case ButtonStates::DOUBLE_CLICKED:
-    return "DOUBLE_CLICKED";
-    break;
-  case ButtonStates::HOLDED:
-    return "HOLDED";
-    break;
-  default:
-    break;
-  }
-
-  return "";
-}
-
-// std::string RotaryEncoderWithButton::prepareMQTTTopicString() const {
-//     return "UNDEFINED";
-// }
 
 const uint16_t RotaryEncoderWithButton::BUTTON_STATE_TIMEOUT_MS = 5000;
 } // namespace Components

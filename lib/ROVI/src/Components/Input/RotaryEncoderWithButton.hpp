@@ -5,6 +5,8 @@
 
 #include <map>
 
+#include <enum.h>
+
 #include "OneButtonFork.h"
 
 // TODO: Cleanup nomenclature
@@ -70,11 +72,13 @@ protected:
   static const uint16_t ENCODER_TICK_UPDATE_TIMEOUT_MS;
 };
 
+BETTER_ENUM(ButtonStates, int, NORMAL, CLICKED, DOUBLE_CLICKED, HOLDED);
+
 class RotaryEncoderWithButton {
 public:
-  enum class ButtonStates { NORMAL, CLICKED, DOUBLE_CLICKED, HOLDED };
+  // enum class ButtonStates { NORMAL, CLICKED, DOUBLE_CLICKED, HOLDED };
 
-  static std::string buttonStateToString(const ButtonStates state);
+  // static std::string buttonStateToString(const ButtonStates state);
 
   struct ButtonStateSetting {
     int increment;

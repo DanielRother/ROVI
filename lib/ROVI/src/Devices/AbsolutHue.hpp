@@ -39,26 +39,22 @@ public:
     std::cout << "AbsolutHue()::setBrightness(" << (int)brightness << ")"
               << std::endl;
     LedDevice<LED>::setBrightness(brightness);
-    m_rotary->setValue(
-        Components::RotaryEncoderWithButton::ButtonStates::NORMAL,
-        this->m_brightness);
+    m_rotary->setValue(Components::ButtonStates::NORMAL, this->m_brightness);
   }
 
   virtual void setColor(const std::shared_ptr<Color> &color) {
     std::cout << "AbsolutHue()::setColor(" << color->toString() << ")"
               << std::endl;
     LedDevice<LED>::setColor(color);
-    m_rotary->setValue(
-        Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED,
-        this->m_color->toHSV()->h);
+    m_rotary->setValue(Components::ButtonStates::DOUBLE_CLICKED,
+                       this->m_color->toHSV()->h);
   }
 
   virtual void setHue(uint32_t hue) {
     std::cout << "AbsolutHue()::setHue(" << hue << ")" << std::endl;
     LedDevice<LED>::setHue(hue);
-    m_rotary->setValue(
-        Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED,
-        this->m_color->toHSV()->h);
+    m_rotary->setValue(Components::ButtonStates::DOUBLE_CLICKED,
+                       this->m_color->toHSV()->h);
   }
 
   virtual void setEffect(const std::shared_ptr<LEDEffect> &effect) {
@@ -67,9 +63,7 @@ public:
     LedDevice<LED>::setEffect(effect);
     for (auto effectIdx = 0; effectIdx < this->m_effects.size(); ++effectIdx) {
       if (this->m_effects[effectIdx]->name() == effect->name()) {
-        m_rotary->setValue(
-            Components::RotaryEncoderWithButton::ButtonStates::HOLDED,
-            effectIdx);
+        m_rotary->setValue(Components::ButtonStates::HOLDED, effectIdx);
         break;
       }
     }
@@ -78,8 +72,7 @@ public:
   virtual void setEffect(int effect) {
     std::cout << "AbsolutHue()::setEffect(" << effect << ")" << std::endl;
     LedDevice<LED>::setEffect(effect);
-    m_rotary->setValue(
-        Components::RotaryEncoderWithButton::ButtonStates::HOLDED, effect);
+    m_rotary->setValue(Components::ButtonStates::HOLDED, effect);
   }
 
 protected:
@@ -99,21 +92,22 @@ protected:
   virtual void jsonToSettings(JsonObject &settings) override {
     Serial << "AbsolutHue::jsonToSettings() " << endl;
 
+    // Restore rotary first. It's better to evaluate a possible power at last
+    // TODO: Rotaray
+    std::cout << "Check rotary" << std::endl;
+    auto rotary = settings["rotary"];
+    if (rotary) {
+      jsonToRotarySettings(rotary);
+    } else {
+      std::cout << "NO rotary received" << std::endl;
+    }
+
     auto led = settings["led"];
     std::cout << "Check led" << std::endl;
     if (led) {
       LedDevice<LED>::jsonToSettings(led);
     } else {
       std::cout << "NO led received" << std::endl;
-    }
-
-    // TODO: Rotaray
-    std::cout << "Check rotary" << std::endl;
-    auto rotary = settings["rotary"];
-    if (rotary) {
-      // LedDevice<LED>::jsonToSettings(led);
-    } else {
-      std::cout << "NO rotary received" << std::endl;
     }
 
     std::cout << "****** Restored setting ******" << std::endl;
@@ -132,7 +126,6 @@ protected:
     LedDevice<LED>::getOptions(ledOptions, buffer);
     options["led"] = ledOptions;
 
-    // TODO rotary
     JsonObject &rotaryOptions = buffer.createObject();
     getRotaryOptions(rotaryOptions, buffer);
     options["rotary"] = rotaryOptions;
@@ -142,8 +135,7 @@ protected:
     auto buttonState = m_rotary->getCurrentButtonState();
     settings["buttonState"] = String{
         // Use String here and above. Otherwise the char* points to nirvana...
-        Components::RotaryEncoderWithButton::buttonStateToString(buttonState)
-            .c_str()};
+        buttonState._to_string()};
     settings["lastButtonStateUpdate_ms"] =
         m_rotary->getLastButtonStateUpdateMs();
 
@@ -151,23 +143,21 @@ protected:
     auto stateValues = m_rotary->getStateValues();
     for (const auto &state : stateValues) {
       JsonObject &value = buffer.createObject();
-      value["state"] = String{
-          Components::RotaryEncoderWithButton::buttonStateToString(state.first)
-              .c_str()};
+      value["state"] = String{state.first._to_string()};
       value["value"] = state.second.value();
       values.add(value);
     }
     settings["values"] = values;
   }
 
+  void jsonToRotarySettings(JsonObject &settings) {}
+
   void getRotaryOptions(JsonObject &options, DynamicJsonBuffer &buffer) {
     JsonArray &settings = buffer.createArray();
     auto stateSettings = m_rotary->getStateSettings();
     for (const auto &state : stateSettings) {
       JsonObject &setting = buffer.createObject();
-      setting["state"] = String{
-          Components::RotaryEncoderWithButton::buttonStateToString(state.first)
-              .c_str()};
+      setting["state"] = String{state.first._to_string()};
       setting["increment"] = state.second.increment;
       setting["minValue"] = state.second.minValue;
       setting["maxValue"] = state.second.maxValue;
@@ -204,13 +194,10 @@ protected:
     const auto maxRotaryValue = 100;
     const auto increment = 10;
     const auto preventOverflow = true;
-    m_rotary->setupState(
-        Components::RotaryEncoderWithButton::ButtonStates::NORMAL,
-        minRotaryValue, maxRotaryValue, increment, preventOverflow,
-        activatedCallback, valueChangeCallback);
-    m_rotary->setValue(
-        Components::RotaryEncoderWithButton::ButtonStates::NORMAL,
-        this->m_brightness);
+    m_rotary->setupState(Components::ButtonStates::NORMAL, minRotaryValue,
+                         maxRotaryValue, increment, preventOverflow,
+                         activatedCallback, valueChangeCallback);
+    m_rotary->setValue(Components::ButtonStates::NORMAL, this->m_brightness);
   }
 
   void setupClick() {
@@ -229,10 +216,9 @@ protected:
     const auto maxRotaryValue = 10;
     const auto increment = 1;
     const auto preventOverflow = false;
-    m_rotary->setupState(
-        Components::RotaryEncoderWithButton::ButtonStates::CLICKED,
-        minRotaryValue, maxRotaryValue, increment, preventOverflow,
-        activatedCallback, valueChangeCallback);
+    m_rotary->setupState(Components::ButtonStates::CLICKED, minRotaryValue,
+                         maxRotaryValue, increment, preventOverflow,
+                         activatedCallback, valueChangeCallback);
   }
 
   void setupDoubleClick() {
@@ -266,10 +252,10 @@ protected:
     const auto maxRotaryValue = 360;
     const auto increment = 10;
     const auto preventOverflow = false;
-    m_rotary->setupState(
-        Components::RotaryEncoderWithButton::ButtonStates::DOUBLE_CLICKED,
-        minRotaryValue, maxRotaryValue, increment, preventOverflow,
-        activatedCallback, valueChangeCallback);
+    m_rotary->setupState(Components::ButtonStates::DOUBLE_CLICKED,
+                         minRotaryValue, maxRotaryValue, increment,
+                         preventOverflow, activatedCallback,
+                         valueChangeCallback);
   }
 
   void setupHold() {
@@ -293,10 +279,9 @@ protected:
     const auto maxRotaryValue = this->m_effects.size() - 1;
     const auto increment = 1;
     const auto preventOverflow = false;
-    m_rotary->setupState(
-        Components::RotaryEncoderWithButton::ButtonStates::HOLDED,
-        minRotaryValue, maxRotaryValue, increment, preventOverflow,
-        activatedCallback, valueChangeCallback);
+    m_rotary->setupState(Components::ButtonStates::HOLDED, minRotaryValue,
+                         maxRotaryValue, increment, preventOverflow,
+                         activatedCallback, valueChangeCallback);
   }
 
   void blink(const uint32_t delay_ms = 250) {
