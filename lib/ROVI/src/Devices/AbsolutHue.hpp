@@ -28,6 +28,10 @@ public:
     std::cout << "AbsolutHue(): Init led" << std::endl;
     // Attention: Do NOT init the leds here again. Otherwise the application
     // hangs..!
+
+    // Do not forget the restore the settings here as the base class restore
+    // doesn't work for this devices
+    this->restoreSettings();
   }
 
   virtual void update() {

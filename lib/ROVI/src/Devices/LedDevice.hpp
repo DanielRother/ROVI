@@ -24,7 +24,7 @@ public:
         m_effect{LEDEffectFactory::getEffect("color_static", m_leds.get())},
         m_tmpEffectName{}, m_effects{effects}, m_timePerEffect{timePerEffect},
         m_nextEffectSelection{std::chrono::system_clock::now()} {
-    std::cout << "Init led" << std::endl;
+    std::cout << "Init LedDevice" << std::endl;
     m_leds->init();
     restoreSettings();
   }
