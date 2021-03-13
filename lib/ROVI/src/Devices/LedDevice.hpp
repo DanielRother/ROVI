@@ -143,7 +143,8 @@ public:
 
   virtual void setEffect(int effect) {
     setOn(true);
-    m_leds->setEffect(effect);
+    auto newEffect = m_effects[effect];
+    m_leds->setEffect(newEffect);
     m_effect = m_leds->effect();
     m_settingsChangedTimestamp = millis();
   }
