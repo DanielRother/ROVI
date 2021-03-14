@@ -86,23 +86,25 @@ public:
   virtual void setColor(const std::shared_ptr<Color> &color) {
     std::cout << "LedDevice::setColor(" << color->toString() << ")"
               << std::endl;
-    // m_effect->stop();
+    m_effect->stop();
 
-    // auto selectedEffect = std::string{"color_static"};
-    // bool effectFound = false;
-    // for(auto effect : this->m_effects) {
-    //     if(effect->name() == selectedEffect) {
-    //         effectFound = true;
-    //         setEffect(effect);
-    //         break;
-    //     }
-    // }
-    // if(!effectFound) {
-    //     auto effect = LEDEffectFactory::getEffect(selectedEffect,
-    //     m_leds.get()); setEffect(effect);
-    //     // Delay processing, otherwise the effect will update to really set
-    //     color to the effect's default one... sleep(1); effect->update();
-    // }
+    auto selectedEffect = std::string{"color_static"};
+    bool effectFound = false;
+    for (auto effect : this->m_effects) {
+      if (effect->name() == selectedEffect) {
+        effectFound = true;
+        setEffect(effect);
+        break;
+      }
+    }
+    if (!effectFound) {
+      auto effect = LEDEffectFactory::getEffect(selectedEffect, m_leds.get());
+      setEffect(effect);
+      // Delay processing, otherwise the effect will update to really set
+      // color to the effect's default one...
+      delay(1);
+      effect->update();
+    }
 
     std::cout << "    finally realy set color" << std::endl;
     m_leds->setColor(color);  // This really sets the color directly
