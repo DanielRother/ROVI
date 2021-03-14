@@ -14,7 +14,6 @@
 #include <Components/Output/FastLedComponent.hpp>
 #include <Components/Output/NeoPixelComponent.hpp>
 #include <Config/RoviWiFiManager.hpp>
-// #include <Devices/AbsoluteHueMQTT.hpp>
 #include <Devices/AbsolutHue.hpp>
 #include <Devices/LedDevice.hpp>
 
