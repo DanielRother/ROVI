@@ -16,6 +16,7 @@ extern "C" {
 #include <vector>
 
 #include <Common/LED/ColorTypes.h>
+#include <Common/LED/Icons.hpp>
 #include <Components/Output/LedMatrix.hpp>
 
 #include "exampleColors.h"
@@ -26,11 +27,6 @@ const auto pinMatrix = 13;
 const auto nbPixel = nbColumns * nbRows;
 const auto brightness = 16;
 
-// auto leds = std::vector<CRGB>(nbPixel);
-// auto matrixOld = new FastLED_NeoMatrix(leds.data(), nbColumns, nbRows,
-//                                     NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
-//                                         NEO_MATRIX_COLUMNS +
-//                                         NEO_MATRIX_ZIGZAG);
 std::shared_ptr<Rovi::Components::LedMatrix<pinMatrix>> matrix;
 
 auto ledsOld = std::vector<CRGB>(nbPixel);
@@ -217,6 +213,13 @@ void setup() {
   //   delay(3000);
   //   matrixOld->clear();
   // #endif
+
+  // Test Icon:
+  auto base64Enc =
+      Rovi::IconsFactory::getBase64EncodedIcon(Rovi::Icons::BANANA);
+  std::cout << "base64: " << base64Enc << std::endl;
+  auto binary = Rovi::IconsFactory::getBinaryIcon(Rovi::Icons::BANANA);
+  std::cout << "binary[0]: " << binary[0] << std::endl;
 };
 
 auto h = 0;
