@@ -260,7 +260,10 @@ AdressableLedComponent::AdressableLedComponent(size_t nbPixel,
     : LEDComponent{name}, m_nbPixel{nbPixel}, m_colors{nbPixel},
       m_swapRGValues(nbPixel,
                      0) // TBD: Maybe make the Pixeltype dynamic as well
-{}
+{
+  std::cout << "AdressableLedComponent::ctor()" << std::endl;
+  std::cout << "nbPixel = " << nbPixel << std::endl;
+}
 
 // AdressableLedComponent(const AdressableLedComponent& other) {};
 AdressableLedComponent::~AdressableLedComponent() /*= default*/ {}
