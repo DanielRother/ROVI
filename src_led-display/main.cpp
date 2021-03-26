@@ -99,22 +99,6 @@ void display_runningPixel() {
   }
 }
 
-// void display_scrollText(const std::string &text) {
-//   std::cout << "display scrollText " << text << std::endl;
-//   const auto charSize = 6;
-//   const auto xLimit = -1 * ((int)text.size() * charSize +
-//   matrixOld->width()); std::cout << "xLimit = " << xLimit << std::endl;
-
-//   matrixOld->setTextColor(getNextColor());
-//   for (auto x = matrixOld->width(); x > xLimit; --x) {
-//     matrixOld->fillScreen(0);
-//     matrixOld->setCursor(x, 0);
-//     matrixOld->print(F(text.c_str()));
-//     matrixOld->show();
-//     delay(100);
-//   }
-// }
-
 void on_draw(pngle_t *pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h,
              uint8_t rgba[4]) {
   uint8_t r = rgba[0]; // 0 - 255
@@ -193,26 +177,6 @@ void setup() {
 
   matrix = std::make_shared<Rovi::Components::LedMatrix<pinMatrix>>(nbColumns,
                                                                     nbRows);
-  //   FastLED.addLeds<NEOPIXEL, pinMatrix>(leds.data(), nbPixel)
-  //       .setCorrection(TypicalLEDStrip);
-  //   Serial.print("Setup serial: ");
-  //   Serial.println(nbPixel);
-
-  //   matrixOld->begin();
-  //   matrixOld->setTextWrap(false);
-  //   matrixOld->setBrightness(brightness);
-  //   Serial.println("If the code crashes here, decrease the brightness or turn
-  //   "
-  //                  "off the all white display below");
-  //   // Test full bright of all LEDs. If brightness is too high
-  //   // for your current limit (i.e. USB), decrease it.
-  // //#define DISABLE_WHITE
-  // #ifndef DISABLE_WHITE
-  //   matrixOld->fillScreen(LED_WHITE_HIGH);
-  //   matrixOld->show();
-  //   delay(3000);
-  //   matrixOld->clear();
-  // #endif
 
   // Test Icon:
   auto base64Enc =
