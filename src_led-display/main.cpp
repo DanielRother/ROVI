@@ -194,13 +194,9 @@ void setup() {
   std::cout << "Init on pin: " << pinMatrix << std::endl;
   std::cout << "Matrix size: " << nbColumns << " x " << nbRows << " = "
             << nbPixel << " pixel" << std::endl;
-  delay(5000);
 
   matrix = std::make_shared<Rovi::Components::LedMatrix<pinMatrix>>(nbColumns,
                                                                     nbRows);
-  std::cout << "matrix constructed" << std::endl;
-  matrix->init();
-  std::cout << "matrix initialized" << std::endl;
   //   FastLED.addLeds<NEOPIXEL, pinMatrix>(leds.data(), nbPixel)
   //       .setCorrection(TypicalLEDStrip);
   //   Serial.print("Setup serial: ");
@@ -228,12 +224,12 @@ void loop() {
   // // display_runningPixel();
   // display_icon();
 
+  matrix->setTextColor(std::make_shared<Rovi::HSVColor>((float)h, 1.0f, 1.0f));
   matrix->display_scrollText("Hello Rovi!");
   // matrix->display_scrollText(
   //     "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöü1234567890");
   matrix->display_scrollText("foobar2000!");
-  h = (h + 10) % 360;
-  matrix->setColor(std::make_shared<Rovi::HSVColor>((float)h, 1.0f, 1.0f));
 
-  delay(10000);
+  h = (h + 10) % 360;
+  // delay(10000);
 };
