@@ -191,8 +191,9 @@ void loop() {
   // // display_runningPixel();
   // display_icon();
 
+  matrix->setColor(std::make_shared<Rovi::RGBColor>(0, 0, 255));
   matrix->setTextColor(std::make_shared<Rovi::HSVColor>((float)h, 1.0f, 1.0f));
-  matrix->display_scrollText("Hello Rovi!");
+  matrix->display_scrollText("Hello Sandra!");
   // matrix->display_scrollText(
   //     "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöü1234567890");
   matrix->display_scrollText("foobar2000!");

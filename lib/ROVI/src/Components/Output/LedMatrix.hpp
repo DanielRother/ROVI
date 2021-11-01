@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -108,18 +109,39 @@ public:
   }
 
   // TODO: Make the effects async (like the regular led effects?)
-  void display_scrollText(const std::string &text) {
+  template <typename Rep, typename Period>
+  void display_scrollText(const std::string &text,
+                          std::shared_ptr<Color> &textColor,
+                          std::shared_ptr<Color> &bgColor,
+                          std::chrono::duration<Rep, Period> waitTime) {
     std::cout << "display scrollText " << text << std::endl;
     const auto xLimit = -1 * ((int)text.size() * CHAR_SIZE + m_matrix.width());
     std::cout << "xLimit = " << xLimit << std::endl;
 
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(waitTime);
+    m_matrix.setTextColor(convertColor(textColor));
+
     for (auto x = m_matrix.width(); x > xLimit; --x) {
-      m_matrix.fillScreen(0);
+      m_matrix.fillScreen(convertColor(bgColor));
       m_matrix.setCursor(x, 0);
       m_matrix.print(F(text.c_str()));
       m_matrix.show();
-      delay(100);
+      delay(ms.count());
     }
+  }
+
+  void display_scrollText(const std::string &text,
+                          std::shared_ptr<Color> &textColor,
+                          std::shared_ptr<Color> &bgColor) {
+    display_scrollText(text, textColor, bgColor, DEFAULT_SCROLL_TEXT_WAIT_TIME);
+  }
+  void display_scrollText(const std::string &text,
+                          std::shared_ptr<Color> &textColor) {
+    display_scrollText(text, textColor, m_color, DEFAULT_SCROLL_TEXT_WAIT_TIME);
+  }
+  void display_scrollText(const std::string &text) {
+    display_scrollText(text, m_textColor, m_color,
+                       DEFAULT_SCROLL_TEXT_WAIT_TIME);
   }
 
 protected:
@@ -136,7 +158,13 @@ protected:
   std::shared_ptr<Color> m_textColor;
 
   static const auto CHAR_SIZE = 6;
+  static const std::chrono::milliseconds DEFAULT_SCROLL_TEXT_WAIT_TIME;
 };
+
+template <uint8_t PIN>
+const std::chrono::milliseconds LedMatrix<PIN>::DEFAULT_SCROLL_TEXT_WAIT_TIME =
+    std::chrono::milliseconds{100};
+
 } // namespace Components
 } // namespace Rovi
 
